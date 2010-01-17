@@ -1,0 +1,10 @@
+syntax: glob
+Media/*
+Binary/*
+Plugins/*
+Build/*
+Criterium.exe*
+*.log
+*.pdb
+*.ilk
+*.dll
