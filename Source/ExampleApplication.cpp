@@ -1,4 +1,4 @@
-#include "ExampleApplication.h"
+/*#include "ExampleApplication.h"
 
 class TutorialApplication : public ExampleApplication
 {
@@ -67,4 +67,4 @@ int main(int argc, char **argv)
     }
 
     return 0;
-}
+}*/

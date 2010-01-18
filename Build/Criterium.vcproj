@@ -26,7 +26,7 @@
 				BuildCommandLine="nmake"
 				ReBuildCommandLine="nmake clean &amp;&amp; nmake"
 				CleanCommandLine="nmake clean"
-				Output="Criterium.exe"
+				Output="..\Criterium.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -65,7 +65,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\Source\Application.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Source\Bicycle.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\ExampleApplication.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Source\FrameListener.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Source\WindowListener.cpp"
 				>
 			</File>
 		</Filter>
@@ -74,6 +90,26 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\Include\Application.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Bicycle.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\FrameListener.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Interface.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\WindowListener.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
