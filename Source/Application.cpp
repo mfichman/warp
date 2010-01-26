@@ -39,6 +39,9 @@ Application::Application() :
     loadGraphics();
     loadInput();
     loadPhysics();
+
+	bicycle_ = Bicycle::make(this);
+	//tree_ = Tree::make(this);
 }
 
 //------------------------------------------------------------------------------
@@ -88,21 +91,23 @@ Application::loadGraphics() {
     }
     
     // Create render window
-    root_->initialise(true, "Criterium");
-    
+    window_ = root_->initialise(true);
+
+	// Create scene manager
+    sceneManager_ = root_->createSceneManager(ST_GENERIC, "Default");
+    sceneManager_->setShadowTechnique(SHADOWTYPE_STENCIL_MODULATIVE);
+
+	// Create the main camera
+	camera_ = sceneManager_->createCamera("Camera");
+    camera_->setNearClipDistance(0.1);
+
     // Initialize resources
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
-    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
     
-    // Create scene manager
-    sceneManager_ = root_->createSceneManager(ST_EXTERIOR_CLOSE, "Default");
-    camera_ = sceneManager_->createCamera("Camera");
-    camera_->setPosition(Vector3(0, 0, 5));
-    camera_->lookAt(Vector3(0, 0, 0));
-    camera_->setNearClipDistance(0.1);
-    
-    window_ = root_->getAutoCreatedWindow();
+	// Initialize viewport
     viewport_ = window_->addViewport(camera_);
+	viewport_->setBackgroundColour(ColourValue(0.7, 0.7, 0.9));
+	camera_->setAspectRatio(Real(viewport_->getActualWidth())/Real(viewport_->getActualHeight()));
     
     // CEGUI Setup
     guiRenderer_ = auto_ptr<CEGUI::OgreCEGUIRenderer>(new CEGUI::OgreCEGUIRenderer(window_, Ogre::RENDER_QUEUE_OVERLAY, false, 3000, sceneManager_));
@@ -110,6 +115,9 @@ Application::loadGraphics() {
     
     frameListener_ = new FrameListener(this);
     windowListener_ = new WindowListener(this);
+
+	
+    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 }
 
 //------------------------------------------------------------------------------
@@ -139,6 +147,11 @@ Application::loadPhysics() {
     world_ = dWorldCreate();
     space_ = dSimpleSpaceCreate(0);
     contactJointGroup_ = dJointGroupCreate(32);
+
+    dGeomID plane = dCreatePlane(space_, 0.0, 1.0, 0.0, -0.742);
+    dGeomSetCategoryBits(plane, TYPETERRAIN);
+    dGeomSetCollideBits(plane, TYPEWHEEL);
+	dWorldSetGravity(world_, 0.0, -9.8, 0.0);   
 }
 
 //------------------------------------------------------------------------------
@@ -147,19 +160,34 @@ main(int argc, char** argv) {
     try {
         dInitODE();
         Application::Ptr app = Application::make(); 
-        app->sceneManager()->setAmbientLight(ColourValue(1, 1, 1));
-        app->sceneManager()->setShadowTechnique(SHADOWTYPE_STENCIL_MODULATIVE);
         
-        dSurfaceParameters surface;
-        
-        memset(&surface, 0, sizeof(dSurfaceParameters));
-        app->surfaceParameters(surface, TYPEWHEEL, TYPETERRAIN);        
-        
-        Bicycle::Ptr bicycle = Bicycle::make(app.get());
-        
-        app->bicycle(bicycle);
-        
-        app->root()->startRendering();
+
+		Plane plane(Vector3::UNIT_Y, -0.742);
+		MeshManager::getSingleton().createPlane("Ground",
+			ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
+			1500, 1500, 200, 200, true, 1, 1500, 1500, Vector3::UNIT_Z);
+
+		Light* light = app->sceneManager()->createLight("Light");
+		light->setType(Light::LT_DIRECTIONAL);
+		light->setDiffuseColour(ColourValue(1.0, 1.0, 1.0));
+		light->setSpecularColour(ColourValue(0.25, 0.25, 0.25));
+		light->setDirection(Vector3( 0, -1, 1 )); 
+
+	//app->camera()->setPosition(-20, 1.0, 0);
+	//app->camera()->lookAt(0, 0, 0);
+
+		app->sceneManager()->setAmbientLight(ColourValue(0, 0, 0));
+
+		Entity* entity = app->sceneManager()->createEntity("Ground", "Ground");
+		entity->setMaterialName("Examples/Rockwall");
+		entity->setCastShadows(false);
+		app->sceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
+
+		//Plane* plane = (Plane*)app->sceneManager()->createEntity("Plane", SceneManager::PT_PLANE);
+		//plane->redefine(Vector3(0, 1, 0), Vector3(0, 0, 0));
+
+
+		app->root()->startRendering();
         
     } catch (Exception& ex) {
         cerr << "Exception: " << ex.getFullDescription() << endl;
@@ -169,20 +197,3 @@ main(int argc, char** argv) {
     return 0;
 
 }
-
-//------------------------------------------------------------------------------
-const dSurfaceParameters& 
-Application::surfaceParameters(int type1, int type2) {
-    pair<int, int> key = (type1 < type2) ? make_pair(type1, type2) : make_pair(type2, type1);    
-    return surfaceParameters_[key];
-}
-
-//------------------------------------------------------------------------------
-void 
-Application::surfaceParameters(const dSurfaceParameters& c, int type1, int type2) {
-    pair<int, int> key = (type1 < type2) ? make_pair(type1, type2) : make_pair(type2, type1);
-    surfaceParameters_.insert(make_pair(key, c));
-}
-
-
-

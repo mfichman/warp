@@ -16,6 +16,7 @@
 #include <map>
 #include <utility>
 #include <Bicycle.hpp>
+#include <Tree.hpp>
 
 #define TYPEWHEEL 0x0001
 #define TYPETERRAIN 0x0002
@@ -39,10 +40,7 @@ public:
     dWorldID world() const { return world_; }
     dSpaceID space() const { return space_; }
     dJointGroupID contactJointGroup() const { return contactJointGroup_; }
-    const dSurfaceParameters& surfaceParameters(int type1, int type2);
-    void surfaceParameters(const dSurfaceParameters& c, int type1, int type2);
     Bicycle::Ptr bicycle() const { return bicycle_; }
-    void bicycle(Bicycle::Ptr b) { this->bicycle_ = b; }
     
 private:
     Application();
@@ -73,9 +71,8 @@ private:
     dSpaceID space_;
     dJointGroupID contactJointGroup_;
     
-    map<pair<int, int>, dSurfaceParameters> surfaceParameters_;
-    
     Bicycle::Ptr bicycle_;
+	Tree::Ptr tree_;
 };
 
 }

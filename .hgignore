@@ -3,6 +3,7 @@ Media/*
 Binary/*
 Plugins/*
 Build/*
+Include/boost/*
 Criterium.exe*
 *.log
 *.pdb

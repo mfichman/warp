@@ -1,0 +1,57 @@
+material Scene/BeechMaterial
+{
+	technique
+	{
+		pass
+		{
+		  transparent
+		  lighting off
+		  scene_blend alpha_blend
+		  depth_write off
+		  depth_test off
+		  transparent_sorting force
+			texture_unit
+			{
+				texture Beech.png
+			}
+		}
+	}
+}
+
+material Scene/PineMaterial
+{
+	technique
+	{
+		pass
+		{
+		  lighting off
+		  scene_blend alpha_blend
+		  depth_write off
+		  depth_test off
+		  transparent_sorting force
+			texture_unit
+			{
+				texture Pine.png
+			}
+		}
+	}
+}
+
+material Scene/EucalyptusMaterial
+{
+	technique
+	{
+		pass
+		{
+		  lighting off
+		  scene_blend alpha_blend
+		  depth_write off
+		  depth_test off
+		  transparent_sorting force
+			texture_unit
+			{
+				texture Eucalyptus.png
+			}
+		}
+	}
+}

@@ -81,6 +81,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\Tree.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\WindowListener.cpp"
 				>
 			</File>
@@ -104,6 +108,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\Interface.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Tree.hpp"
 				>
 			</File>
 			<File

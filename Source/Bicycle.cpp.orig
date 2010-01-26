@@ -1,0 +1,192 @@
+/******************************************************************************
+ * Criterium: CS248 Final Project                                             *
+ * Copyright (c) 2010 Matt Fichman                                            *
+ ******************************************************************************/
+
+#include <Bicycle.hpp>
+#include <Application.hpp>
+
+using namespace Criterium;
+using namespace Ogre;
+using namespace std;
+
+#define WHEELRADIUS 0.368f // meters
+#define WHEELWIDTH  0.5f //0.035f // meters
+#define WHEELMASS 1.200f // kilograms
+#define FRAMELENGTH 0.996f // meters
+#define FRAMEHEIGHT 0.848f // meters
+#define FRAMEWIDTH 0.035f // meters
+#define FRAMEMASS 80.000f // kilograms
+
+
+#define RIDERMASS 68.0f
+#define RIDERRADIUS 0.30f
+
+//------------------------------------------------------------------------------
+Bicycle::Ptr
+Bicycle::make(Application* app) {
+    return new Bicycle(app);
+}
+
+
+//------------------------------------------------------------------------------
+Bicycle::Bicycle(Application* app) :
+    app_(app),
+    nextAnimation_(animCoast),
+    currentAnimation_(animCoast) {
+    
+    dMass mass;
+    
+    // Set up OGRE scene nodes
+    SceneNode* root = app_->sceneManager()->getRootSceneNode();
+    SceneNode* node = root->createChildSceneNode("Node");
+    
+        
+    frameNode_ = node->createChildSceneNode("Frame");
+    frameNode_->attachObject(app_->sceneManager()->createEntity("Frame", "Frame.mesh"));
+    frameNode_->setPosition(0.000, 0.756, 0.000);
+    
+    frontWheelNode_ = node->createChildSceneNode("FrontWheel");
+    frontWheelNode_->attachObject(app_->sceneManager()->createEntity("FrontWheel", "FrontWheel.mesh"));
+    frontWheelNode_->setPosition(0.693, 0.368, 0.000);
+    
+    rearWheelNode_ = node->createChildSceneNode("RearWheel");
+    rearWheelNode_->attachObject(app_->sceneManager()->createEntity("RearWheel", "RearWheel.mesh"));
+    rearWheelNode_->setPosition(-0.415, 0.368, 0.000);
+    
+    //forkNode_ = node->createChildSceneNode("Fork");
+    //forkNode_->attachObject(app_->sceneManager()->createEntity("Fork", "Fork.mesh"));
+    //forkNode_->setPosition(0.516, 0.046, 0.000);
+   
+    //0.848
+    frontWheelBody_ = dBodyCreate(app_->world());
+    dMassSetSphereTotal(&mass, 80, 0.020);
+    dBodySetMass(frontWheelBody_, &mass);
+    dBodySetPosition(frontWheelBody_, 0.000, 0.000, 0.000);
+    
+    frameBody_ = dBodyCreate(app_->world());
+    dMassSetSphereTotal(&mass, 80, 0.1);
+    dBodySetPosition(frontWheelBody_, 0.000, 0.000, 0.000);
+    dBodySetData(frameBody_, node);
+    dBodySetMovedCallback(frameBody_, &Bicycle::onBodyNodeMoved);
+    
+    
+    // Bodies
+    /*frontWheelBody_ = dBodyCreate(app_->world());
+    dMassSetSphereTotal(&mass, WHEELMASS, WHEELRADIUS);
+    dBodySetMass(frontWheelBody_, &mass);
+    dBodySetPosition(frontWheelBody_, 0.693, -0.374, 0.000);
+    dBodySetData(frontWheelBody_, frontWheelNode_);
+    dBodySetMovedCallback(frontWheelBody_, &Bicycle::onBodyNodeMoved);
+    
+    rearWheelBody_ = dBodyCreate(app_->world());
+    dMassSetSphereTotal(&mass, WHEELMASS, WHEELRADIUS);
+    dBodySetMass(rearWheelBody_, &mass);
+    dBodySetPosition(rearWheelBody_, -0.415, -0.367, 0.000);
+    dBodySetData(rearWheelBody_, rearWheelNode_);
+    dBodySetMovedCallback(rearWheelBody_, &Bicycle::onBodyNodeMoved);
+    
+    frameBody_ = dBodyCreate(app_->world());
+    dMassSetBoxTotal(&mass, FRAMEMASS, FRAMELENGTH, FRAMEHEIGHT, FRAMEWIDTH);
+    dBodySetMass(frameBody_, &mass);
+    dBodySetData(frameBody_, frameNode_);
+    dBodySetMovedCallback(frameBody_, &Bicycle::onBodyNodeMoved);*/
+    
+    frontWheelGeom_= dCreateSphere(app_->space(), 0.020);
+    dGeomSetBody(frontWheelGeom_, frontWheelBody_);
+    dGeomSetCategoryBits(frontWheelGeom_, TYPEWHEEL);
+    dGeomSetCollideBits(frontWheelGeom_, TYPETERRAIN);
+    
+    // Geoms
+    /*frontWheelGeom_ = dCreateSphere(app_->space(), WHEELRADIUS);
+    dGeomSetBody(frontWheelGeom_, frontWheelBody_);
+    dGeomSetCategoryBits(frontWheelGeom_, TYPEWHEEL);
+    dGeomSetCollideBits(frontWheelGeom_, TYPETERRAIN);
+    
+    rearWheelGeom_ = dCreateSphere(app_->space(), WHEELRADIUS);
+    dGeomSetBody(rearWheelGeom_, rearWheelBody_);
+    dGeomSetCategoryBits(rearWheelGeom_, TYPEWHEEL);
+    dGeomSetCollideBits(rearWheelGeom_, TYPETERRAIN);
+    
+    frameGeom_= dCreateBox(app_->space(), FRAMELENGTH, FRAMEHEIGHT, FRAMEWIDTH);
+    dGeomSetBody(frameGeom_, frameBody_);
+    dGeomSetCategoryBits(frameGeom_, TYPEWHEEL);
+    dGeomSetCollideBits(frameGeom_, TYPETERRAIN);*/
+    
+    
+    frontWheelJoint_ = dJointCreateBall(app_->world(), 0);
+    dJointAttach(frontWheelJoint_, frontWheelBody_, frameBody_);
+    dJointSetBallAnchor(frontWheelJoint_, 0.000, 0.000, 0.000);
+   // dJointSetHingeAxis(frontWheelJoint_, 0.000, 0.000, 1.000);
+    
+    // Joints
+    /*frontWheelJoint_ = dJointCreateBall(app_->world(), 0);
+    dJointAttach(frontWheelJoint_, frontWheelBody_, frameBody_);
+    dJointSetBallAnchor(frontWheelJoint_, 0.693, -0.374, 0.000);
+    
+    rearWheelJoint_ = dJointCreateHinge(app_->world(), 0);
+    dJointAttach(rearWheelJoint_, rearWheelBody_, frameBody_);
+    dJointSetHingeAnchor(rearWheelJoint_, -0.415, -0.367, 0.000);
+    dJointSetHingeAxis(rearWheelJoint_, 0.000, 0.000, 1.000);*/
+    
+    dJointID motor = dJointCreateAMotor(app_->world(), 0);
+    dJointSetAMotorMode(motor, dAMotorUser);
+    dJointSetAMotorNumAxes(motor, 3);
+    dJointSetAMotorAxis(motor, 0, 0, 1.000, 0.000, 0.000);
+    dJointSetAMotorAxis(motor, 1, 0, 1.000, 0.000, 0.000);
+    dJointSetAMotorAxis(motor, 2, 0, 1.000, 0.000, 0.000);
+    dJointSetAMotorParam(dParamVel + dParamGroup * 0, 0);
+    dJointSetAMotorParam(dParamVel + dParamGroup * 1, 0);
+    dJointSetAMotorParam(dParamVel + dParamGroup * 2, 0);
+   
+    dWorldSetGravity(app_->world(), 0.0, -9.81, 0.0);      
+    
+    
+    dGeomID plane = dCreatePlane(app_->space(), 0.0, 1.0, 0.0, -0.742);
+    dGeomSetCategoryBits(plane, TYPETERRAIN);
+    dGeomSetCollideBits(plane, TYPEWHEEL);
+    
+    cout << "BUILT" << endl;
+}
+
+//------------------------------------------------------------------------------
+Bicycle::~Bicycle() {
+
+}
+
+//------------------------------------------------------------------------------
+void
+Bicycle::onBodyNodeMoved(dBodyID body) {
+
+    // Update the position of the scene node attached to this body.
+    // Position is in global coordinates.
+    SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
+    const dReal* pos = dBodyGetPosition(body);
+    const dReal* quat = dBodyGetQuaternion(body);
+    
+    // N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
+    node->setPosition(pos[0], pos[1], pos[2]);
+    node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
+}
+
+//------------------------------------------------------------------------------
+void
+Bicycle::onFrame() {
+    if (app_->keyboard()->isKeyDown(OIS::KC_LEFT)) {
+        //dBodyAddRelTorque(frameBody_, 10, 0, 0);
+        //dBodyAddTorque(frontWheelBody_, 0, 0, -10);
+    }
+    if (app_->keyboard()->isKeyDown(OIS::KC_RIGHT)) {
+        //dBodyAddRelTorque(frameBody_, -10, 0, 0);
+        //dBodyAddTorque(frontWheelBody_, 0, 0, 10);
+    }
+    if (app_->keyboard()->isKeyDown(OIS::KC_UP)) {
+        //dBodyAddRelTorque(rearWheelBody_, 0, 0, -100);
+        dBodyAddTorque(frontWheelBody_, 0, 0, -10);
+    }
+    if (app_->keyboard()->isKeyDown(OIS::KC_DOWN)) {
+        //dBodyAddRelTorque(rearWheelBody_, 0, 0, 100);
+        dBodyAddTorque(frontWheelBody_, 0, 0, 10);
+    }
+
+}

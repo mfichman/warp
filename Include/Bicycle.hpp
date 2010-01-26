@@ -30,22 +30,23 @@ public:
 
 private:
     Bicycle(Application* app);
+	void initBodies();
+	void initGeoms();
+	void initJoints();
+	void initMotors();
+
     static void onBodyNodeMoved(dBodyID id);
 
     Application* app_;
     
     Animation nextAnimation_;
     Animation currentAnimation_;
-    
-    Ogre::SceneNode* frameNode_;
-    Ogre::SceneNode* forkNode_;
-    Ogre::SceneNode* frontWheelNode_;
-    Ogre::SceneNode* rearWheelNode_;
-    
+
     dBodyID frontWheelBody_;
     dBodyID rearWheelBody_;
     dBodyID frameBody_;
     dBodyID forkBody_;
+
     dGeomID frontWheelGeom_;
     dGeomID rearWheelGeom_;
     dGeomID frameGeom_;
@@ -53,12 +54,11 @@ private:
     dJointID rearWheelJoint_;
     dJointID frontWheelJoint_;
     dJointID forkJoint_;
-    dJointID forkMotor_;
-    
-    dBodyID riderBody_;
-    dJointID riderJoint_;
-    dJointID riderMotor_;
 
+	dJointID leanMotor_;
+
+	float leanAngle_;
+	float turnRadius_;
 };
 
 }
