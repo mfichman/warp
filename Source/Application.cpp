@@ -151,7 +151,7 @@ Application::loadPhysics() {
     dGeomID plane = dCreatePlane(space_, 0.0, 1.0, 0.0, -0.742);
     dGeomSetCategoryBits(plane, TYPETERRAIN);
     dGeomSetCollideBits(plane, TYPEWHEEL);
-	dWorldSetGravity(world_, 0.0, -9.8, 0.0);   
+	//dWorldSetGravity(world_, 0.0, -9.8, 0.0);   
 }
 
 //------------------------------------------------------------------------------
@@ -169,14 +169,12 @@ main(int argc, char** argv) {
 
 		Light* light = app->sceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
-		light->setDiffuseColour(ColourValue(1.0, 1.0, 1.0));
-		light->setSpecularColour(ColourValue(0.25, 0.25, 0.25));
+		light->setDiffuseColour(ColourValue(0.75, 0.75, 0.75));
+		light->setSpecularColour(ColourValue(0.75, 0.75, 0.75));
 		light->setDirection(Vector3( 0, -1, 1 )); 
 
-	//app->camera()->setPosition(-20, 1.0, 0);
-	//app->camera()->lookAt(0, 0, 0);
 
-		app->sceneManager()->setAmbientLight(ColourValue(0, 0, 0));
+		app->sceneManager()->setAmbientLight(ColourValue(0.6f, 0.6f, 0.6f));
 
 		Entity* entity = app->sceneManager()->createEntity("Ground", "Ground");
 		entity->setMaterialName("Examples/Rockwall");

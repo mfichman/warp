@@ -80,20 +80,21 @@ FrameListener::onGeomCollision(void* data, dGeomID o1, dGeomID o2) {
 		memset(&contact, 0, sizeof(dContact));
         contact.geom = geom[i];
         
+		contact.surface.mode = dContactApprox1 | dContactFDir1 | dContactSlip2;
+        contact.surface.mu = 0.0;
+       // contact.surface.slip2 = 0.003;; * v; // Tire slip
         
-        if (t1 == TYPEWHEEL && t2 == TYPETERRAIN) {
+        /*if (t1 == TYPEWHEEL && t2 == TYPETERRAIN) {
             const dReal* r = dBodyGetRotation(dGeomGetBody(o1));
             const dReal* vel = dBodyGetLinearVel(dGeomGetBody(o1));
             Ogre::Vector3 front(-r[2], -r[6], -r[10]);
             Ogre::Vector3 up(r[1], r[5], r[9]);
             
             float v = sqrtf(vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]);
-            contact.surface.mode = dContactApprox1 | dContactFDir1 | dContactSlip2;
-            contact.surface.mu = 3.0;
-            contact.surface.slip2 = 0.003 * v; // Tire slip
+
 
 			((Ogre::Vector3&)contact.fdir1) = front;
-        }
+        }*/
         
         // Add a contact joint
         dJointID joint = dJointCreateContact(app->world(), app->contactJointGroup(), &contact);
