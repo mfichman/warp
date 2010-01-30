@@ -10,21 +10,21 @@ int main(int argc, char** argv) {
 
 		//Hack hack hack
 		
-		//Ogre::Plane plane(Vector3::UNIT_Y, -0.742);
-		//Ogre::MeshManager::getSingleton().createPlane(
-		//	"Ground", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
-		//	1500, 1500, 200, 200, true, 1, 500, 500, Vector3::UNIT_Z);
+		Ogre::Plane plane(Vector3::UNIT_Y, -0.742);
+		Ogre::MeshManager::getSingleton().createPlane(
+			"Ground", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, plane,
+			1500, 1500, 200, 200, true, 1, 500, 500, Vector3::UNIT_Z);
 		
 
-		// Hack hack hack - flat ground
-		
-		///Ogre::Entity* entity = game->getSceneManager()->createEntity("Ground", "Ground");
-		//entity->setMaterialName("Examples/Rockwall");
-		//entity->setCastShadows(false);
-		//game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
+		// Hack hack hack - flat ground		
+		Ogre::Entity* entity = game->getSceneManager()->createEntity("Ground", "Ground");
+		entity->setMaterialName("Examples/Rockwall");
+		entity->setCastShadows(false);
+		game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
 		
 
 		// Hack ahack hack
+		/*
 		game->getCamera()->setPosition(0, 100, 500);
 		game->getCamera()->lookAt(0, 0, 0);
 		game->getCamera()->setNearClipDistance(0.5);
@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
 		game->getSceneManager()->setWorldGeometry("terrain.cfg");
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.6, 0.6, 1.0));
 		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 300, 900);
+		*/
 
 
 		Ogre::Light* light = game->getSceneManager()->createLight("Light");

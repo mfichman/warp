@@ -22,6 +22,17 @@ using namespace std;
 
 struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
+	Impl() : 
+		guiRenderer_(0), 
+		guiSystem_(0), 
+		root_(0), 
+		world_(0), 
+		space_(0), 
+		inputManager_(0),
+		keyboard_(0),
+		mouse_(0) {
+	}
+
 	/** Destroys subsystems */
 	~Impl() {
 		objects_.clear();
@@ -151,9 +162,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		physicsAccumulator_ += evt.timeSinceLastFrame;
 		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
 
-				const OIS::MouseState& state = mouse_->getMouseState();
-			camera_->pitch(Radian(-state.Y.rel/100.0));
-			camera_->yaw(Radian(-state.X.rel/100.0));
+			//	const OIS::MouseState& state = mouse_->getMouseState();
+			//camera_->pitch(Radian(-state.Y.rel/100.0));
+			//camera_->yaw(Radian(-state.X.rel/100.0));
 
 		// Run fixed time steps using time in accumulator
 		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
@@ -172,9 +183,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 
 			
-			if (keyboard_->isKeyDown(OIS::KC_UP)) {
-				camera_->moveRelative(Vector3(0.0, 0.0, -0.5));
-			}
+			//if (keyboard_->isKeyDown(OIS::KC_UP)) {
+			//	camera_->moveRelative(Vector3(0.0, 0.0, -0.5));
+			//}
 		}
 		return true;
 	}
@@ -239,7 +250,7 @@ Game::Game() : impl_(new Impl()) {
 	impl_->loadGraphics();
 	impl_->loadInput();
 	impl_->loadPhysics();
-	//impl_->objects_.push_back(new Bicycle(this));
+	impl_->objects_.push_back(new Bicycle(this));
 }
 
 OIS::Keyboard* Game::getKeyboard() const { 
