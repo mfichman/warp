@@ -4,7 +4,6 @@
  ******************************************************************************/
 
 #include <Bicycle.hpp>
-#include <Application.hpp>
 
 using namespace Criterium;
 using namespace Ogre;
@@ -19,214 +18,253 @@ using namespace std;
 #define WHEELBASE 0.1108 // meters
 
 #define CASTERANGLE 0.3988 // radians
+#define MAXLEANANGLE 0.8000 // radians
+#define SENSITIVITY 0.1000 
 
-//------------------------------------------------------------------------------
-Bicycle::Ptr
-Bicycle::make(Application* app) {
-    return new Bicycle(app);
-}
+struct Bicycle::Impl : public Game::Listener {
 
+	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
+	void initNodes() {
 
-//------------------------------------------------------------------------------
-Bicycle::Bicycle(Application* app) :
-    app_(app),
-    nextAnimation_(animCoast),
-	currentAnimation_(animCoast) { 
+		dMass mass; Entity* entity;
 
-	initBodies();
-	//initGeoms();
-}
+		// Set up OGRE scene nodes
+		SceneNode* root = game_->getSceneManager()->getRootSceneNode();
+		SceneNode* bodyNode = root->createChildSceneNode("Bike");
 
-//------------------------------------------------------------------------------
-void
-Bicycle::initBodies() {
-	dMass mass;
-	Entity* entity;
+		centerNode_ = bodyNode->createChildSceneNode("Center");
+		centerNode_->setPosition(0.0f, -0.735f, 0.0f);
 
-    // Set up OGRE scene nodes
-    SceneNode* root = app_->sceneManager()->getRootSceneNode();
+		// Bike frame
+		SceneNode* frameNode = centerNode_->createChildSceneNode("Frame");
+		entity = game_->getSceneManager()->createEntity("Frame", "Frame.mesh");
+		entity->setCastShadows(true);
+		frameNode->attachObject(entity);
+		frameNode->setPosition(0, 0.735, 0);
 
-	SceneNode* bodyNode = root->createChildSceneNode("Bike");
+		// Front bike fork
+		forkNode_ = centerNode_->createChildSceneNode("Fork");
+		entity = game_->getSceneManager()->createEntity("Fork", "Fork.mesh");
+		entity->setCastShadows(true);
+		forkNode_->attachObject(entity);
+		forkNode_->setPosition(0.516, 0.781, 0.000);
+		
+		// Front wheel
+		SceneNode* frontWheelNode = forkNode_->createChildSceneNode("FrontWheel");
+		entity = game_->getSceneManager()->createEntity("FrontWheel", "Wheel.mesh");
+		entity->setCastShadows(true);
+		frontWheelNode->attachObject(entity);
+		frontWheelNode->setPosition(0.177, -0.420, 0.000);
+		
+		// Rear wheel
+		SceneNode* rearWheelNode = centerNode_->createChildSceneNode("RearWheel");
+		entity = game_->getSceneManager()->createEntity("RearWheel", "Wheel.mesh");
+		entity->setCastShadows(true);
+		rearWheelNode->attachObject(entity);
+		rearWheelNode->setPosition(-0.415, 0.368, 0.000);
 
-	centerNode_ = bodyNode->createChildSceneNode("Center");
-	centerNode_->setPosition(0.0f, -0.735f, 0.0f);
+		// Cyclist and animation state
+		SceneNode* cyclistNode = centerNode_->createChildSceneNode("Cyclist");
+		entity = game_->getSceneManager()->createEntity("Shirt", "Cyclist.mesh");
+		entity->setCastShadows(true);
+		cyclistNode->attachObject(entity);
+		cyclistNode->setPosition(-0.2600, 1.020, 0.000);
+		cyclistNode->setOrientation(Quaternion(Degree(90), Vector3(0.000, 1.000, 0.000)));
+		cyclingState_ = entity->getAnimationState("Cycling");
+		cyclingState_->setEnabled(true);
+		cyclingState_->setLoop(true);
+		
+		bodyNode->attachObject(game_->getCamera());
+		game_->getCamera()->setPosition(-3.0, 1.0, -2.0);
+		game_->getCamera()->lookAt(0, 0, 0);
 
-    SceneNode* frameNode = centerNode_->createChildSceneNode("Frame");
-	entity = app_->sceneManager()->createEntity("Frame", "Frame.mesh");
-	entity->setCastShadows(true);
-    frameNode->attachObject(entity);
-	frameNode->setPosition(0, 0.735, 0);
+		leanAngle_ = 0;
+		turnRadius_ = 0;
 
-	forkNode_ = centerNode_->createChildSceneNode("Fork");
-	entity = app_->sceneManager()->createEntity("Fork", "Fork.mesh");
-	entity->setCastShadows(true);
-    forkNode_->attachObject(entity);
-	forkNode_->setPosition(0.516, 0.781, 0.000);
-	
-	SceneNode* frontWheelNode = forkNode_->createChildSceneNode("FrontWheel");
-	entity = app_->sceneManager()->createEntity("FrontWheel", "Wheel.mesh");
-	entity->setCastShadows(true);
-    frontWheelNode->attachObject(entity);
-	frontWheelNode->setPosition(0.177, -0.420, 0.000);
-	
-	SceneNode* rearWheelNode = centerNode_->createChildSceneNode("RearWheel");
-	entity = app_->sceneManager()->createEntity("RearWheel", "Wheel.mesh");
-	entity->setCastShadows(true);
-    rearWheelNode->attachObject(entity);
-	rearWheelNode->setPosition(-0.415, 0.368, 0.000);
-	
+		// Set up ODE bodies
+		body_ = dBodyCreate(game_->getWorld());
+		dMassSetBoxTotal(&mass, FRAMEMASS, FRAMELENGTH, FRAMEHEIGHT, FRAMEWIDTH);
+		dBodySetMass(body_, &mass);
+		dBodySetData(body_, bodyNode);
+		dBodySetMaxAngularSpeed(body_, 0);
+		dBodySetMovedCallback(body_, &Impl::onBodyMoved);
+		dBodySetLinearVel(body_, 5.0f, 0.0f, 0.0f);
 
-	bodyNode->attachObject(app_->camera());
-	app_->camera()->setPosition(-1.0, 1.0, -3.0);
-	app_->camera()->lookAt(0, 0, 0);
+		frontWheel_ = dBodyCreate(game_->getWorld());
+		dMassSetSphereTotal(&mass, 1, WHEELRADIUS);
+		dBodySetMass(frontWheel_, &mass);
+		dBodySetData(frontWheel_, frontWheelNode);
+		dBodySetMovedCallback(frontWheel_, &Impl::onWheelMoved);
 
+		rearWheel_ = dBodyCreate(game_->getWorld());
+		dMassSetSphereTotal(&mass, 1, WHEELRADIUS);
+		dBodySetMass(rearWheel_, &mass);
+		dBodySetData(rearWheel_, rearWheelNode);
+		dBodySetMovedCallback(rearWheel_, &Impl::onWheelMoved);
+	}
 
-	leanAngle_ = 0;
-	turnRadius_ = 0;
-
-	// Set up ODE bodies
-	body_ = dBodyCreate(app_->world());
-    dMassSetBoxTotal(&mass, FRAMEMASS, FRAMELENGTH, FRAMEHEIGHT, FRAMEWIDTH);
-    dBodySetMass(body_, &mass);
-	dBodySetData(body_, bodyNode);
-	dBodySetMaxAngularSpeed(body_, 0);
-    dBodySetMovedCallback(body_, &Bicycle::onBodyMoved);
-
-	frontWheel_ = dBodyCreate(app_->world());
-    dMassSetSphereTotal(&mass, 1, WHEELRADIUS);
-    dBodySetMass(frontWheel_, &mass);
-	dBodySetData(frontWheel_, frontWheelNode);
-	dBodySetMovedCallback(frontWheel_, &Bicycle::onWheelMoved);
-
-	rearWheel_ = dBodyCreate(app_->world());
-    dMassSetSphereTotal(&mass, 1, WHEELRADIUS);
-    dBodySetMass(rearWheel_, &mass);
-	dBodySetData(rearWheel_, rearWheelNode);
-	dBodySetMovedCallback(rearWheel_, &Bicycle::onWheelMoved);
-
-}
-
-//------------------------------------------------------------------------------
-void
-Bicycle::initGeoms() {
-	
-    // Set up ODE geoms
-	geom_ = dCreateCapsule(app_->space(), 0.02, 2*0.735 - 0.04);
-    dGeomSetBody(geom_, body_);
-    dGeomSetCategoryBits(geom_, TYPEWHEEL);
-    dGeomSetCollideBits(geom_, TYPETERRAIN);
-	
-	dMatrix3 rotation;
-	dRFromAxisAndAngle(rotation, 1.0, 0.0, 0.0, 3.14159/2);
-	dGeomSetOffsetRotation(geom_, rotation);
-}
-
-//------------------------------------------------------------------------------
-Bicycle::~Bicycle() {
-	/*
-	dBodyDestroy(frontWheelBody_);
-    dBodyDestroy(rearWheelBody_);
-    dBodyDestroy(frameBody_);
-    dBodyDestroy(forkBody_);
-	dBodyDestroy(riderBody_);
-
-    dGeomDestroy(frontWheelGeom_);
-    dGeomDestroy(rearWheelGeom_);
-    dGeomDestroy(frameGeom_);
-    
-    dJointDestroy(rearWheelJoint_);
-    dJointDestroy(frontWheelJoint_);
-    dJointDestroy(forkJoint_);
-    dJointDestroy(forkMotor_);
-    
-    dJointDestroy(riderJoint_);
-    dJointDestroy(riderMotor_);*/
-}
-
-//------------------------------------------------------------------------------
-void
-Bicycle::onBodyMoved(dBodyID body) {
-
-    // Update the position of the scene node attached to this body.
-    // Position is in global coordinates.
-    SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
-    const dReal* pos = dBodyGetPosition(body);
-    const dReal* quat = dBodyGetQuaternion(body);
-    
-    // N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
-    node->setPosition(pos[0], pos[1], pos[2]);
-    node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
-}
-
-//------------------------------------------------------------------------------
-void
-Bicycle::onWheelMoved(dBodyID body) {
-    // Update the position of the scene node attached to this body.
-    // Position is in global coordinates.
-    SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
-    const dReal* quat = dBodyGetQuaternion(body);
-    
-    // N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
-    node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
-}
-
-
-//------------------------------------------------------------------------------
-void
-Bicycle::onFrame() {
-	const dReal* velocity = dBodyGetLinearVel(body_);
-	float speed = dLENGTH(velocity);
-
-	if (leanAngle_ != 0.0f) {
-		// Calculate the turn radius (r = v^2/(g*tan(theta)))
-		turnRadius_ = (speed*speed)/(9.81*tanf(leanAngle_));
-
-		// Set the transformation matrix for the lean rotation
-		centerNode_->setOrientation(Quaternion(Radian(leanAngle_), Vector3(1.0f, 0.0f, 0.0f)));
-
-		// Get the transformation matrix to point the bike 
-		// in the direction that it's moving
-		dReal forward[3] = { velocity[0], velocity[1], velocity[2] }; // X AXIS
-		dReal up[3] = { 0.0f, 1.0f, 0.0f }; // Y AXIS
+	/** Initializes the geometric shape of the bicycle for collision detection */
+	void initGeoms() {
+		
+		// Set up ODE geoms
+		geom_ = dCreateCapsule(game_->getSpace(), 0.02, 2*0.735 - 0.04);
+		dGeomSetBody(geom_, body_);
+		dGeomSetCategoryBits(geom_, TYPEWHEEL);
+		dGeomSetCollideBits(geom_, TYPETERRAIN);
+		
 		dMatrix3 rotation;
-		dRFrom2Axes(rotation, forward[0], forward[1], forward[2], up[0], up[1], up[2]);
-		dBodySetRotation(body_, rotation);		
-
-		// Calculate the centripetal force (F = mv^2/r)
-		float force =(FRAMEMASS*speed*speed)/turnRadius_;
-		dBodyAddRelForce(body_, 0.0, 0.0, force);
-
-		// Calculate the steer angle about the steering axis
-		steerAngle_ = -20 * (WHEELBASE*cosf(leanAngle_)) / (turnRadius_*cosf(CASTERANGLE));
-		forkNode_->setOrientation(Quaternion(Radian(steerAngle_), Vector3(-0.177, 0.420, 0.0f)));
+		dRFromAxisAndAngle(rotation, 1.0, 0.0, 0.0, 3.14159/2);
+		dGeomSetOffsetRotation(geom_, rotation);
 	}
 
-	// Wheel rotation
-	dReal radius[3] = {0.0f, WHEELRADIUS, 0.0f};
-	dReal linvel[3] = { speed, 0.0f, 0.0f };
-	dReal cross[3];
-	dCROSS(cross, =, radius, linvel);
-	cross[0] /= WHEELRADIUS*WHEELRADIUS;
-	cross[1] /= WHEELRADIUS*WHEELRADIUS;
-	cross[2] /= WHEELRADIUS*WHEELRADIUS;
-	dBodySetAngularVel(frontWheel_, cross[0], cross[1], cross[2]);
-	dBodySetAngularVel(rearWheel_, cross[0], cross[1], cross[2]);
+	/** Called when a new frame is detected */
+	void onTimeStep() {
+		updateAnimation();
+		calculateOrientation();
+		processInput();
+	}
+
+	float time;
+
+	/** Update the animation of the cyclist */
+	void updateAnimation() {
+		// Update the cyclist animation
+		if (time > 0.0) {
+			cyclingState_->addTime(time);
+		}
+
+		if (!game_->getMouse()->getMouseState().buttonDown(OIS::MB_Left)) {
+			time = 0.01;
+		} else {
+			time -= 0.0004f;
+		}
+
+	}
+
+	/** Calculate the orientation of the bike based on velocity and lean angle */
+	void calculateOrientation() {
+
+		const dReal* velocity = dBodyGetLinearVel(body_);
+		float speed = dLENGTH(velocity);
+
+		if (leanAngle_ != 0.0f) {
+			// Calculate the turn radius (r = v^2/(g*tan(theta)))
+			turnRadius_ = (speed*speed)/(9.81*tanf(leanAngle_));
+
+			// Calculate a small wobble when the bike is at high velocity and lean
+			time_ += abs(0.01 * speed * leanAngle_);
+			if (time_ > 6.28) {
+				time_ -= 6.28;
+			}
+			float deviation = 0.01*cosf(time_);
+
+			// Set the transformation matrix for the lean rotation
+			centerNode_->setOrientation(Quaternion(Radian(leanAngle_ + deviation), Vector3(1.0f, 0.0f, 0.0f)));
+
+			if (speed > 0.001) {
+				// Get the transformation matrix to point the bike 
+				// in the direction that it's moving
+				dReal forward[3] = { velocity[0], velocity[1], velocity[2] }; // X AXIS
+				dReal up[3] = { 0.0f, 1.0f, 0.0f }; // Y AXIS: Change to normal vector
+				dMatrix3 rotation;
+				dRFrom2Axes(rotation, forward[0], forward[1], forward[2], up[0], up[1], up[2]);
+				dBodySetRotation(body_, rotation);		
+
+				// Calculate the centripetal force (F = mv^2/r)
+				float force =(FRAMEMASS*speed*speed)/turnRadius_;
+				dBodyAddRelForce(body_, 0.0, 0.0, force);
+
+				// Calculate the steer angle about the steering axis
+				steerAngle_ = -20 * (WHEELBASE*cosf(leanAngle_)) / (turnRadius_*cosf(CASTERANGLE));
+				forkNode_->setOrientation(Quaternion(Radian(steerAngle_), Vector3(-0.177, 0.420, 0.0f)));
+			}
+		}
+
+		if (speed > 0.001) {
+			// Calculate the wheel rotation given the current velocity
+			// of the bicycle
+			dReal radius[3] = {0.0f, WHEELRADIUS, 0.0f};
+			dReal linvel[3] = { speed, 0.0f, 0.0f };
+			dReal cross[3];
+			dCROSS(cross, =, radius, linvel);
+			cross[0] /= WHEELRADIUS*WHEELRADIUS;
+			cross[1] /= WHEELRADIUS*WHEELRADIUS;
+			cross[2] /= WHEELRADIUS*WHEELRADIUS;
+			dBodySetAngularVel(frontWheel_, cross[0], cross[1], cross[2]);
+			dBodySetAngularVel(rearWheel_, cross[0], cross[1], cross[2]);
+		}
+	}
+
+	/** Determine the new lean angle and apply acceleration/brake forces */
+	void processInput() {
+		// Get the new lean angle from the position of the getMouse on the screen
+		unsigned int width, height, depth;
+		int top, left;
+		unsigned int x = game_->getMouse()->getMouseState().X.abs;
+		game_->getWindow()->getMetrics(width, height, depth, left, top);
+		float steering = MAXLEANANGLE*(x - width/2.0f)/(width/2.0f);
+		leanAngle_ = leanAngle_*SENSITIVITY + (1-SENSITIVITY)*steering;
 	
-	if (app_->keyboard()->isKeyDown(OIS::KC_LEFT)) {
-		leanAngle_ -= 0.005;
-    }
-    if (app_->keyboard()->isKeyDown(OIS::KC_RIGHT)) {
-		leanAngle_ += 0.005;
-    }
-    if (app_->keyboard()->isKeyDown(OIS::KC_UP)) {
-        dBodyAddRelForce(body_, 1000, 0, 0);
-    }
-    if (app_->keyboard()->isKeyDown(OIS::KC_DOWN)) {
-        dBodyAddRelForce(body_, -1000, 0, 0);
-    }
+		// Accelerate or brake the bike using input
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
+			dBodyAddRelForce(body_, 1000, 0, 0);
+		}
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
+			dBodyAddRelForce(body_, -1000, 0, 0);
+		}
 
-	if (app_->keyboard()->isKeyDown(OIS::KC_U)) {
-		dBodyAddForce(body_, 0, 1000, 0);
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_U)) {
+			dBodyAddForce(body_, 0, 1000, 0);
+		}
+	}
+	
+	/** Called when the body is moved to move the corresponding scene node */
+	static void onBodyMoved(dBodyID body) {
+
+		// Update the position of the scene node attached to this body.
+		// Position is in global coordinates.
+		SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
+		const dReal* pos = dBodyGetPosition(body);
+		const dReal* quat = dBodyGetQuaternion(body);
+	    
+		// N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
+		node->setPosition(pos[0], pos[1], pos[2]);
+		node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
 	}
 
+	/** Called when a wheel rotates to move the corresponding scene node */
+	static void onWheelMoved(dBodyID body) {
+		// Update the position of the scene node attached to this body.
+		// Position is in global coordinates.
+		SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
+		const dReal* quat = dBodyGetQuaternion(body);
+	    
+		// N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
+		node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
+	}
+
+	Game* game_;
+
+	Ogre::AnimationState* cyclingState_;
+
+    dBodyID body_;
+    dGeomID geom_;
+	dBodyID frontWheel_;
+	dBodyID rearWheel_;
+
+	Ogre::SceneNode* centerNode_;
+	Ogre::SceneNode* forkNode_;
+
+	float leanAngle_;
+	float turnRadius_;
+	float steerAngle_;
+	float time_;
+};
+
+Bicycle::Bicycle(Game* game) : impl_(new Impl()) {
+	impl_->game_ = game;
+	impl_->time_ = 0;
+	impl_->initNodes();
+	impl_->initGeoms();
+	game->addListener(impl_.get());
 }

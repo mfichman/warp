@@ -65,27 +65,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\Source\Application.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Source\Bicycle.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Source\ExampleApplication.cpp"
+				RelativePath="..\Source\Game.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Source\FrameListener.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Source\Tree.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Source\WindowListener.cpp"
+				RelativePath="..\Source\Main.cpp"
 				>
 			</File>
 		</Filter>
@@ -95,27 +83,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\Include\Application.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Include\Bicycle.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Include\FrameListener.hpp"
+				RelativePath="..\Include\Game.hpp"
 				>
 			</File>
 			<File
 				RelativePath="..\Include\Interface.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\Tree.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\WindowListener.hpp"
 				>
 			</File>
 		</Filter>
