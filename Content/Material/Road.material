@@ -1,0 +1,18 @@
+material Road
+{
+
+	technique
+	{
+
+	
+		pass
+		{
+			texture_unit
+			{
+			  filtering anisotropic
+        max_anisotropy 8
+				texture Road.png
+			}
+		}
+	}
+}

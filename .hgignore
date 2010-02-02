@@ -5,6 +5,7 @@ Plugins/*
 Build/*
 Include/boost/*
 Criterium.exe*
+RoadTool.exe*
 *.log
 *.pdb
 *.ilk

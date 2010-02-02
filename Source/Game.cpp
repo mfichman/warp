@@ -162,9 +162,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		physicsAccumulator_ += evt.timeSinceLastFrame;
 		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
 
-			//	const OIS::MouseState& state = mouse_->getMouseState();
-			//camera_->pitch(Radian(-state.Y.rel/100.0));
-			//camera_->yaw(Radian(-state.X.rel/100.0));
+			const OIS::MouseState& state = mouse_->getMouseState();
+			camera_->pitch(Radian(-state.Y.rel/100.0));
+			camera_->yaw(Radian(-state.X.rel/100.0));
 
 		// Run fixed time steps using time in accumulator
 		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
@@ -183,9 +183,20 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 
 			
-			//if (keyboard_->isKeyDown(OIS::KC_UP)) {
-			//	camera_->moveRelative(Vector3(0.0, 0.0, -0.5));
-			//}
+
+			if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
+				if (keyboard_->isKeyDown(OIS::KC_UP)) {
+					camera_->moveRelative(Vector3(0.0, 0.0, -500 * PHYSICSUPDATEINTERVAL));
+				} else if (keyboard_->isKeyDown(OIS::KC_DOWN)) {
+					camera_->moveRelative(Vector3(0.0, 0.0, 500 * PHYSICSUPDATEINTERVAL));
+				}
+			} else {
+				if (keyboard_->isKeyDown(OIS::KC_UP)) {
+					camera_->moveRelative(Vector3(0.0, 0.0, -11.18 * PHYSICSUPDATEINTERVAL));
+				} else if (keyboard_->isKeyDown(OIS::KC_DOWN)) {
+					camera_->moveRelative(Vector3(0.0, 0.0, 11.18 * PHYSICSUPDATEINTERVAL));
+				}
+			}
 		}
 		return true;
 	}
@@ -250,7 +261,7 @@ Game::Game() : impl_(new Impl()) {
 	impl_->loadGraphics();
 	impl_->loadInput();
 	impl_->loadPhysics();
-	impl_->objects_.push_back(new Bicycle(this));
+	//impl_->objects_.push_back(new Bicycle(this));
 }
 
 OIS::Keyboard* Game::getKeyboard() const { 
