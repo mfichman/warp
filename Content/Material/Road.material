@@ -7,6 +7,9 @@ material Road
 	
 		pass
 		{
+			ambient 0.000000 0.000000 0.000000 1.000000
+			diffuse 1.00000 1.000000 1.00000 1.000000
+			
 			texture_unit
 			{
 			  filtering anisotropic

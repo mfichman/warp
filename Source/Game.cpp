@@ -192,9 +192,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 				}
 			} else {
 				if (keyboard_->isKeyDown(OIS::KC_UP)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, -11.18 * PHYSICSUPDATEINTERVAL));
+					camera_->moveRelative(Vector3(0.0, 0.0, -22.18 * PHYSICSUPDATEINTERVAL));
 				} else if (keyboard_->isKeyDown(OIS::KC_DOWN)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, 11.18 * PHYSICSUPDATEINTERVAL));
+					camera_->moveRelative(Vector3(0.0, 0.0, 22.18 * PHYSICSUPDATEINTERVAL));
 				}
 			}
 		}

@@ -30,20 +30,20 @@ int main(int argc, char** argv) {
 		//game->getCamera()->setPosition(0, 100, 500);
 		game->getCamera()->setPosition(10, 500, 10);
 		game->getCamera()->lookAt(0, 0, 0);
-		//game->getCamera()->setNearClipDistance(0.5);
-		//game->getCamera()->setFarClipDistance(500);
+		game->getCamera()->setNearClipDistance(0.5);
+		game->getCamera()->setFarClipDistance(100);
 		game->getSceneManager()->setWorldGeometry("terrain.cfg");
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.6, 0.6, 1.0));
-		//game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 300, 900);
-		
-
+		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 300, 900);
 
 		Ogre::Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
-		light->setDiffuseColour(ColourValue(0.75, 0.75, 0.75));
-		light->setSpecularColour(ColourValue(0.75, 0.75, 0.75));
-		light->setDirection(Vector3( 0, -1, 1 )); 
-		game->getSceneManager()->setAmbientLight(ColourValue(0.6f, 0.6f, 0.6f));
+		light->setDiffuseColour(ColourValue(1.0, 1.0, 1.0));
+		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
+		light->setDirection(Vector3(0, -1, 1)); 
+		//game->getSceneManager()->setAmbientLight(ColourValue(0.2f, 0.2f, 0.2f));
+
+		game->getSceneManager()->setAmbientLight(ColourValue(0.0f, 0.0f, 0.0f));
 		game->getRoot()->startRendering();
         
     } catch (Exception& ex) {

@@ -7,9 +7,9 @@
 
 using namespace std;
 
-#define HEIGHTOFFSET 1.2f // meters
+#define HEIGHTOFFSET 0.35 // meters
 #define ROADWIDTH 9.0f // meters
-#define SMOOTHING 0.8f
+//#define SMOOTHING 0.1f
 #define WORLDSCALING 1.46484375f // 
 #define OBJSCALING 1.0f
 
@@ -17,6 +17,16 @@ vector<Ogre::Vector3> points;
 Ogre::Root* root;
 Ogre::TerrainSceneManager* sceneManager;
 Ogre::ManualObject* manual;
+
+
+struct Vertex {
+	Vertex(const Ogre::Vector3 pos, float u, float v) : p(pos), u(u), v(v), n(0, 0, 0) {}
+	Ogre::Vector3 p;
+	Ogre::Vector3 n;
+	float u;
+	float v;
+};
+
 
 void ReadFile(char* file) {
 	ifstream in(file);
@@ -43,6 +53,15 @@ void ReadFile(char* file) {
 	}
 
 	cout << points.size() << " points read." << endl;
+}
+
+Ogre::Vector3 normal(Ogre::Vector3 p1, Ogre::Vector3 p2, Ogre::Vector3 p3, bool even) {
+	if (even) {
+		return ((p2 - p1).crossProduct(p2 - p3)).normalisedCopy();
+	} else {
+		return -((p2 - p1).crossProduct(p2 - p3)).normalisedCopy();
+	}
+	
 }
 
 void LoadTerrain() {
@@ -73,14 +92,29 @@ void LoadTerrain() {
 	
 }
 
+void ComputeNormals(vector<Vertex>& vertices) {
+	for (size_t i = 2; i < vertices.size(); i++) {
+		Ogre::Vector3& p1 = vertices[i-2].p;
+		Ogre::Vector3& p2 = vertices[i-1].p;
+		Ogre::Vector3& p3 = vertices[i-0].p;
+
+		Ogre::Vector3 n = normal(p1, p2, p3, (i%2) != 0);
+		vertices[i-2].n += n;
+		vertices[i-1].n += n;
+		vertices[i-0].n += n;
+	}
+}
+
 void ComputeVertices() {
 
-	manual->begin("Road", Ogre::RenderOperation::OT_TRIANGLE_LIST);
+	manual->begin("Road", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
 
-	Ogre::Vector3 up(0.0, 1.0, 0.0);
+	const Ogre::Vector3 up(0.0, 1.0, 0.0);
 
+	// Create road segments
+	//float hprev = -1.0f;
 	float u = 0.0f;
-	float hprev = -1.0f;
+	vector<Vertex> vertices;
 	for (size_t i = 2; i < points.size(); i++) {
 		Ogre::Vector3 v1 = points[i-1] - points[i-2];
 		Ogre::Vector3 v2 = points[i] - points[i-1];
@@ -95,56 +129,51 @@ void ComputeVertices() {
 		float h1 = sceneManager->getHeightAt(p1.x, p1.z);
 		float h2 = sceneManager->getHeightAt(p2.x, p2.z);
 
+
 		float h = max(h1, h2) + HEIGHTOFFSET;
-		if (hprev != 1.0f) {
-			h = SMOOTHING*h + (1-SMOOTHING)*hprev;
-		}
-		hprev = h;
 
-		
-		manual->position(OBJSCALING * Ogre::Vector3(p1.x, h, p1.z));
-		manual->normal(up);
-		manual->textureCoord(0.0f, u/ROADWIDTH);
-		manual->position(OBJSCALING * Ogre::Vector3(p2.x, h, p2.z));
-		manual->normal(up);
-		manual->textureCoord(1.0f, u/ROADWIDTH);
-
-		manual->position(OBJSCALING * Ogre::Vector3(p1.x, 0, p1.z));
-		manual->normal(n1);
-		manual->textureCoord(0.0f, 0.0f);
-		manual->position(OBJSCALING * Ogre::Vector3(p2.x, 0, p2.z));
-		manual->normal(n2);
-		manual->textureCoord(0.0f, 0.0f);
-
-		cout << "X: " << points[i].x << endl;
-		cout << "Z: " << points[i].z << endl;
+		vertices.push_back(Vertex(Ogre::Vector3(p1.x, h, p1.z), u, 0.0f));
+		vertices.push_back(Vertex(Ogre::Vector3(p2.x, h, p2.z), u, 1.0f));
 
 		u += points[i-1].distance(points[i-2]);
-
-		cout << i << endl;
-
-
 	}
 
-	int indices = 0;
-	for (size_t i = 7; i < points.size(); i += 4) {
-		//manual->triangle(i-3, i-2, i);
-		//manual->triangle(i, i-1, i-3);
+	// Create the object
+#define SMOOTHFACTOR 20
+	vector<Vertex> temp;
+	for (size_t i = 0; i < vertices.size(); i++) {
 
-		// Top
-		manual->triangle(i-7, i-6, i-2);
-		manual->triangle(i-2, i-3, i-7);
+		size_t start = max(0U, i-SMOOTHFACTOR);
+		size_t end = min(vertices.size(), i+SMOOTHFACTOR+1);
+		float y = 0.0f;
+		for (size_t j = start; j < end; j++) {
+			y += vertices[j].p.y;
+		}
+		y /= (end-start);
+		
+		temp.push_back(Vertex(
+			Ogre::Vector3(vertices[i].p.x, y, vertices[i].p.z), 
+			vertices[i].v, 
+			vertices[i].u/ROADWIDTH));
 
-		// Right
-		manual->triangle(i, i-6, i-4);
-		manual->triangle(i, i-2, i-6);
+	}
+	vertices = temp;
 
-		// Left
-		manual->triangle(i-1, i-5, i-7);
-		manual->triangle(i-1, i-7, i-3);
+
+	// Set normals
+	ComputeNormals(vertices);
+
+	// Add vertices to manual object
+	for (size_t i = 0; i < vertices.size(); i++) {
+		manual->position(vertices[i].p);
+		manual->normal(vertices[i].n.normalisedCopy());
+		manual->textureCoord(vertices[i].u, vertices[i].v);
 	}
 
-	cout << "INDICIES: " << indices << endl;
+	// Calculate index buffer
+	for (size_t i = 0; i < vertices.size(); i++) {
+		manual->index(i);
+	}
 
 	manual->end();
 }
@@ -173,8 +202,6 @@ int main(int argc, char** argv) {
 	} catch (Ogre::Exception ex) {
 		cout << ex.getFullDescription() << endl;
 	}
-
-
 
 	return 0;
 }
