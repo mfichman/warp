@@ -19,3 +19,23 @@ material Road
 		}
 	}
 }
+
+material RoadSide
+{
+
+	technique
+	{
+
+	
+		pass
+		{
+			ambient 0.300000 0.300000 0.300000 1.00000
+			diffuse 0.5000 0.50000 0.5000 1.00000
+			
+			texture_unit
+			{
+				texture GreenGrass.png
+			}
+		}
+	}
+}

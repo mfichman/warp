@@ -23,7 +23,13 @@ int main(int argc, char** argv) {
 		//game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
 		
 
-		Ogre::Entity* entity = game->getSceneManager()->createEntity("Road", "Road.mesh");
+		Ogre::Entity* entity;
+		
+		entity= game->getSceneManager()->createEntity("Road", "Road.mesh");
+		game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
+		entity= game->getSceneManager()->createEntity("RightRoadEdge", "LeftRoadEdge.mesh");
+		game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
+		entity= game->getSceneManager()->createEntity("LeftRoadEdge", "RightRoadEdge.mesh");
 		game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
 		// Hack ahack hack
 		
@@ -41,9 +47,8 @@ int main(int argc, char** argv) {
 		light->setDiffuseColour(ColourValue(1.0, 1.0, 1.0));
 		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
 		light->setDirection(Vector3(0, -1, 1)); 
-		//game->getSceneManager()->setAmbientLight(ColourValue(0.2f, 0.2f, 0.2f));
+		game->getSceneManager()->setAmbientLight(ColourValue(1.0f, 1.0f, 1.0f));
 
-		game->getSceneManager()->setAmbientLight(ColourValue(0.0f, 0.0f, 0.0f));
 		game->getRoot()->startRendering();
         
     } catch (Exception& ex) {
