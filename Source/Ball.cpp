@@ -57,7 +57,7 @@ struct Ball::Impl : public Game::Listener {
 		
 
 		float alpha = 0.1f;
-		float alphay = 0.1f;
+		float alphay = 0.02f;
 		Vector3 front2;
 		front2.x = alpha*front.x + (1-alpha)*last.x;
 		front2.y = alphay*front.y + (1-alphay)*last.y;
@@ -95,10 +95,10 @@ struct Ball::Impl : public Game::Listener {
 
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_RETURN)) {
 			//dBodySetPosition(body_, game_->getCamera()->getPosition().x, game_->getCamera()->getPosition().y,  game_->getCamera()->getPosition().z);
-			//dBodySetPosition(body_, 629, 75, 546);  
+			dBodySetPosition(body_, 629, 75, 546);  
 
 
-			dBodySetPosition(body_, 89.635, 51, 178.7);
+			//dBodySetPosition(body_, 89.635, 51, 178.7);
 
 			dBodySetLinearVel(body_, 0.0f, 0.0f, 0.0f);
 			dBodySetAngularVel(body_, 0.0f, 0.0f, 0.0f);
