@@ -9,9 +9,8 @@ using namespace std;
 
 #define HEIGHTOFFSET 0.4 // meters
 #define ROADWIDTH 9.0f // meters
-//#define SMOOTHING 0.1f
-#define WORLDSCALING 1.46484375f // 
-#define OBJSCALING 1.0f
+#define WORLDSCALING 1.46484375f
+#define SMOOTHFACTOR 2
 
 vector<Ogre::Vector3> points;
 Ogre::Root* root;
@@ -85,7 +84,7 @@ void LoadTerrain() {
 
 	// Create scene manager
 	sceneManager = static_cast<Ogre::TerrainSceneManager*>(root->createSceneManager(Ogre::ST_EXTERIOR_CLOSE, "Default"));
-	sceneManager->setWorldGeometry("terrain.cfg");
+	sceneManager->setWorldGeometry("Road.cfg");
 
 
 	
@@ -160,7 +159,6 @@ void ComputeVertices() {
 	}
 
 	// Create the object
-#define SMOOTHFACTOR 20
 	vector<Vertex> temp;
 	vector<Vertex> left;
 	vector<Vertex> right;
@@ -199,11 +197,9 @@ void ComputeVertices() {
 	}
 	surface = temp;
 
-	SerializeMesh(surface, "Road", "Road");
-	SerializeMesh(left, "LeftRoadEdge", "RoadSide");
-	SerializeMesh(right, "RightRoadEdge", "RoadSide");
-
-
+	SerializeMesh(surface, "RoadTop", "Road");
+	SerializeMesh(left, "RoadLeft", "RoadSide");
+	SerializeMesh(right, "RoadRight", "RoadSide");
 
 }
 

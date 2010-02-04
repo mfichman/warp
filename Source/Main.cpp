@@ -1,4 +1,11 @@
 #include <Game.hpp>
+#include <Terrain.hpp>
+#include <Ball.hpp>
+#include <Cylinder.hpp>
+#include <Overlays.hpp>
+#include <Bicycle.hpp>
+#include <OgreTerrainSceneManager.h>
+#include <sstream>
 
 using namespace Ogre;
 using namespace std;
@@ -22,32 +29,26 @@ int main(int argc, char** argv) {
 		//entity->setCastShadows(false);
 		//game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
 		
-
-		Ogre::Entity* entity;
 		
-		entity= game->getSceneManager()->createEntity("Road", "Road.mesh");
-		game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
-		entity= game->getSceneManager()->createEntity("RightRoadEdge", "LeftRoadEdge.mesh");
-		game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
-		entity= game->getSceneManager()->createEntity("LeftRoadEdge", "RightRoadEdge.mesh");
-		game->getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
-		// Hack ahack hack
 		
-		//game->getCamera()->setPosition(0, 100, 500);
-		game->getCamera()->setPosition(10, 500, 10);
-		game->getCamera()->lookAt(0, 0, 0);
 		game->getCamera()->setNearClipDistance(0.5);
 		game->getCamera()->setFarClipDistance(100);
-		game->getSceneManager()->setWorldGeometry("terrain.cfg");
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.6, 0.6, 1.0));
 		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 300, 900);
 
+		Criterium::Terrain* terrain = new Criterium::Terrain(game.get(), "Road");
+		//Criterium::Cylinder* cylinder = new Criterium::Cylinder(game.get());
+		Criterium::Ball* ball = new Criterium::Ball(game.get());
+		Criterium::Overlays* overlays = new Criterium::Overlays(game.get());
+		//Criterium::Bicycle* bicycle = new Criterium::Bicycle(game.get());
+
+		// Light
 		Ogre::Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
-		light->setDiffuseColour(ColourValue(1.0, 1.0, 1.0));
-		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
+		light->setDiffuseColour(ColourValue(0.8, 0.8, 0.8));
+		light->setSpecularColour(ColourValue(0.0, 0.0, 0.0));
 		light->setDirection(Vector3(0, -1, 1)); 
-		game->getSceneManager()->setAmbientLight(ColourValue(1.0f, 1.0f, 1.0f));
+		game->getSceneManager()->setAmbientLight(ColourValue(0.2f, 0.2f, 0.2f));
 
 		game->getRoot()->startRendering();
         

@@ -13,6 +13,8 @@
 #define TYPEWHEEL 0x0001
 #define TYPETERRAIN 0x0002
 #define TYPEGUARD 0x0004
+#define TYPEBALL 0x0008
+#define TYPEROAD 0x0010
 
 namespace Criterium {
 
@@ -21,6 +23,7 @@ public:
     typedef intrusive_ptr<Game> Ptr;
 	struct Impl; 
 	class Listener;
+	struct Object;
 
 	/** Creates a new game */
 	Game();
@@ -65,6 +68,10 @@ public:
 
 	/** Called when every time a new timestep is calculated */
 	virtual void onTimeStep() {}
+};
+
+struct Game::Object {
+	Ogre::Vector3 normal;
 };
 
 }

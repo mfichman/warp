@@ -4,6 +4,7 @@ material Road
 	technique
 	{
 
+
 	
 		pass
 		{
@@ -34,7 +35,7 @@ material RoadSide
 			
 			texture_unit
 			{
-				texture GreenGrass.png
+				texture GreenGrass.jpg
 			}
 		}
 	}

@@ -21,6 +21,8 @@ using namespace std;
 #define MAXLEANANGLE 0.8000 // radians
 #define SENSITIVITY 0.1000 
 
+bool enable = false;
+
 struct Bicycle::Impl : public Game::Listener {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
@@ -64,7 +66,7 @@ struct Bicycle::Impl : public Game::Listener {
 		rearWheelNode->setPosition(-0.415, 0.368, 0.000);
 
 		// Cyclist and animation state
-		SceneNode* cyclistNode = centerNode_->createChildSceneNode("Cyclist");
+		/*SceneNode* cyclistNode = centerNode_->createChildSceneNode("Cyclist");
 		entity = game_->getSceneManager()->createEntity("Shirt", "Cyclist.mesh");
 		entity->setCastShadows(true);
 		cyclistNode->attachObject(entity);
@@ -72,10 +74,10 @@ struct Bicycle::Impl : public Game::Listener {
 		cyclistNode->setOrientation(Quaternion(Degree(90), Vector3(0.000, 1.000, 0.000)));
 		cyclingState_ = entity->getAnimationState("Cycling");
 		cyclingState_->setEnabled(true);
-		cyclingState_->setLoop(true);
+		cyclingState_->setLoop(true);*/
 		
 		bodyNode->attachObject(game_->getCamera());
-		game_->getCamera()->setPosition(-3.0, 1.0, -2.0);
+		game_->getCamera()->setPosition(-3.0, 1.0, 0.0);
 		game_->getCamera()->lookAt(0, 0, 0);
 
 		leanAngle_ = 0;
@@ -86,7 +88,7 @@ struct Bicycle::Impl : public Game::Listener {
 		dMassSetBoxTotal(&mass, FRAMEMASS, FRAMELENGTH, FRAMEHEIGHT, FRAMEWIDTH);
 		dBodySetMass(body_, &mass);
 		dBodySetData(body_, bodyNode);
-		dBodySetMaxAngularSpeed(body_, 0);
+		//dBodySetMaxAngularSpeed(body_, 0);
 		dBodySetMovedCallback(body_, &Impl::onBodyMoved);
 		dBodySetLinearVel(body_, 5.0f, 0.0f, 0.0f);
 
@@ -101,27 +103,35 @@ struct Bicycle::Impl : public Game::Listener {
 		dBodySetMass(rearWheel_, &mass);
 		dBodySetData(rearWheel_, rearWheelNode);
 		dBodySetMovedCallback(rearWheel_, &Impl::onWheelMoved);
+
+		dBodySetPosition(body_, 29, 34, 194.5);
 	}
 
 	/** Initializes the geometric shape of the bicycle for collision detection */
 	void initGeoms() {
 		
 		// Set up ODE geoms
-		geom_ = dCreateCapsule(game_->getSpace(), 0.02, 2*0.735 - 0.04);
+		geom_ = dCreateCapsule(game_->getSpace(), 0.2, 2*0.735 - 0.4);
 		dGeomSetBody(geom_, body_);
 		dGeomSetCategoryBits(geom_, TYPEWHEEL);
-		dGeomSetCollideBits(geom_, TYPETERRAIN);
+		dGeomSetCollideBits(geom_, TYPETERRAIN | TYPEROAD);
 		
 		dMatrix3 rotation;
 		dRFromAxisAndAngle(rotation, 1.0, 0.0, 0.0, 3.14159/2);
 		dGeomSetOffsetRotation(geom_, rotation);
 	}
 
+	
+
 	/** Called when a new frame is detected */
 	void onTimeStep() {
-		updateAnimation();
-		calculateOrientation();
+		
 		processInput();
+		//updateAnimation();
+
+		if (enable) {
+		calculateOrientation();
+		}
 	}
 
 	float time;
@@ -204,6 +214,13 @@ struct Bicycle::Impl : public Game::Listener {
 		game_->getWindow()->getMetrics(width, height, depth, left, top);
 		float steering = MAXLEANANGLE*(x - width/2.0f)/(width/2.0f);
 		leanAngle_ = leanAngle_*SENSITIVITY + (1-SENSITIVITY)*steering;
+
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_RETURN)) {
+			enable = !enable;
+		}
+
+
+		dBodySetAngularVel(body_, 0, steering, 0);
 	
 		// Accelerate or brake the bike using input
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {

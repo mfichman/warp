@@ -10,13 +10,13 @@
 
 namespace Criterium {
 
-class Bicycle : public Interface {
+class Overlays : public Interface {
 public:
-    typedef intrusive_ptr<Bicycle> Ptr;
+    typedef intrusive_ptr<Overlays> Ptr;
 	struct Impl;
 
 	/** Creates a new bicycle */
-    Bicycle(Game* game);
+    Overlays(Game* game);
 
 private:
 	std::auto_ptr<Impl> impl_;

@@ -137,10 +137,10 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		space_ = dSimpleSpaceCreate(0);
 		contactJointGroup_ = dJointGroupCreate(32);
 
-		dGeomID plane = dCreatePlane(space_, 0.0, 1.0, 0.0, -0.742);
-		dGeomSetCategoryBits(plane, TYPETERRAIN);
-		dGeomSetCollideBits(plane, TYPEWHEEL);
-		dWorldSetGravity(world_, 0.0, -9.8, 0.0);   
+		//dGeomID plane = dCreatePlane(space_, 0.0, 1.0, 0.0, -0.742);
+		//dGeomSetCategoryBits(plane, TYPETERRAIN);
+		//dGeomSetCollideBits(plane, TYPEWHEEL | TYPEBALL);
+		dWorldSetGravity(world_, 0.0, -12, 0.0);   
 	}
 
 	/** Called when the main window is closed */
@@ -162,9 +162,11 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		physicsAccumulator_ += evt.timeSinceLastFrame;
 		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
 
-			const OIS::MouseState& state = mouse_->getMouseState();
+		/*	const OIS::MouseState& state = mouse_->getMouseState();
 			camera_->pitch(Radian(-state.Y.rel/100.0));
 			camera_->yaw(Radian(-state.X.rel/100.0));
+
+			cout << camera_->getPosition() << endl;*/
 
 		// Run fixed time steps using time in accumulator
 		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
@@ -179,24 +181,21 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			dJointGroupEmpty(contactJointGroup_);
 			physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
 
-			for_each(listeners_.begin(), listeners_.end(), mem_fun(&Listener::onTimeStep));
+			for_each(listeners_.begin(), listeners_.end(), mem_fun(&Listener::onTimeStep));			
 
-
-			
-
-			if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
-				if (keyboard_->isKeyDown(OIS::KC_UP)) {
+		/*	if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
+				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
 					camera_->moveRelative(Vector3(0.0, 0.0, -500 * PHYSICSUPDATEINTERVAL));
-				} else if (keyboard_->isKeyDown(OIS::KC_DOWN)) {
+				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
 					camera_->moveRelative(Vector3(0.0, 0.0, 500 * PHYSICSUPDATEINTERVAL));
 				}
 			} else {
-				if (keyboard_->isKeyDown(OIS::KC_UP)) {
+				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
 					camera_->moveRelative(Vector3(0.0, 0.0, -22.18 * PHYSICSUPDATEINTERVAL));
-				} else if (keyboard_->isKeyDown(OIS::KC_DOWN)) {
+				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
 					camera_->moveRelative(Vector3(0.0, 0.0, 22.18 * PHYSICSUPDATEINTERVAL));
 				}
-			}
+			}*/
 		}
 		return true;
 	}
@@ -212,6 +211,16 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		// Look up the surface params for these object types
 		int t1 = dGeomGetCategoryBits(o1);
 		int t2 = dGeomGetCategoryBits(o2);
+
+
+		if (dGeomGetData(o1)) {
+			Game::Object* obj = static_cast<Game::Object*>(dGeomGetData(o1));
+			obj->normal = Ogre::Vector3(geom[0].normal[0], geom[0].normal[1], geom[0].normal[2]);
+		}
+		if (dGeomGetData(o2)) {
+			Game::Object* obj = static_cast<Game::Object*>(dGeomGetData(o2));
+			obj->normal = Ogre::Vector3(geom[0].normal[0], geom[0].normal[1], geom[0].normal[2]);
+		}
 	    
 		for (int i = 0; i < num; i++) {
 			dContact contact;
@@ -219,7 +228,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			contact.geom = geom[i];
 	        
 			contact.surface.mode = dContactApprox1;
-			contact.surface.mu = 0.0;
+			contact.surface.mu = 0;
 	        
 			// Add a contact joint
 			dJointID joint = dJointCreateContact(impl->world_, impl->contactJointGroup_, &contact);
