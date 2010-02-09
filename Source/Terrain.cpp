@@ -5,6 +5,7 @@
 
 #include <Terrain.hpp>
 #include <fstream>
+#include <OgreTerrainSceneManager.h>
 
 using namespace Criterium;
 using namespace Ogre;
@@ -19,11 +20,18 @@ struct Terrain::Impl : public Game::Listener {
 		game_->getSceneManager()->setWorldGeometry(name + ".cfg");
 
 		// Create the road mesh
+        Entity* entity;
 		SceneNode* node = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode();
-		Entity* entity = game_->getSceneManager()->createEntity(name + "Top", name + "Top.mesh");
-		node->attachObject(entity);
-		node->attachObject(game_->getSceneManager()->createEntity(name + "Right", name + "Right.mesh"));
-		node->attachObject(game_->getSceneManager()->createEntity(name + "Left", name + "Left.mesh"));
+        entity = game_->getSceneManager()->createEntity(name + "Right", name + "Right.mesh");
+        entity->setCastShadows(false);
+        node->attachObject(entity);
+		entity = game_->getSceneManager()->createEntity(name + "Left", name + "Left.mesh");
+        entity->setCastShadows(false);
+        node->attachObject(entity);
+		entity = game_->getSceneManager()->createEntity(name + "Top", name + "Top.mesh");
+		entity->setCastShadows(false);
+        node->attachObject(entity);
+
 
 		MeshPtr mesh = entity->getMesh();
 		SubMesh* submesh = mesh->getSubMesh(0);
@@ -62,12 +70,21 @@ struct Terrain::Impl : public Game::Listener {
 		
 		// Lock buffers, read, and build the index
 		data_ = dGeomTriMeshDataCreate();
-		dGeomTriMeshDataBuildSingle(data_, &vertices_.front(), sizeof(Vector3), vertices_.size(), &indices_.front(), indices_.size(), sizeof(int));
-		
-		
-		geom_ = dCreateTriMesh(game_->getSpace(), data_, 0, 0, 0);
-		dGeomSetCategoryBits(geom_, TYPEROAD);
-		dGeomSetCollideBits(geom_, TYPEBALL | TYPEWHEEL);
+		dGeomTriMeshDataBuildSingle(data_, &vertices_.front(), sizeof(Vector3), vertices_.size(), &indices_.front(), indices_.size(), sizeof(int));		
+		road_ = dCreateTriMesh(game_->getSpace(), data_, 0, 0, 0);
+		dGeomSetCategoryBits(road_, TYPEROAD);
+		dGeomSetCollideBits(road_, TYPEBALL | TYPEWHEEL);
+
+		// Setup the height map
+		/*Ogre::TerrainSceneManager* mgr = static_cast<Ogre::TerrainSceneManager*>(game_->getSceneManager());
+		heightfield_ = dGeomHeightfieldDataCreate();
+
+		dGeomHeightfieldDataBuildCallback (heightfield_, mgr, &Impl::onHeightfieldQuery, 3000.0, 3000.0, 2, 2, 1.0, 0.0, 0, 0);
+		dGeomHeightfieldDataSetBounds(heightfield_, 0.0f,  100.0f);
+
+		terrain_ = dCreateHeightfield(game_->getSpace(), heightfield_, 0);
+		dGeomSetCategoryBits(road_, TYPEROAD);
+		dGeomSetCollideBits(road_, TYPEBALL | TYPEWHEEL);*/
 	}
 
 	void onTimeStep() {
@@ -82,9 +99,17 @@ struct Terrain::Impl : public Game::Listener {
 		//cout << dGeomTriMeshGetTriangleCount(geom_) << endl;
 	}
 
+	static float onHeightfieldQuery(void* data, int x, int z) {
+		cout << x << ", " << z << endl;
+		Ogre::TerrainSceneManager* mgr = static_cast<Ogre::TerrainSceneManager*>(data);
+		return mgr->getHeightAt(x * 3000/1024, z * 3000/1024);
+	}
+
 	Game* game_;
 	dTriMeshDataID data_;
-	dGeomID geom_;
+	dHeightfieldDataID heightfield_;
+	dGeomID road_;
+	dGeomID terrain_;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
 };

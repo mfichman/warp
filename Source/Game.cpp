@@ -78,9 +78,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		window_ = root_->initialise(true);
 
 		// Create scene manager
-		//sceneManager_ = root_->createSceneManager("PagingLandScapeSceneManager", "Default");
 		sceneManager_ = root_->createSceneManager(ST_EXTERIOR_CLOSE, "Default");
 		sceneManager_->setShadowTechnique(SHADOWTYPE_STENCIL_MODULATIVE);
+        //sceneManager_->setShadowFarDistance(10.0f);
 
 		// Create the main camera
 		camera_ = sceneManager_->createCamera("Camera");
@@ -303,6 +303,21 @@ Ogre::SceneManager*	Game::getSceneManager() const {
 
 Ogre::RenderWindow*	Game::getWindow() const { 
 	return impl_->window_; 
+}
+
+float Game::getGravity() const {
+    dReal gravityVector[3];
+    dWorldGetGravity(impl_->world_, gravityVector);
+    return dLENGTH(gravityVector);
+}
+
+float Game::getMouseNormalizedX() const {
+	unsigned int width, height, depth;
+	int top, left;
+	unsigned int x = impl_->mouse_->getMouseState().X.abs;
+	impl_->window_->getMetrics(width, height, depth, left, top);
+    return (x - width/2.0f)/(width/2.0f);
+
 }
 
 void Game::addListener(Listener* listener) { 

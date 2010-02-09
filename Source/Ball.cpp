@@ -26,12 +26,7 @@ struct Ball::Impl : public Game::Listener {
 		node->attachObject(game_->getSceneManager()->createEntity("Ball", "Ball.mesh"));
 
 		// Set up ODE bodies
-		body_ = dBodyCreate(game_->getWorld());
-
-		//node->attachObject(game_->getCamera());
-		//game_->getCamera()->setPosition(-3.0, 1.0, 0.0);
-		//game_->getCamera()->lookAt(0, 0, 0);
-		
+		body_ = dBodyCreate(game_->getWorld());		
 		dBodySetMass(body_, &mass);
 		dBodySetData(body_, node);
 		dBodySetMaxAngularSpeed(body_, 0);
@@ -41,10 +36,7 @@ struct Ball::Impl : public Game::Listener {
 		geom_ = dCreateSphere(game_->getSpace(), BALLRADIUS);
 		dGeomSetBody(geom_, body_);
 		dGeomSetCategoryBits(geom_, TYPEBALL);
-		dGeomSetCollideBits(geom_, TYPETERRAIN | TYPEROAD);
-
-		dBodySetPosition(body_, 629, 75, 546);
-		
+		dGeomSetCollideBits(geom_, TYPETERRAIN | TYPEROAD);		
 	}
 
 	Ogre::Vector3 last;

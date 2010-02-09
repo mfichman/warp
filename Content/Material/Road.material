@@ -13,9 +13,9 @@ material Road
 			
 			texture_unit
 			{
-			  filtering anisotropic
-        max_anisotropy 8
-				texture Road.png
+			    filtering anisotropic
+                max_anisotropy 8
+			    texture Road.png
 			}
 		}
 	}

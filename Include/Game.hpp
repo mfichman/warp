@@ -52,6 +52,12 @@ public:
 	/** Returns the main window */
     Ogre::RenderWindow*	getWindow() const;
 
+    /** Returns the gravity constant */
+    float getGravity() const;
+
+    /** Returns the normalized mouse position */
+    float getMouseNormalizedX() const;
+
 	/** Adds a new event listener */
 	void addListener(Listener* listener);
 

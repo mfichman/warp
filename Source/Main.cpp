@@ -32,15 +32,15 @@ int main(int argc, char** argv) {
 		
 		
 		game->getCamera()->setNearClipDistance(0.5);
-		game->getCamera()->setFarClipDistance(100);
+		game->getCamera()->setFarClipDistance(400);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.6, 0.6, 1.0));
-		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 300, 900);
+		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 200, 400);
 
 		Criterium::Terrain* terrain = new Criterium::Terrain(game.get(), "Road1");
 		//Criterium::Cylinder* cylinder = new Criterium::Cylinder(game.get());
-		Criterium::Ball* ball = new Criterium::Ball(game.get());
+		//Criterium::Ball* ball = new Criterium::Ball(game.get());
 		Criterium::Overlays* overlays = new Criterium::Overlays(game.get());
-		//Criterium::Bicycle* bicycle = new Criterium::Bicycle(game.get());
+		Criterium::Bicycle* bicycle = new Criterium::Bicycle(game.get());
 
 		// Light
 		Ogre::Light* light = game->getSceneManager()->createLight("Light");
