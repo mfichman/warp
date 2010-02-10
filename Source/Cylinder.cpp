@@ -38,7 +38,6 @@ struct Cylinder::Impl : public Game::Listener {
 		dGeomSetBody(geom_, body_);
 		dGeomSetCategoryBits(geom_, TYPEBALL);
 		dGeomSetCollideBits(geom_, TYPETERRAIN | TYPEROAD);
-		dGeomSetData(geom_, &object_);
 
 		dBodySetPosition(body_, 0, 10, 0);
 		
@@ -54,19 +53,7 @@ struct Cylinder::Impl : public Game::Listener {
 			dBodyAddRelTorque(body_, 0, 0, -100);
 		}
 
-		Ogre::Vector3 n = 10 * object_.normal;
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
-			dBodyAddTorque(body_, n.x, n.y, n.z);
-		}
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
-			dBodyAddTorque(body_, -n.x, -n.y, -n.z);
-		}
 
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_RETURN)) {
-			const Ogre::Vector3& p = game_->getCamera()->getPosition();
-			dBodySetPosition(body_, p.x, p.y, p.z);
-			dBodySetLinearVel(body_, 0.0f, 0.0f, 0.0f);
-		}
 	}
 	
 	/** Called when the body is moved to move the corresponding scene node */
@@ -86,7 +73,6 @@ struct Cylinder::Impl : public Game::Listener {
 	Game* game_;
     dBodyID body_;
     dGeomID geom_;
-	Game::Object object_;
 };
 
 Cylinder::Cylinder(Game* game) : impl_(new Impl()) {

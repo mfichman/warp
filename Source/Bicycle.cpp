@@ -72,21 +72,13 @@ struct Bicycle::Impl : public Game::Listener {
 
 		// Cyclist and animation state
 		SceneNode* cyclistNode = centerNode_->createChildSceneNode("Cyclist");
-		entity = game_->getSceneManager()->createEntity("Shirt", "Cyclist.mesh");
+		entity = game_->getSceneManager()->createEntity("Cyclist", "Cyclist.mesh");
 		cyclistNode->attachObject(entity);
 		cyclistNode->setPosition(-0.2600, 1.020, 0.000);
 		cyclistNode->setOrientation(Quaternion(Degree(90), Vector3(0.000, 1.000, 0.000)));
 		cyclingState_ = entity->getAnimationState("Cycling");
 		cyclingState_->setEnabled(true);
 		cyclingState_->setLoop(true);
-
-        Technique* t = entity->getSubEntity(0)->getMaterial()->getBestTechnique();
-        Pass* p = t->getPass(0);
-        if (p->hasVertexProgram() && p->getVertexProgram()->isSkeletalAnimationIncluded()) {
-
-        } else {
-            exit(0);
-        }
 
         dMass mass; 
         dMassSetSphere(&mass, FRAMEMASS, FRAMERADIUS);
@@ -97,6 +89,7 @@ struct Bicycle::Impl : public Game::Listener {
 		dBodySetData(body_, bodyNode_);
         dBodySetMaxAngularSpeed(body_, 0);
 		dBodySetMovedCallback(body_, &Impl::onBodyMoved);
+        bodyNode_->setUserAny(Any(body_));
 
 		frontWheel_ = dBodyCreate(game_->getWorld());
 		dMassSetSphereTotal(&mass, 1, WHEELRADIUS);
@@ -165,10 +158,18 @@ struct Bicycle::Impl : public Game::Listener {
         // Calculate the lean angle of the bike from gravity and centripetal force
         float leanAngle = atan2(force.dotProduct(right), gravity * FRAMEMASS);
 
+        // Calculate the radius of the turn
+        float turnRadius = FRAMEMASS*speed*speed/force.dotProduct(right);
+
         // Set the transformation matrix for the lean rotation
         centerNode_->setOrientation(Quaternion(Radian(leanAngle), Vector3::UNIT_X));
-
+        
 		if (speed > 0.001) {
+            // Calculate the steer angle of the bike
+            float steerAngle = -10*(WHEELBASE*cosf(leanAngle))/(turnRadius*cosf(CASTERANGLE));
+            // Set the transformation for the steering angle
+            forkNode_->setOrientation(Quaternion(Radian(steerAngle), Vector3(-0.177, 0.240, 0.000f)));
+
 			// Calculate the wheel rotation given the current velocity
 			// of the bicycle
             Vector3 radius(0.0f, WHEELRADIUS, 0.0f);

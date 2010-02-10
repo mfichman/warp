@@ -4,6 +4,7 @@
 #include <Cylinder.hpp>
 #include <Overlays.hpp>
 #include <Bicycle.hpp>
+#include <Script.hpp>
 #include <OgreTerrainSceneManager.h>
 #include <sstream>
 
@@ -39,6 +40,7 @@ int main(int argc, char** argv) {
 		Criterium::Terrain* terrain = new Criterium::Terrain(game.get(), "Road1");
 		//Criterium::Cylinder* cylinder = new Criterium::Cylinder(game.get());
 		//Criterium::Ball* ball = new Criterium::Ball(game.get());
+        Criterium::Script* script = new Criterium::Script(game.get(), "Scripts/Test.lua");
 		Criterium::Overlays* overlays = new Criterium::Overlays(game.get());
 		Criterium::Bicycle* bicycle = new Criterium::Bicycle(game.get());
 
@@ -54,7 +56,9 @@ int main(int argc, char** argv) {
         
     } catch (Exception& ex) {
         cerr << "Exception: " << ex.getFullDescription() << endl;
-    }
+    } catch (std::exception& ex) {
+        cerr << "Exception: " << ex.what() << endl;
+    }   
 
     return 0;
 }

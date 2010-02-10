@@ -9,6 +9,9 @@
 #include <Ogre.h>
 #include <OIS/OIS.h>
 #include <ode/ode.h>
+extern "C" { 
+#include <lua/lua.h> 
+}
 
 #define TYPEWHEEL 0x0001
 #define TYPETERRAIN 0x0002
@@ -18,12 +21,10 @@
 
 namespace Criterium {
 
-class Game : public Interface {
+class Game {
 public: 
-    typedef intrusive_ptr<Game> Ptr;
 	struct Impl; 
 	class Listener;
-	struct Object;
 
 	/** Creates a new game */
 	Game();
@@ -52,32 +53,36 @@ public:
 	/** Returns the main window */
     Ogre::RenderWindow*	getWindow() const;
 
+    /** Returns the main script engine handle */
+    lua_State* getScriptState() const;
+
+    /** Returns the object factory */
+    Factory* getObjectFactory() const;
+
     /** Returns the gravity constant */
     float getGravity() const;
 
-    /** Returns the normalized mouse position */
+    /** Returns the normalized mouse position in the range (-1, 1) */
     float getMouseNormalizedX() const;
 
-	/** Adds a new event listener */
+    /** Returns the normalized mouse position in the range (-1, 1) */
+    float getMouseNormalizedY() const;
+
+	/** Adds a new event listener, which is called at a fixed interval (0.01 s) */
 	void addListener(Listener* listener);
 
-	/** Removes a listener */
+	/** Removes an event listener */
 	void removeListener(Listener* listener);
     
 private:
 	std::auto_ptr<Impl> impl_;
 };
 
-class Game::Listener : public Interface {
+class Game::Listener {
 public:
-	typedef intrusive_ptr<Game::Listener> Ptr;
 
-	/** Called when every time a new timestep is calculated */
+	/** Called for every physics timestep (fixed at every 0.01 s) */
 	virtual void onTimeStep() {}
-};
-
-struct Game::Object {
-	Ogre::Vector3 normal;
 };
 
 }

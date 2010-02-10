@@ -5,12 +5,17 @@
 
 #include <Game.hpp>
 #include <Bicycle.hpp>
+#include <Script.hpp>
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include <utility>
 #include <OgreCEGUIRenderer.h>
 #include <CEGUI/CEGUI.h>
+extern "C" {
+#include <lua/lualib.h>
+#include <lua/lauxlib.h>
+}
 
 using namespace Criterium;
 using namespace Ogre;
@@ -46,6 +51,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			if (mouse_) inputManager_->destroyInputObject(mouse_);
 			OIS::InputManager::destroyInputSystem(inputManager_);
 		}
+        if (scriptState_) { lua_close(scriptState_); }
 	}
 
 	/** Loads resource configuration files */
@@ -143,6 +149,28 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		dWorldSetGravity(world_, 0.0, -12, 0.0);   
 	}
 
+    /** Loads the scripting engine */
+    void loadScripting() {
+        scriptState_ = lua_open();
+        luaL_openlibs(scriptState_);
+
+        lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
+        lua_pushcclosure(scriptState_, &Impl::luaGetNode, 1);
+        lua_setglobal(scriptState_, "crGetNode");
+
+        lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
+        lua_pushcclosure(scriptState_, &Impl::luaSetNode, 1);
+        lua_setglobal(scriptState_, "crSetNode");
+
+        lua_pushlightuserdata(scriptState_, this); // Modifies a light
+        lua_pushcclosure(scriptState_, &Impl::luaGetLight, 1);
+        lua_setglobal(scriptState_, "crGetLight");
+
+        lua_pushlightuserdata(scriptState_, this); // Modifies a light
+        lua_pushcclosure(scriptState_, &Impl::luaSetLight, 1);
+        lua_setglobal(scriptState_, "crSetLight");
+    }
+
 	/** Called when the main window is closed */
 	void windowClosed(Ogre::RenderWindow* rw) { 
 		root_->queueEndRendering();
@@ -181,7 +209,14 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			dJointGroupEmpty(contactJointGroup_);
 			physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
 
-			for_each(listeners_.begin(), listeners_.end(), mem_fun(&Listener::onTimeStep));			
+            list<Listener*>::iterator i = listeners_.begin();
+            while (i != listeners_.end()) {
+                Listener* listener = *i;
+                i++;
+                listener->onTimeStep();
+            }
+
+			//for_each(listeners_.begin(), listeners_.end(), mem_fun(&Listener::onTimeStep));			
 
 		/*	if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
 				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
@@ -211,16 +246,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		// Look up the surface params for these object types
 		int t1 = dGeomGetCategoryBits(o1);
 		int t2 = dGeomGetCategoryBits(o2);
-
-
-		if (dGeomGetData(o1)) {
-			Game::Object* obj = static_cast<Game::Object*>(dGeomGetData(o1));
-			obj->normal = Ogre::Vector3(geom[0].normal[0], geom[0].normal[1], geom[0].normal[2]);
-		}
-		if (dGeomGetData(o2)) {
-			Game::Object* obj = static_cast<Game::Object*>(dGeomGetData(o2));
-			obj->normal = Ogre::Vector3(geom[0].normal[0], geom[0].normal[1], geom[0].normal[2]);
-		}
 	    
 		for (int i = 0; i < num; i++) {
 			dContact contact;
@@ -235,6 +260,93 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			dJointAttach(joint, dGeomGetBody(o1), dGeomGetBody(o2));
 		}
 	}
+
+    /** Geom moved callback.  Called to copy position from ODE to Ogre  */
+    static void onBodyMoved(dBodyID body) {
+		// Update the position of the scene node attached to this body.
+		// Position is in global coordinates.
+		SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
+		const dReal* pos = dBodyGetPosition(body);
+		const dReal* quat = dBodyGetQuaternion(body);
+	    
+		// N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
+		node->setPosition(pos[0], pos[1], pos[2]);
+		node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
+    }
+
+    /** Lua callback.  Gets the given values for the node */
+    static int luaGetNode(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+
+        if (!lua_isstring(env, 1)) {
+            lua_pushstring(env, "Expected string for node name");
+            lua_error(env);
+        }
+        string name(lua_tostring(env, 1)); // First argument: name of the entity
+        if (!impl->sceneManager_->hasSceneNode(name)) {
+            lua_pushstring(env, "Invalid node name");
+            lua_error(env);
+        }
+        SceneNode* node = impl->sceneManager_->getSceneNode(name);
+        env << *node;
+
+        return 1;
+    }
+
+    /** Lua callback.  Gets the given values for the node */
+    static int luaSetNode(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+
+        if (!lua_isstring(env, 1)) {
+            lua_pushstring(env, "Expected string for node name");
+            lua_error(env);
+        }
+        string name(lua_tostring(env, 1)); // First argument: name of the entity
+        if (!impl->sceneManager_->hasEntity(name)) {
+            lua_pushstring(env, "Invalid node name");
+            lua_error(env);
+        }
+        SceneNode* node = impl->sceneManager_->getSceneNode(name);
+        env >> *node;
+
+        return 1;
+    }
+
+    /** Lua callback.  Get the light state */
+    static int luaGetLight(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        if (!lua_isstring(env, 1)) {
+            lua_pushstring(env, "Expected string for entity name");
+            lua_error(env);
+        }       
+        string name(lua_tostring(env, 1)); // First argument: name of the light
+        if (!impl->sceneManager_->hasLight(name)) {
+            lua_pushstring(env, "Invalid entity name");
+            lua_error(env);
+        }
+        Light* light = impl->sceneManager_->getLight(name);
+        env << *light;
+
+        return 1;
+    }
+
+    /** Lua callback.  Sets the given values for the light */
+    static int luaSetLight(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        if (!lua_isstring(env, 1)) {
+            lua_pushstring(env, "Expected string for entity name");
+            lua_error(env);
+        }       
+        string name(lua_tostring(env, 1)); // First argument: name of the light
+        if (!impl->sceneManager_->hasLight(name)) {
+            lua_pushstring(env, "Invalid entity name");
+            lua_error(env);
+        }
+        Light* light = impl->sceneManager_->getLight(name);
+        env >> *light;
+        
+        return 0;
+    }
 
 	// Graphics objects
     Ogre::Root* root_;
@@ -261,6 +373,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	// Game objects
 	list<Interface::Ptr> objects_;
 	list<Listener*> listeners_;
+
+    // Scripting objects
+    lua_State* scriptState_;
 };
 
 Game::Game() : impl_(new Impl()) {
@@ -270,7 +385,7 @@ Game::Game() : impl_(new Impl()) {
 	impl_->loadGraphics();
 	impl_->loadInput();
 	impl_->loadPhysics();
-	//impl_->objects_.push_back(new Bicycle(this));
+    impl_->loadScripting();
 }
 
 OIS::Keyboard* Game::getKeyboard() const { 
@@ -305,6 +420,10 @@ Ogre::RenderWindow*	Game::getWindow() const {
 	return impl_->window_; 
 }
 
+lua_State* Game::getScriptState() const {
+    return impl_->scriptState_;
+}
+
 float Game::getGravity() const {
     dReal gravityVector[3];
     dWorldGetGravity(impl_->world_, gravityVector);
@@ -318,6 +437,14 @@ float Game::getMouseNormalizedX() const {
 	impl_->window_->getMetrics(width, height, depth, left, top);
     return (x - width/2.0f)/(width/2.0f);
 
+}
+
+float Game::getMouseNormalizedY() const {
+	unsigned int width, height, depth;
+	int top, left;
+	unsigned int y = impl_->mouse_->getMouseState().Y.abs;
+	impl_->window_->getMetrics(width, height, depth, left, top);
+    return (y - height/2.0f)/(height/2.0f);
 }
 
 void Game::addListener(Listener* listener) { 

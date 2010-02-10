@@ -10,13 +10,24 @@
 
 namespace Criterium {
 
-class Ball : public Interface {
+class Factory {
 public:
-    typedef intrusive_ptr<Ball> Ptr;
 	struct Impl;
 
-	/** Creates a new ball */
-    Ball(Game* game);
+	/** Creates a new object factory */
+    Factory(Game* game);
+
+    /** Creates a new ball using parameters in the given table */
+    Ball* createBall(int table);
+
+    /** Creates a new cube using parameters in the given table */
+    Cube* createCube(int table);
+
+    /** Creates a new ship using parameters in the given table */
+    Ship* createShip(int table);
+
+private:
+	std::auto_ptr<Impl> impl_;
 };
 
 }
