@@ -60,3 +60,7 @@ Overlays::Overlays(Game* game) : impl_(new Impl()) {
 	impl_->init();
 	game->addListener(impl_.get());
 }
+
+Overlays::~Overlays() {
+
+}

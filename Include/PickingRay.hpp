@@ -4,19 +4,23 @@
  ******************************************************************************/
 #pragma once
 
-#include <Interface.hpp>
-#include <memory>
 #include <Game.hpp>
+#include <memory>
+#include <string>
 
 namespace Criterium {
 
-class Cylinder : public Interface {
+class Game;
+
+class PickingRay {
 public:
-    typedef intrusive_ptr<Cylinder> Ptr;
 	struct Impl;
 
-	/** Creates a new bicycle */
-    Cylinder(Game* game);
+	/** Creates a new object factory */
+    PickingRay(Game* game);
+
+    /** Destructor */
+    ~PickingRay();
 
 private:
 	std::auto_ptr<Impl> impl_;

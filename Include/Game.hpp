@@ -4,7 +4,7 @@
  ******************************************************************************/
 #pragma once 
 
-#include <Interface.hpp>
+#include <Overlays.hpp>
 #include <memory>
 #include <Ogre.h>
 #include <OIS/OIS.h>
@@ -13,21 +13,22 @@ extern "C" {
 #include <lua/lua.h> 
 }
 
-#define TYPEWHEEL 0x0001
-#define TYPETERRAIN 0x0002
-#define TYPEGUARD 0x0004
-#define TYPEBALL 0x0008
-#define TYPEROAD 0x0010
-
 namespace Criterium {
+
+class Overlays;
+class Objects;
 
 class Game {
 public: 
 	struct Impl; 
 	class Listener;
+    class Collidable;
 
 	/** Creates a new game */
 	Game();
+
+    /** Destructor */
+    ~Game();
 
 	/** Returns the keyboard state object */
     OIS::Keyboard* getKeyboard() const;
@@ -57,7 +58,10 @@ public:
     lua_State* getScriptState() const;
 
     /** Returns the object factory */
-    Factory* getObjectFactory() const;
+    Objects* getObjects() const;
+
+    /** Returns the overlays object */
+    Overlays* getOverlays() const;
 
     /** Returns the gravity constant */
     float getGravity() const;
@@ -83,6 +87,14 @@ public:
 
 	/** Called for every physics timestep (fixed at every 0.01 s) */
 	virtual void onTimeStep() {}
+};
+
+class Game::Collidable {
+public:
+    
+    /** Called when an object collides with another object */
+    virtual void onCollision(dGeomID other, dContactGeom& contact) {}
+
 };
 
 }

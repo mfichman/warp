@@ -65,14 +65,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\Source\Ball.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Source\Bicycle.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Source\Game.cpp"
 				>
 			</File>
@@ -81,7 +73,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\Objects.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\Overlays.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Source\PickingRay.cpp"
 				>
 			</File>
 			<File
@@ -103,23 +103,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\Include\Ball.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\Bicycle.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Include\Game.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Include\Interface.hpp"
+				RelativePath="..\Include\Objects.hpp"
 				>
 			</File>
 			<File
 				RelativePath="..\Include\Overlays.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\PickingRay.hpp"
 				>
 			</File>
 			<File

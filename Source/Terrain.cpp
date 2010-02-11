@@ -72,8 +72,8 @@ struct Terrain::Impl : public Game::Listener {
 		data_ = dGeomTriMeshDataCreate();
 		dGeomTriMeshDataBuildSingle(data_, &vertices_.front(), sizeof(Vector3), vertices_.size(), &indices_.front(), indices_.size(), sizeof(int));		
 		road_ = dCreateTriMesh(game_->getSpace(), data_, 0, 0, 0);
-		dGeomSetCategoryBits(road_, TYPEROAD);
-		dGeomSetCollideBits(road_, TYPEBALL | TYPEWHEEL);
+		dGeomSetCategoryBits(road_, 0);
+		dGeomSetCollideBits(road_, 0);
 
 		// Setup the height map
 		/*Ogre::TerrainSceneManager* mgr = static_cast<Ogre::TerrainSceneManager*>(game_->getSceneManager());

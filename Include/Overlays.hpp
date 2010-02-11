@@ -4,19 +4,22 @@
  ******************************************************************************/
 #pragma once
 
-#include <Interface.hpp>
-#include <memory>
 #include <Game.hpp>
+#include <memory>
 
 namespace Criterium {
 
-class Overlays : public Interface {
+class Game;
+
+class Overlays {
 public:
-    typedef intrusive_ptr<Overlays> Ptr;
 	struct Impl;
 
-	/** Creates a new bicycle */
+	/** Creates a new set of overlays */
     Overlays(Game* game);
+
+    /** Destructor */
+    ~Overlays();
 
 private:
 	std::auto_ptr<Impl> impl_;

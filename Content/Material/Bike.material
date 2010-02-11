@@ -56,18 +56,18 @@ material ShortsMaterial/TEXFACE/CyclistShorts.png
 	{
 		pass
 		{
-            vertex_program_ref Ogre/HardwareSkinningTwoWeights
-			{
+            //vertex_program_ref Ogre/HardwareSkinningTwoWeights
+			//{
 			
-			}
+			//}
 			// alternate shadow caster program
-			shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
-			{
-				param_named_auto worldMatrix3x4Array world_matrix_array_3x4
-				param_named_auto viewProjectionMatrix viewproj_matrix
-				param_named_auto ambient ambient_light_colour
+			//shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
+			//{
+			//	param_named_auto worldMatrix3x4Array world_matrix_array_3x4
+			//	param_named_auto viewProjectionMatrix viewproj_matrix
+			//	param_named_auto ambient ambient_light_colour
 			
-			}
+			//}
 		
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000
@@ -94,18 +94,18 @@ material Helmet/TEXFACE/Helmet.png
 	{
 		pass
 		{
-            vertex_program_ref Ogre/HardwareSkinningTwoWeights
-			{
+            //vertex_program_ref Ogre/HardwareSkinningTwoWeights
+			//{
 			
-			}
+			//}
 			// alternate shadow caster program
-			shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
-			{
-				param_named_auto worldMatrix3x4Array world_matrix_array_3x4
-				param_named_auto viewProjectionMatrix viewproj_matrix
-				param_named_auto ambient ambient_light_colour
+			//shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
+			/{
+			//	param_named_auto worldMatrix3x4Array world_matrix_array_3x4
+			//	param_named_auto viewProjectionMatrix viewproj_matrix
+			//	param_named_auto ambient ambient_light_colour
 			
-			}
+			//}
 		
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000
@@ -132,18 +132,18 @@ material Frame/TEXFACE/BikeFrame.png
 	{
 		pass
 		{
-            vertex_program_ref Ogre/HardwareSkinningTwoWeights
-			{
+            //vertex_program_ref Ogre/HardwareSkinningTwoWeights
+			//{
 			
-			}
+			//}
 			// alternate shadow caster program
-			shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
-			{
-				param_named_auto worldMatrix3x4Array world_matrix_array_3x4
-				param_named_auto viewProjectionMatrix viewproj_matrix
-				param_named_auto ambient ambient_light_colour
+			//shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
+			//{
+			//	param_named_auto worldMatrix3x4Array world_matrix_array_3x4
+			//	param_named_auto viewProjectionMatrix viewproj_matrix
+			//	param_named_auto ambient ambient_light_colour
 			
-			}
+			//}
 		
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000
@@ -170,18 +170,18 @@ material SkinMaterial/TEXFACE/CyclistSkin.png
 	{
 		pass
 		{
-            vertex_program_ref Ogre/HardwareSkinningTwoWeights
-			{
+            //vertex_program_ref Ogre/HardwareSkinningTwoWeights
+			//{
 			
-			}
+			//}
 			// alternate shadow caster program
-			shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
-			{
-				param_named_auto worldMatrix3x4Array world_matrix_array_3x4
-				param_named_auto viewProjectionMatrix viewproj_matrix
-				param_named_auto ambient ambient_light_colour
+			//shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
+			//{
+			//	param_named_auto worldMatrix3x4Array world_matrix_array_3x4
+			//	param_named_auto viewProjectionMatrix viewproj_matrix
+			//	param_named_auto ambient ambient_light_colour
 			
-			}
+			//}
 		
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000
@@ -209,18 +209,18 @@ material ShirtMaterial/TEXFACE/CyclistJersey.png
 	{
 		pass
 		{
-            vertex_program_ref Ogre/HardwareSkinningTwoWeights
-			{
+            //vertex_program_ref Ogre/HardwareSkinningTwoWeights
+			//{
 			
-			}
+			//}
 			// alternate shadow caster program
-			shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
-			{
-				param_named_auto worldMatrix3x4Array world_matrix_array_3x4
-				param_named_auto viewProjectionMatrix viewproj_matrix
-				param_named_auto ambient ambient_light_colour
+			//shadow_caster_vertex_program_ref Ogre/HardwareSkinningTwoWeightsShadowCaster
+			//{
+			//	param_named_auto worldMatrix3x4Array world_matrix_array_3x4
+			//	param_named_auto viewProjectionMatrix viewproj_matrix
+			//	param_named_auto ambient ambient_light_colour
 			
-			}
+			//}
 		
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000

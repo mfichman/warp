@@ -21,6 +21,30 @@ material Road
 	}
 }
 
+material Asphalt
+{
+
+	technique
+	{
+
+
+	
+		pass
+		{
+			ambient 0.000000 0.000000 0.000000 1.000000
+			diffuse 0.80000 0.000000 0.00000 1.000000
+			
+			//texture_unit
+			//{
+			//    filtering anisotropic
+            //    max_anisotropy 8
+			//    texture Asphalt.jpg
+			//}
+		}
+	}
+}
+
+
 material RoadSide
 {
 

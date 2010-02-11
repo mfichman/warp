@@ -4,27 +4,39 @@
  ******************************************************************************/
 #pragma once
 
-#include <Interface.hpp>
-#include <memory>
 #include <Game.hpp>
+#include <memory>
+#include <string>
 
 namespace Criterium {
 
-class Factory {
+class Game;
+
+class Objects {
 public:
 	struct Impl;
 
+    enum Type {
+        TYPE_PLANE = 0x00000001,
+        TYPE_BALL = 0x00000002,
+        TYPE_RAY = 0x00000003,
+        TYPE_ANY = 0xFFFFFFFF
+    };
+
 	/** Creates a new object factory */
-    Factory(Game* game);
+    Objects(Game* game);
+
+    /** Destructor */
+    ~Objects();
 
     /** Creates a new ball using parameters in the given table */
-    Ball* createBall(int table);
+    void createBall(const std::string& name, int table);
 
     /** Creates a new cube using parameters in the given table */
-    Cube* createCube(int table);
+    void createPlane(const std::string& name, int table);
 
     /** Creates a new ship using parameters in the given table */
-    Ship* createShip(int table);
+    void createShip(const std::string& name, int table);
 
 private:
 	std::auto_ptr<Impl> impl_;

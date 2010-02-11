@@ -4,18 +4,16 @@
  ******************************************************************************/
 #pragma once
 
-#include <Interface.hpp>
-#include <memory>
 #include <Game.hpp>
+#include <memory>
 
 namespace Criterium {
 
-class Terrain : public Interface {
+class Terrain  {
 public:
-    typedef intrusive_ptr<Terrain> Ptr;
 	struct Impl;
 
-	/** Creates a new bicycle */
+	/** Initializes the terrain */
 	Terrain(Game* game, const std::string& name);
 
 private:

@@ -4,23 +4,20 @@
  ******************************************************************************/
 #pragma once
 
-#include <Interface.hpp>
-#include <memory>
 #include <Game.hpp>
+#include <memory>
 
 namespace Criterium {
 
-class Script : public Interface {
+class Script {
 public:
-    typedef intrusive_ptr<Script> Ptr;
 	struct Impl;
 
 	/** Creates a new script and begins executing it inside a coroutine */
     Script(Game* game, const std::string& name);
 
-    /** Creates a new script using the given reference to a user function */
-    Script(Game* game, int reference);
-
+    /** Descructor */
+    ~Script();
 
 private:
 	std::auto_ptr<Impl> impl_;

@@ -4,18 +4,20 @@
  ******************************************************************************/
 
 #include <Game.hpp>
-#include <Bicycle.hpp>
+#include <Objects.hpp>
 #include <Script.hpp>
-#include <string>
-#include <iostream>
-#include <algorithm>
-#include <utility>
+
 #include <OgreCEGUIRenderer.h>
 #include <CEGUI/CEGUI.h>
 extern "C" {
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
 }
+
+#include <string>
+#include <iostream>
+#include <algorithm>
+#include <utility>
 
 using namespace Criterium;
 using namespace Ogre;
@@ -35,12 +37,12 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		space_(0), 
 		inputManager_(0),
 		keyboard_(0),
-		mouse_(0) {
+		mouse_(0),
+        scriptState_(0) {
 	}
 
 	/** Destroys subsystems */
 	~Impl() {
-		objects_.clear();
 		if (guiRenderer_) { delete guiRenderer_;	}
 		if (guiSystem_) { delete guiSystem_; }
 		if (root_) { delete root_; }
@@ -146,7 +148,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		//dGeomID plane = dCreatePlane(space_, 0.0, 1.0, 0.0, -0.742);
 		//dGeomSetCategoryBits(plane, TYPETERRAIN);
 		//dGeomSetCollideBits(plane, TYPEWHEEL | TYPEBALL);
-		dWorldSetGravity(world_, 0.0, -12, 0.0);   
+		dWorldSetGravity(world_, 0.0, -20, 0.0);   
 	}
 
     /** Loads the scripting engine */
@@ -169,6 +171,16 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         lua_pushlightuserdata(scriptState_, this); // Modifies a light
         lua_pushcclosure(scriptState_, &Impl::luaSetLight, 1);
         lua_setglobal(scriptState_, "crSetLight");
+
+        lua_pushlightuserdata(scriptState_, this); 
+        lua_pushinteger(scriptState_, Objects::TYPE_BALL);
+        lua_pushcclosure(scriptState_, &Impl::luaCreateObject, 2);
+        lua_setglobal(scriptState_, "crCreateBall");
+
+        lua_pushlightuserdata(scriptState_, this); 
+        lua_pushinteger(scriptState_, Objects::TYPE_PLANE);
+        lua_pushcclosure(scriptState_, &Impl::luaCreateObject, 2);
+        lua_setglobal(scriptState_, "crCreatePlane");
     }
 
 	/** Called when the main window is closed */
@@ -190,35 +202,11 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		physicsAccumulator_ += evt.timeSinceLastFrame;
 		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
 
-		/*	const OIS::MouseState& state = mouse_->getMouseState();
+			const OIS::MouseState& state = mouse_->getMouseState();
 			camera_->pitch(Radian(-state.Y.rel/100.0));
 			camera_->yaw(Radian(-state.X.rel/100.0));
 
-			cout << camera_->getPosition() << endl;*/
-
-		// Run fixed time steps using time in accumulator
-		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
-	        
-			// Run collision detection 
-			dSpaceCollide(space_, this, &Impl::onGeomCollision);
-	        
-			// Step world
-			dWorldStep(world_, PHYSICSUPDATEINTERVAL);
-	        
-			// Clean up
-			dJointGroupEmpty(contactJointGroup_);
-			physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
-
-            list<Listener*>::iterator i = listeners_.begin();
-            while (i != listeners_.end()) {
-                Listener* listener = *i;
-                i++;
-                listener->onTimeStep();
-            }
-
-			//for_each(listeners_.begin(), listeners_.end(), mem_fun(&Listener::onTimeStep));			
-
-		/*	if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
+            if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
 				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
 					camera_->moveRelative(Vector3(0.0, 0.0, -500 * PHYSICSUPDATEINTERVAL));
 				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
@@ -230,7 +218,29 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
 					camera_->moveRelative(Vector3(0.0, 0.0, 22.18 * PHYSICSUPDATEINTERVAL));
 				}
-			}*/
+			}
+
+		// Run fixed time steps using time in accumulator
+		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
+
+            
+            list<Listener*>::iterator i = listeners_.begin();
+            while (i != listeners_.end()) {
+                Listener* listener = *i;
+                i++;
+                listener->onTimeStep();
+            }
+
+	        
+			// Run collision detection 
+			dSpaceCollide(space_, this, &Impl::onGeomCollision);
+	        
+			// Step world
+			dWorldStep(world_, PHYSICSUPDATEINTERVAL);
+	        
+			// Clean up
+			dJointGroupEmpty(contactJointGroup_);
+			physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
 		}
 		return true;
 	}
@@ -246,14 +256,29 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		// Look up the surface params for these object types
 		int t1 = dGeomGetCategoryBits(o1);
 		int t2 = dGeomGetCategoryBits(o2);
+
+        Collidable* c1 = static_cast<Collidable*>(dGeomGetData(o1));
+        Collidable* c2 = static_cast<Collidable*>(dGeomGetData(o2));
+
+        if (c1) {
+            c1->onCollision(o2, geom[0]);
+        }
+        if (c2) {
+            c2->onCollision(o1, geom[0]);
+        }
+
+        if (t1 == Objects::TYPE_RAY || t2 == Objects::TYPE_RAY) {
+            return;
+        }
 	    
 		for (int i = 0; i < num; i++) {
 			dContact contact;
 			memset(&contact, 0, sizeof(dContact));
 			contact.geom = geom[i];
 	        
-			contact.surface.mode = dContactApprox1;
-			contact.surface.mu = 0;
+			contact.surface.mode = dContactApprox1 | dContactBounce;
+			contact.surface.mu = 0.0f;
+            contact.surface.bounce = 1.0f;
 	        
 			// Add a contact joint
 			dJointID joint = dJointCreateContact(impl->world_, impl->contactJointGroup_, &contact);
@@ -348,6 +373,22 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         return 0;
     }
 
+    /** Lua callback.  Creates an object */
+    static int luaCreateObject(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        Objects::Type type = (Objects::Type)lua_tointeger(env, lua_upvalueindex(2));
+        
+        string name = lua_isstring(env, 1) ? lua_tostring(env, 1) : "Object";
+        int reference = lua_ref(env, LUA_REGISTRYINDEX);
+
+        switch (type) {
+            case Objects::TYPE_BALL: impl->objects_->createBall(name, reference); break;
+            case Objects::TYPE_PLANE: impl->objects_->createPlane(name, reference); break;
+        }
+
+        return 0;
+    }
+
 	// Graphics objects
     Ogre::Root* root_;
     Ogre::Camera* camera_;
@@ -371,11 +412,13 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     dJointGroupID contactJointGroup_;
     
 	// Game objects
-	list<Interface::Ptr> objects_;
 	list<Listener*> listeners_;
 
     // Scripting objects
     lua_State* scriptState_;
+
+    auto_ptr<Objects> objects_;
+    auto_ptr<Overlays> overlays_;
 };
 
 Game::Game() : impl_(new Impl()) {
@@ -386,6 +429,20 @@ Game::Game() : impl_(new Impl()) {
 	impl_->loadInput();
 	impl_->loadPhysics();
     impl_->loadScripting();
+    impl_->objects_.reset(new Objects(this));
+    impl_->overlays_.reset(new Overlays(this));
+}
+
+Game::~Game() {
+
+}
+
+Objects* Game::getObjects() const {
+    return impl_->objects_.get();
+}
+
+Overlays* Game::getOverlays() const {
+    return impl_->overlays_.get();
 }
 
 OIS::Keyboard* Game::getKeyboard() const { 

@@ -1,21 +1,13 @@
 -- Criterium: CS248 Final Project
 -- Copyright (c) 2010 Matt Fichman
 
-t = 0
+crCreatePlane("Plane1", {})
+--crCreatePlane("Plane2", {normal={ 1, 0, 0 }, depth=-1000})
+--crCreatePlane("Plane3", {normal={ -1, 0, 0 }, depth=1000})
 
+for i=1,10 do
 
-
-function printtable(t)
-    for i,v in pairs(t) do
-        print(i, v)
-    end
-end
-
-while (true) do
-t = t + 0.1
-crSetLight("Light", {diffuse = {(math.sin(t)+1)/2, -(math.sin(t)+1)/2, 0.5} })
-printtable(crGetNode("Bike"))
-print("here")
-coroutine.yield(1)
+crCreateBall("Ball"..i, { radius=10 })
+crSetNode("Ball"..i, { position={math.random(-20, 20), math.random(0, 300), math.random(-20, 20)} })
 
 end

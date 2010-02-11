@@ -103,6 +103,10 @@ Script::Script(Game* game, const std::string& path) : impl_(new Impl()) {
     impl_->game_->addListener(impl_.get());
 }
 
+Script::~Script() {
+
+}
+
 
 /** Methods for sending Ogre and ODE values to a script */
 lua_State* Criterium::operator<<(lua_State* env, const Ogre::Vector3& v) {
