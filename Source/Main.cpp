@@ -25,8 +25,13 @@ int main(int argc, char** argv) {
 		light->setSpecularColour(ColourValue(0.0, 0.0, 0.0));
 		light->setDirection(Vector3(0, -1, 1)); 
 
-        Criterium::Script script(game.get(), "Scripts/Test.lua");
-        Criterium::PickingRay ray(game.get());
+        //Criterium::Script script(game.get(), "Scripts/Test.lua");
+        //Criterium::PickingRay ray(game.get());
+
+		SceneNode* node = game->getSceneManager()->getRootSceneNode()->createChildSceneNode("Test");
+		Entity* entity = game->getSceneManager()->createEntity("Test", "Test.mesh");
+		entity->setMaterialName("Test");
+		node->attachObject(entity);
 
 		game->getRoot()->startRendering();
         

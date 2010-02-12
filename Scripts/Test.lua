@@ -11,3 +11,8 @@ crCreateBall("Ball"..i, { radius=10 })
 crSetNode("Ball"..i, { position={math.random(-20, 20), math.random(0, 300), math.random(-20, 20)} })
 
 end
+
+coroutine.yield(100)
+
+crSetLight("Light", {diffuse={1, 0, 0}})
+

@@ -1,12 +1,15 @@
 syntax: glob
 Media/*
+media/*
 Binary/*
 Plugins/*
 Build/*
 Include/boost/*
 Criterium.exe*
 RoadTool.exe*
+CurveTool.exe*
 *.log
 *.pdb
 *.ilk
 *.dll
+*.orig

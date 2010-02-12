@@ -202,6 +202,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		physicsAccumulator_ += evt.timeSinceLastFrame;
 		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
 
+			// hack hack hack
 			const OIS::MouseState& state = mouse_->getMouseState();
 			camera_->pitch(Radian(-state.Y.rel/100.0));
 			camera_->yaw(Radian(-state.X.rel/100.0));
@@ -222,8 +223,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 		// Run fixed time steps using time in accumulator
 		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
-
-            
+        
             list<Listener*>::iterator i = listeners_.begin();
             while (i != listeners_.end()) {
                 Listener* listener = *i;
