@@ -77,18 +77,6 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
         object_.reset(new btCollisionObject());
         object_->setCollisionShape(shape_.get());
         game_->getWorld()->addCollisionObject(object_.get());
-
-        //btScalar mass(BALLMASS);
-        //btVector3 inertia(0.0f, 0.0f, 0.0f);
-        //shape_->calculateLocalInertia(mass, inertia);
-
-        //btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
-        //body_.reset(new btRigidBody(rbinfo));
-
-       // btCollisionObject
-        
-		
-		// Lock buffers, read, and build the index
 	}
 
     ~Impl() {
@@ -106,13 +94,10 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
         //node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
         //const btVector3& position = transform.getOrigin();
         //node_->setPosition(position.x(), position.y(), position.z());
-
-        cout << transform.getOrigin() << endl;
     }
 
 	/** Called when a new frame is detected */
 	void onTimeStep() {
-
 	}
 
 	Game* game_;
