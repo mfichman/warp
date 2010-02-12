@@ -8,6 +8,7 @@
 #include <Script.hpp>
 
 #include <OgreCEGUIRenderer.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <CEGUI/CEGUI.h>
 extern "C" {
 #include <lua/lualib.h>
@@ -154,6 +155,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         broadphase_ = new btDbvtBroadphase();
         solver_ = new btSequentialImpulseConstraintSolver();
         world_ = new btDiscreteDynamicsWorld(dispatcher_, broadphase_, solver_, collisionConfiguration_);
+        btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 	}
 
     /** Loads the scripting engine */

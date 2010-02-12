@@ -6,11 +6,13 @@
 #include <Tube.hpp>
 #include <Objects.hpp>
 
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
+
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-struct Tube::Impl : public Game::Listener {
+struct Tube::Impl : public Game::Listener, public btMotionState {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
 	void init(const std::string& name) {
@@ -64,16 +66,63 @@ struct Tube::Impl : public Game::Listener {
             
 		}
         ibuf->unlock();
+
+        data_.reset(new btTriangleIndexVertexArray(indices_.size()/3, &indices_.front(), 3*sizeof(int), vertices_.size(), (btScalar*)&vertices_.front(), sizeof(Vector3)));
+
+
+        position_.setIdentity();
+        shape_.reset(new btGImpactMeshShape(data_.get()));
+        shape_->setMargin(0.0f);
+        shape_->updateBound();
+        object_.reset(new btCollisionObject());
+        object_->setCollisionShape(shape_.get());
+        game_->getWorld()->addCollisionObject(object_.get());
+
+        //btScalar mass(BALLMASS);
+        //btVector3 inertia(0.0f, 0.0f, 0.0f);
+        //shape_->calculateLocalInertia(mass, inertia);
+
+        //btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
+        //body_.reset(new btRigidBody(rbinfo));
+
+       // btCollisionObject
+        
 		
 		// Lock buffers, read, and build the index
 	}
 
+    ~Impl() {
+        game_->getWorld()->removeCollisionObject(object_.get());
+    }
+
+    /** Called by bullet to get the transform state */
+    void getWorldTransform(btTransform& transform) const {
+        transform = position_;
+    }
+
+    /** Called by Bullet to update the scene node */
+    void setWorldTransform(const btTransform& transform) {
+        //const btQuaternion& rotation = transform.getRotation();
+        //node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
+        //const btVector3& position = transform.getOrigin();
+        //node_->setPosition(position.x(), position.y(), position.z());
+
+        cout << transform.getOrigin() << endl;
+    }
+
+	/** Called when a new frame is detected */
 	void onTimeStep() {
+
 	}
 
 	Game* game_;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
+    auto_ptr<btTriangleIndexVertexArray> data_;
+    auto_ptr<btGImpactMeshShape> shape_;
+    auto_ptr<btCollisionObject> object_;
+    btTransform position_;
+
 };
 
 Tube::Tube(Game* game, const std::string& name) : impl_(new Impl()) {

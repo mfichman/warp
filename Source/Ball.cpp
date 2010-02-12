@@ -25,6 +25,8 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 
         
         position_.setIdentity();
+        
+        position_.setOrigin(btVector3(0, 0, 40));
         shape_.reset(new btSphereShape(BALLRADIUS));
 
         btScalar mass(BALLMASS);
@@ -53,8 +55,6 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
         node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
         const btVector3& position = transform.getOrigin();
         node_->setPosition(position.x(), position.y(), position.z());
-
-        cout << node_->getPosition() << endl;
     }
 
 	/** Called when a new frame is detected */
