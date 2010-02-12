@@ -203,7 +203,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
 
 			// hack hack hack
-			const OIS::MouseState& state = mouse_->getMouseState();
+			/*const OIS::MouseState& state = mouse_->getMouseState();
 			camera_->pitch(Radian(-state.Y.rel/100.0));
 			camera_->yaw(Radian(-state.X.rel/100.0));
 
@@ -219,7 +219,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
 					camera_->moveRelative(Vector3(0.0, 0.0, 22.18 * PHYSICSUPDATEINTERVAL));
 				}
-			}
+			}*/
 
 		// Run fixed time steps using time in accumulator
 		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
@@ -270,15 +270,16 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         if (t1 == Objects::TYPE_RAY || t2 == Objects::TYPE_RAY) {
             return;
         }
+
 	    
 		for (int i = 0; i < num; i++) {
 			dContact contact;
 			memset(&contact, 0, sizeof(dContact));
 			contact.geom = geom[i];
 	        
-			contact.surface.mode = dContactApprox1 | dContactBounce;
+			contact.surface.mode = dContactApprox1;// | dContactBounce;
 			contact.surface.mu = 0.0f;
-            contact.surface.bounce = 1.0f;
+            //contact.surface.bounce = 1.0f;
 	        
 			// Add a contact joint
 			dJointID joint = dJointCreateContact(impl->world_, impl->contactJointGroup_, &contact);

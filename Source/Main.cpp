@@ -1,4 +1,6 @@
 #include <Game.hpp>
+#include <Ball.hpp>
+#include <Tube.hpp>
 #include <Overlays.hpp>
 #include <Script.hpp>
 #include <PickingRay.hpp>
@@ -14,8 +16,8 @@ int main(int argc, char** argv) {
 		
 		game->getCamera()->setNearClipDistance(0.5);
 		game->getCamera()->setFarClipDistance(400);
-        game->getCamera()->setPosition(1, 200, 1);
-        game->getCamera()->lookAt(0, 0, 0);
+        game->getCamera()->setPosition(0, 0, -20);
+        game->getCamera()->lookAt(0, -10, 100);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.6, 0.6, 1.0));
 		//game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 200, 400);
 
@@ -27,11 +29,13 @@ int main(int argc, char** argv) {
 
         //Criterium::Script script(game.get(), "Scripts/Test.lua");
         //Criterium::PickingRay ray(game.get());
+        Criterium::Ball ball(game.get());
+        Criterium::Tube tube(game.get(), "Test");
 
-		SceneNode* node = game->getSceneManager()->getRootSceneNode()->createChildSceneNode("Test");
-		Entity* entity = game->getSceneManager()->createEntity("Test", "Test.mesh");
-		entity->setMaterialName("Test");
-		node->attachObject(entity);
+		//SceneNode* node = game->getSceneManager()->getRootSceneNode()->createChildSceneNode("Test");
+		//Entity* entity = game->getSceneManager()->createEntity("Test", "Test.mesh");
+		//entity->setMaterialName("Test");
+		//node->attachObject(entity);
 
 		game->getRoot()->startRendering();
         

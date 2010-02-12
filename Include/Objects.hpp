@@ -20,6 +20,7 @@ public:
         TYPE_PLANE = 0x00000001,
         TYPE_BALL = 0x00000002,
         TYPE_RAY = 0x00000003,
+        TYPE_TERRAIN = 0x00000004,
         TYPE_ANY = 0xFFFFFFFF
     };
 

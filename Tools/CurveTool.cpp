@@ -38,8 +38,9 @@ void generateRing() {
 
 		Vector3 normal(normalh.x, normalh.y, normalh.z);
 		// Add to mesh object here
-		manual->normal(normal);
+		
 		manual->position(position);
+        manual->normal(normal);
 		//manual->textureCoord(vertices[i].u, vertices[i].v);
 		//manual->index(i);
 	}
@@ -67,8 +68,10 @@ void generateIndices() {
 
 	for (int i = 0; i < segments-1; i++) {
 		for (int j = 0; j <= SEGMENT_STEPS; j++) {
-			manual->index(j % SEGMENT_STEPS + i * SEGMENT_STEPS);
-			manual->index(j % SEGMENT_STEPS + (i+1) * SEGMENT_STEPS);
+
+			    manual->index(j % SEGMENT_STEPS + i * SEGMENT_STEPS);
+			    manual->index(j % SEGMENT_STEPS + (i+1) * SEGMENT_STEPS);
+
 		}
 	}
 }
@@ -82,12 +85,12 @@ int main(int argc, char** argv) {
 	manual = sceneManager->createManualObject("Test");
 	manual->begin("BaseWhite", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
 
-	//generateCurve(Vector3::UNIT_Y, 45, 20);
-	//generateStraight(100);
-	//generateCurve(-Vector3::UNIT_Y, 90, 20);
+	generateCurve(Vector3::UNIT_Y, 45, 200);
+	generateStraight(100);
+	generateCurve(-Vector3::UNIT_Y, 90, 200);
 	generateStraight(100);
 	generateStraight(100);
-	//generateCurve(Vector3::UNIT_Y, 90, 20);
+	generateCurve(Vector3::UNIT_Y, 90, 200);
 
 	
 	generateIndices();
