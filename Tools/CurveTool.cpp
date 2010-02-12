@@ -93,12 +93,16 @@ int main(int argc, char** argv) {
 	manual = sceneManager->createManualObject("Test");
 	manual->begin("BaseWhite", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
 
+
 	generateCurve(Vector3::UNIT_Y, 45, 200);
 	generateStraight(100);
 	generateCurve(-Vector3::UNIT_Y, 90, 200);
 	generateStraight(100);
-	generateStraight(100);
 	generateCurve(Vector3::UNIT_Y, 90, 200);
+    generateCurve(Vector3::UNIT_X, 45, 100);
+    generateCurve(-Vector3::UNIT_X, 45, 100);
+    generateStraight(100);
+    generateStraight(100);
 
 	
 	generateIndices();
