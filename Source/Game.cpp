@@ -1,5 +1,5 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
+ * Warp: CS248 Final Project                                             *
  * Copyright (c) 2010 Matt Fichman                                            *
  ******************************************************************************/
 
@@ -19,7 +19,7 @@ extern "C" {
 #include <algorithm>
 #include <utility>
 
-using namespace Criterium;
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
@@ -33,8 +33,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		guiRenderer_(0), 
 		guiSystem_(0), 
 		root_(0), 
-		world_(0), 
-		space_(0), 
 		inputManager_(0),
 		keyboard_(0),
 		mouse_(0),
@@ -46,8 +44,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		if (guiRenderer_) { delete guiRenderer_;	}
 		if (guiSystem_) { delete guiSystem_; }
 		if (root_) { delete root_; }
-		if (world_) { dWorldDestroy(world_); }
-		if (space_) { dSpaceDestroy(space_); }
 		if (inputManager_) { 
 			if (keyboard_) inputManager_->destroyInputObject(keyboard_);
 			if (mouse_) inputManager_->destroyInputObject(mouse_);
@@ -141,14 +137,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 	/** Loads the physics world and collision space */
 	void loadPhysics() {
-		world_ = dWorldCreate();
-		space_ = dSimpleSpaceCreate(0);
-		contactJointGroup_ = dJointGroupCreate(32);
 
-		//dGeomID plane = dCreatePlane(space_, 0.0, 1.0, 0.0, -0.742);
-		//dGeomSetCategoryBits(plane, TYPETERRAIN);
-		//dGeomSetCollideBits(plane, TYPEWHEEL | TYPEBALL);
-		dWorldSetGravity(world_, 0.0, -20, 0.0);   
 	}
 
     /** Loads the scripting engine */
@@ -197,108 +186,16 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 			root_->queueEndRendering();
 		}
-	    
-		// Prevent physics from running while game doesn't have focus
-		physicsAccumulator_ += evt.timeSinceLastFrame;
-		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
+	   
+        list<Listener*>::iterator i = listeners_.begin();
+        while (i != listeners_.end()) {
+            Listener* listener = *i;
+            i++;
+            listener->onTimeStep();
+        }
 
-			// hack hack hack
-			/*const OIS::MouseState& state = mouse_->getMouseState();
-			camera_->pitch(Radian(-state.Y.rel/100.0));
-			camera_->yaw(Radian(-state.X.rel/100.0));
-
-            if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
-				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, -500 * PHYSICSUPDATEINTERVAL));
-				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, 500 * PHYSICSUPDATEINTERVAL));
-				}
-			} else {
-				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, -22.18 * PHYSICSUPDATEINTERVAL));
-				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, 22.18 * PHYSICSUPDATEINTERVAL));
-				}
-			}*/
-
-		// Run fixed time steps using time in accumulator
-		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
-        
-            list<Listener*>::iterator i = listeners_.begin();
-            while (i != listeners_.end()) {
-                Listener* listener = *i;
-                i++;
-                listener->onTimeStep();
-            }
-
-	        
-			// Run collision detection 
-			dSpaceCollide(space_, this, &Impl::onGeomCollision);
-	        
-			// Step world
-			dWorldStep(world_, PHYSICSUPDATEINTERVAL);
-	        
-			// Clean up
-			dJointGroupEmpty(contactJointGroup_);
-			physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
-		}
 		return true;
 	}
-
-	/** Called when to geometric objects collide */
-	static void onGeomCollision(void* data, dGeomID o1, dGeomID o2) {
-		Impl* impl = static_cast<Impl*>(data);
-
-		dContactGeom geom[10];
-		int num = dCollide(o1, o2, 10, geom, sizeof(dContactGeom));
-		if (num <= 0) return;
-	    
-		// Look up the surface params for these object types
-		int t1 = dGeomGetCategoryBits(o1);
-		int t2 = dGeomGetCategoryBits(o2);
-
-        Collidable* c1 = static_cast<Collidable*>(dGeomGetData(o1));
-        Collidable* c2 = static_cast<Collidable*>(dGeomGetData(o2));
-
-        if (c1) {
-            c1->onCollision(o2, geom[0]);
-        }
-        if (c2) {
-            c2->onCollision(o1, geom[0]);
-        }
-
-        if (t1 == Objects::TYPE_RAY || t2 == Objects::TYPE_RAY) {
-            return;
-        }
-
-	    
-		for (int i = 0; i < num; i++) {
-			dContact contact;
-			memset(&contact, 0, sizeof(dContact));
-			contact.geom = geom[i];
-	        
-			contact.surface.mode = dContactApprox1;// | dContactBounce;
-			contact.surface.mu = 0.0f;
-            //contact.surface.bounce = 1.0f;
-	        
-			// Add a contact joint
-			dJointID joint = dJointCreateContact(impl->world_, impl->contactJointGroup_, &contact);
-			dJointAttach(joint, dGeomGetBody(o1), dGeomGetBody(o2));
-		}
-	}
-
-    /** Geom moved callback.  Called to copy position from ODE to Ogre  */
-    static void onBodyMoved(dBodyID body) {
-		// Update the position of the scene node attached to this body.
-		// Position is in global coordinates.
-		SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
-		const dReal* pos = dBodyGetPosition(body);
-		const dReal* quat = dBodyGetQuaternion(body);
-	    
-		// N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
-		node->setPosition(pos[0], pos[1], pos[2]);
-		node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
-    }
 
     /** Lua callback.  Gets the given values for the node */
     static int luaGetNode(lua_State* env) {
@@ -407,10 +304,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     OIS::Mouse*	mouse_;
     
 	// Physics objects
-	float physicsAccumulator_;
-    dWorldID world_;
-    dSpaceID space_;
-    dJointGroupID contactJointGroup_;
+
     
 	// Game objects
 	list<Listener*> listeners_;
@@ -424,7 +318,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 Game::Game() : impl_(new Impl()) {
 	impl_->root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
-	impl_->physicsAccumulator_ = 0;
 	impl_->loadResources();
 	impl_->loadGraphics();
 	impl_->loadInput();
@@ -454,14 +347,6 @@ OIS::Mouse*	Game::getMouse() const {
 	return impl_->mouse_; 
 }
 
-dWorldID Game::getWorld() const { 
-	return impl_->world_; 
-}
-
-dSpaceID Game::getSpace() const { 
-	return impl_->space_; 
-}
-
 Ogre::Root* Game::getRoot() const { 
 	return impl_->root_; 
 }
@@ -480,12 +365,6 @@ Ogre::RenderWindow*	Game::getWindow() const {
 
 lua_State* Game::getScriptState() const {
     return impl_->scriptState_;
-}
-
-float Game::getGravity() const {
-    dReal gravityVector[3];
-    dWorldGetGravity(impl_->world_, gravityVector);
-    return dLENGTH(gravityVector);
 }
 
 float Game::getMouseNormalizedX() const {

@@ -1,12 +1,12 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
+ * Warp: CS248 Final Project                                             *
  * Copyright (c) 2010 Matt Fichman                                            *
  ******************************************************************************/
 
 #include <Overlays.hpp>
 #include <CEGUI/CEGUI.h>
 
-using namespace Criterium;
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 

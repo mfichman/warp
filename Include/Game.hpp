@@ -1,5 +1,5 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
+ * Warp: CS248 Final Project                                             *
  * Copyright (c) 2010 Matt Fichman                                            *
  ******************************************************************************/
 #pragma once 
@@ -8,12 +8,11 @@
 #include <memory>
 #include <Ogre.h>
 #include <OIS/OIS.h>
-#include <ode/ode.h>
 extern "C" { 
 #include <lua/lua.h> 
 }
 
-namespace Criterium {
+namespace Warp {
 
 class Overlays;
 class Objects;
@@ -35,12 +34,6 @@ public:
 
 	/** Returns the mouse state object */
     OIS::Mouse*	getMouse() const;
-
-	/** Returns the ODE physics world */
-    dWorldID getWorld() const;
-
-	/** Returns the ODE collision space */
-    dSpaceID getSpace() const;
 
 	/** Returns the OGRE root renderer object */
     Ogre::Root*	getRoot() const;
@@ -93,7 +86,7 @@ class Game::Collidable {
 public:
     
     /** Called when an object collides with another object */
-    virtual void onCollision(dGeomID other, dContactGeom& contact) {}
+    virtual void onCollision() {}
 
 };
 

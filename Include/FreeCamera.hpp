@@ -9,15 +9,15 @@
 
 namespace Warp {
 
-class Ball  {
+class FreeCamera  {
 public:
 	struct Impl;
 
 	/** Creates a new ball */
-    Ball(Game* game);
+    FreeCamera(Game* game);
 
     /** Destructor */
-    ~Ball();
+    ~FreeCamera();
 
 private:
     std::auto_ptr<Impl> impl_;

@@ -1,12 +1,12 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
+ * Warp: CS248 Final Project                                             *
  * Copyright (c) 2010 Matt Fichman                                            *
  ******************************************************************************/
 
 #include <Tube.hpp>
 #include <Objects.hpp>
 
-using namespace Criterium;
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
@@ -66,39 +66,12 @@ struct Tube::Impl : public Game::Listener {
         ibuf->unlock();
 		
 		// Lock buffers, read, and build the index
-		data_ = dGeomTriMeshDataCreate();
-		dGeomTriMeshDataBuildSingle(data_, &vertices_.front(), sizeof(Vector3), vertices_.size(), &indices_.front(), indices_.size(), sizeof(int));		
-		tube_ = dCreateTriMesh(game_->getSpace(), data_, 0, 0, 0);
-        dGeomSetCategoryBits(tube_, Objects::TYPE_TERRAIN);
-		dGeomSetCollideBits(tube_, Objects::TYPE_BALL);
-
-		// Setup the height map
-		/*Ogre::TubeSceneManager* mgr = static_cast<Ogre::TubeSceneManager*>(game_->getSceneManager());
-		heightfield_ = dGeomHeightfieldDataCreate();
-
-		dGeomHeightfieldDataBuildCallback (heightfield_, mgr, &Impl::onHeightfieldQuery, 3000.0, 3000.0, 2, 2, 1.0, 0.0, 0, 0);
-		dGeomHeightfieldDataSetBounds(heightfield_, 0.0f,  100.0f);
-
-		tube_ = dCreateHeightfield(game_->getSpace(), heightfield_, 0);
-		dGeomSetCategoryBits(road_, TYPEROAD);
-		dGeomSetCollideBits(road_, TYPEBALL | TYPEWHEEL);*/
 	}
 
 	void onTimeStep() {
-		//dMatrix4 matrix;
-		//memset(matrix, 0, sizeof(matrix));
-		//matrix[0] = 1.0f;
-		//matrix[5] = 1.0f;
-		//matrix[10] = 1.0f;
-		//matrix[15] = 1.0f;
-		//dGeomTriMeshSetLastTransform(geom_, matrix);
-
-		//cout << dGeomTriMeshGetTriangleCount(geom_) << endl;
 	}
 
 	Game* game_;
-	dTriMeshDataID data_;
-	dGeomID tube_;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
 };
@@ -107,4 +80,8 @@ Tube::Tube(Game* game, const std::string& name) : impl_(new Impl()) {
 	impl_->game_ = game;
 	impl_->init(name);
 	game->addListener(impl_.get());
+}
+
+Tube::~Tube() {
+
 }

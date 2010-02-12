@@ -1,5 +1,5 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
+ * Warp: CS248 Final Project                                             *
  * Copyright (c) 2010 Matt Fichman                                            *
  ******************************************************************************/
 #pragma once
@@ -7,7 +7,7 @@
 #include <Game.hpp>
 #include <memory>
 
-namespace Criterium {
+namespace Warp {
 
 class Game;
 

@@ -1,6 +1,7 @@
 #include <Game.hpp>
 #include <Ball.hpp>
 #include <Tube.hpp>
+#include <FreeCamera.hpp>
 #include <Overlays.hpp>
 #include <Script.hpp>
 #include <PickingRay.hpp>
@@ -11,8 +12,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
     try {
-        dInitODE();
-		auto_ptr<Criterium::Game> game(new Criterium::Game()); 
+		auto_ptr<Warp::Game> game(new Warp::Game()); 
 		
 		game->getCamera()->setNearClipDistance(0.5);
 		game->getCamera()->setFarClipDistance(400);
@@ -27,10 +27,11 @@ int main(int argc, char** argv) {
 		light->setSpecularColour(ColourValue(0.0, 0.0, 0.0));
 		light->setDirection(Vector3(0, -1, 1)); 
 
-        //Criterium::Script script(game.get(), "Scripts/Test.lua");
-        //Criterium::PickingRay ray(game.get());
-        Criterium::Ball ball(game.get());
-        Criterium::Tube tube(game.get(), "Test");
+        //Warp::Script script(game.get(), "Scripts/Test.lua");
+        //Warp::PickingRay ray(game.get());
+        Warp::Ball ball(game.get());
+        Warp::Tube tube(game.get(), "Test");
+        Warp::FreeCamera camera(game.get());
 
 		//SceneNode* node = game->getSceneManager()->getRootSceneNode()->createChildSceneNode("Test");
 		//Entity* entity = game->getSceneManager()->createEntity("Test", "Test.mesh");

@@ -1,12 +1,12 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
+ * Warp: CS248 Final Project                                             *
  * Copyright (c) 2010 Matt Fichman                                            *
  ******************************************************************************/
 
 #include <Script.hpp>
 #include <stdexcept>
 
-using namespace Criterium;
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
@@ -109,7 +109,7 @@ Script::~Script() {
 
 
 /** Methods for sending Ogre and ODE values to a script */
-lua_State* Criterium::operator<<(lua_State* env, const Ogre::Vector3& v) {
+lua_State* Warp::operator<<(lua_State* env, const Ogre::Vector3& v) {
     lua_newtable(env);
     lua_pushnumber(env, v.x);
     lua_rawseti(env, -2, 1);
@@ -120,7 +120,7 @@ lua_State* Criterium::operator<<(lua_State* env, const Ogre::Vector3& v) {
     return env;
 }
 
-lua_State* Criterium::operator<<(lua_State* env, const Ogre::Quaternion& q) {
+lua_State* Warp::operator<<(lua_State* env, const Ogre::Quaternion& q) {
      lua_newtable(env);
      lua_pushnumber(env, q.x);
      lua_rawseti(env, -2, 1);
@@ -133,33 +133,22 @@ lua_State* Criterium::operator<<(lua_State* env, const Ogre::Quaternion& q) {
      return env;
 }
 
-lua_State* Criterium::operator<<(lua_State* env, const Ogre::SceneNode& n) {
-    dBodyID body = any_cast<dBodyID>(n.getUserAny());
+lua_State* Warp::operator<<(lua_State* env, const Ogre::SceneNode& n) {
     lua_newtable(env);
-    if (body) {
-        env << Ogre::Vector3(dBodyGetPosition(body));
-        lua_setfield(env, -2, "position");
-        env << Ogre::Quaternion((Real*)dBodyGetQuaternion(body));
-        lua_setfield(env, -2, "orientation");
-        env << Ogre::Vector3(dBodyGetLinearVel(body));
-        lua_setfield(env, -2, "linearvel");
-        env << Ogre::Vector3(dBodyGetAngularVel(body));
-        lua_setfield(env, -2, "angularvel");        
-    } else {
-        env << n.getPosition();
-        lua_setfield(env, -2, "position");
-        env << n.getOrientation();
-        lua_setfield(env, -2, "orientation");
-        env << Ogre::Vector3::ZERO;
-        lua_setfield(env, -2, "linearvel");
-        env << Ogre::Vector3::ZERO;
-        lua_setfield(env, -2, "angularvel");       
-    }
+
+    env << n.getPosition();
+    lua_setfield(env, -2, "position");
+    env << n.getOrientation();
+    lua_setfield(env, -2, "orientation");
+    env << Ogre::Vector3::ZERO;
+    lua_setfield(env, -2, "linearvel");
+    env << Ogre::Vector3::ZERO;
+    lua_setfield(env, -2, "angularvel");       
 
     return env;
 }
 
-lua_State* Criterium::operator<<(lua_State* env, const Ogre::Light& l) {
+lua_State* Warp::operator<<(lua_State* env, const Ogre::Light& l) {
     lua_newtable(env);
     env << l.getPosition();
     lua_setfield(env, -2, "position");
@@ -180,7 +169,7 @@ lua_State* Criterium::operator<<(lua_State* env, const Ogre::Light& l) {
 
 }
 
-lua_State* Criterium::operator<<(lua_State* env, const Ogre::ColourValue& c) {
+lua_State* Warp::operator<<(lua_State* env, const Ogre::ColourValue& c) {
     lua_pushnumber(env, c.r);
     lua_rawseti(env, -2, 1);
     lua_pushnumber(env, c.b);
@@ -193,7 +182,7 @@ lua_State* Criterium::operator<<(lua_State* env, const Ogre::ColourValue& c) {
 
 
 /** Methods for reading Ogre and ODE values from a script */
-lua_State* Criterium::operator>>(lua_State* env, Ogre::Vector3& v) {
+lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
     assert(lua_istable(env, -1));
     lua_rawgeti(env, -1, 1);
     v.x = lua_tonumber(env, -1);
@@ -210,7 +199,7 @@ lua_State* Criterium::operator>>(lua_State* env, Ogre::Vector3& v) {
 
 }
 
-lua_State* Criterium::operator>>(lua_State* env, Ogre::Quaternion& q) {
+lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
     assert(lua_istable(env, -1));
     lua_rawgeti(env, -1, 1);
     q.x = lua_tonumber(env, -1);
@@ -230,56 +219,24 @@ lua_State* Criterium::operator>>(lua_State* env, Ogre::Quaternion& q) {
 
 }
 
-lua_State* Criterium::operator>>(lua_State* env, Ogre::SceneNode& n) {
+lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
     assert(lua_istable(env, -1));
-    dBodyID body = any_cast<dBodyID>(n.getUserAny());
-    Vector3 position, linearvel, angularvel;
+    Vector3 position;
     Quaternion orientation;
 
-    if (body) {
-        lua_getfield(env, -1, "position");
-        if (!lua_isnil(env, -1)) {
-            env >> position;
-            dBodySetPosition(body, position.x, position.y, position.z);
-        } else {
-            lua_pop(env, 1);
-        }
-        lua_getfield(env, -1, "orientation");
-        if (!lua_isnil(env, -1)) {
-            env >> orientation;
-            dBodySetQuaternion(body, (dReal*)&orientation);
-        } else {
-            lua_pop(env, 1);
-        }
-        lua_getfield(env, -1, "linearvel");
-        if (!lua_isnil(env, -1)) {
-            env >> linearvel;
-            dBodySetLinearVel(body, linearvel.x, linearvel.y, linearvel.z);
-        } else {
-            lua_pop(env, 1);
-        }
-        lua_getfield(env, -1, "angularvel");
-        if (!lua_isnil(env, -1)) {
-            env >> angularvel;
-            dBodySetAngularVel(body, angularvel.x, angularvel.y, angularvel.z);
-        }  else {
-            lua_pop(env, 1);
-        }     
+    lua_getfield(env, -1, "position");
+    if (!lua_isnil(env, -1)) {
+        env >> position;
+        n.setPosition(position);
     } else {
-        lua_getfield(env, -1, "position");
-        if (!lua_isnil(env, -1)) {
-            env >> position;
-            n.setPosition(position);
-        } else {
-            lua_pop(env, 1);
-        }
-        lua_getfield(env, -1, "orientation");
-        if (!lua_isnil(env, -1)) {
-            env >> orientation;
-            n.setOrientation(orientation);
-        } else {
-            lua_pop(env, 1);
-        }
+        lua_pop(env, 1);
+    }
+    lua_getfield(env, -1, "orientation");
+    if (!lua_isnil(env, -1)) {
+        env >> orientation;
+        n.setOrientation(orientation);
+    } else {
+        lua_pop(env, 1);
     }
     lua_pop(env, 1);
 
@@ -287,7 +244,7 @@ lua_State* Criterium::operator>>(lua_State* env, Ogre::SceneNode& n) {
 
 }
 
-lua_State* Criterium::operator>>(lua_State* env, Ogre::Light& l) {
+lua_State* Warp::operator>>(lua_State* env, Ogre::Light& l) {
     assert(lua_istable(env, -1));
     Vector3 position, direction;
     ColourValue diffuse, specular;
@@ -343,7 +300,7 @@ lua_State* Criterium::operator>>(lua_State* env, Ogre::Light& l) {
 }
 
 
-lua_State* Criterium::operator>>(lua_State* env, Ogre::ColourValue& c) {
+lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
     assert(lua_istable(env, -1));
     lua_rawgeti(env, -1, 1);
     c.r = lua_tonumber(env, -1);

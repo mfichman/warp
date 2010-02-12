@@ -73,6 +73,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\FreeCamera.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\Game.cpp"
 				>
 			</File>
@@ -116,6 +120,10 @@
 			>
 			<File
 				RelativePath="..\Include\Ball.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\FreeCamera.hpp"
 				>
 			</File>
 			<File
