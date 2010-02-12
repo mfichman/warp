@@ -19,7 +19,7 @@ struct Tube::Impl : public Game::Listener {
 		SceneNode* node = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode();
         Entity* entity = game_->getSceneManager()->createEntity(name, name + ".mesh");
         entity->setCastShadows(false);
-        entity->setMaterialName("Test");
+        entity->setMaterialName("Road");
         node->attachObject(entity);
 
 

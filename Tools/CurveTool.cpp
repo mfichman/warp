@@ -18,6 +18,8 @@ using namespace std;
 Matrix4 trans = Matrix4::IDENTITY;
 ManualObject* manual;
 int segments = 0;
+Vector3 lastSpinePosition;
+int v = 0;
 
 
 void generateRing() {
@@ -25,10 +27,15 @@ void generateRing() {
 	Vector3 spineForward = trans * Vector3::UNIT_Z;
 	Vector3 spineUp = trans * Vector3::UNIT_Y;
 
-	// Todo: write spine to a file
+    if (segments != 0) {
+        v += lastSpinePosition.distance(spinePosition);
+    }
+    lastSpinePosition = spinePosition;
 
+	// Todo: write spine to a file
 	for (int i = 0; i < SEGMENT_STEPS; i++) {
 		float theta = 360.0f/SEGMENT_STEPS*i;
+        float u = i; //(float)i/(float)SEGMENT_STEPS * 2;
 		Vector3 position(cosf(PI/180.0*theta)*SEGMENT_RADIUS, sinf(PI/180.0*theta)*SEGMENT_RADIUS, 0.0f);
 		Vector4 normalh(-position.normalisedCopy());
 		normalh.w = 0;
@@ -41,6 +48,7 @@ void generateRing() {
 		
 		manual->position(position);
         manual->normal(normal);
+        manual->textureCoord(u, v / (2 * PI * SEGMENT_RADIUS));
 		//manual->textureCoord(vertices[i].u, vertices[i].v);
 		//manual->index(i);
 	}
