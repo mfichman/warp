@@ -23,7 +23,7 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-#define PHYSICSUPDATEINTERVAL	0.01f // seconds
+#define PHYSICSUPDATEINTERVAL	1.0f/60.0f // seconds
 #define PHYSICSMAXINTERVAL		0.25f // seconds
 
 
@@ -36,7 +36,13 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		inputManager_(0),
 		keyboard_(0),
 		mouse_(0),
-        scriptState_(0) {
+        scriptState_(0),
+        collisionConfiguration_(0),
+        dispatcher_(0),
+        broadphase_(0),
+        solver_(0),
+        world_(0),
+        physicsAccumulator_(0.0f) {
 	}
 
 	/** Destroys subsystems */
@@ -50,6 +56,12 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			OIS::InputManager::destroyInputSystem(inputManager_);
 		}
         if (scriptState_) { lua_close(scriptState_); }
+        
+        if (world_) { delete world_; }
+        if (solver_) { delete solver_; }
+        if (broadphase_) { delete broadphase_; }
+        if (dispatcher_) { delete dispatcher_; }
+        if (collisionConfiguration_) { delete collisionConfiguration_; }
 	}
 
 	/** Loads resource configuration files */
@@ -137,7 +149,11 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 	/** Loads the physics world and collision space */
 	void loadPhysics() {
-
+        collisionConfiguration_ = new btDefaultCollisionConfiguration();
+        dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
+        broadphase_ = new btDbvtBroadphase();
+        solver_ = new btSequentialImpulseConstraintSolver();
+        world_ = new btDiscreteDynamicsWorld(dispatcher_, broadphase_, solver_, collisionConfiguration_);
 	}
 
     /** Loads the scripting engine */
@@ -186,12 +202,23 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 			root_->queueEndRendering();
 		}
-	   
-        list<Listener*>::iterator i = listeners_.begin();
-        while (i != listeners_.end()) {
-            Listener* listener = *i;
-            i++;
-            listener->onTimeStep();
+
+		// Prevent physics from running while game doesn't have focus
+		physicsAccumulator_ += evt.timeSinceLastFrame;
+		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
+
+        while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
+            list<Listener*>::iterator i = listeners_.begin();
+            while (i != listeners_.end()) {
+                Listener* listener = *i;
+                i++;
+                listener->onTimeStep();
+            }
+
+            // Step the world using the fixed timestep
+            world_->stepSimulation(PHYSICSUPDATEINTERVAL, 0);
+
+            physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
         }
 
 		return true;
@@ -304,7 +331,12 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     OIS::Mouse*	mouse_;
     
 	// Physics objects
-
+    btBroadphaseInterface* broadphase_;
+    btCollisionDispatcher* dispatcher_;
+    btConstraintSolver* solver_;
+    btDefaultCollisionConfiguration* collisionConfiguration_;
+    btDiscreteDynamicsWorld* world_;
+    float physicsAccumulator_;
     
 	// Game objects
 	list<Listener*> listeners_;
@@ -365,6 +397,10 @@ Ogre::RenderWindow*	Game::getWindow() const {
 
 lua_State* Game::getScriptState() const {
     return impl_->scriptState_;
+}
+
+btDynamicsWorld* Game::getWorld() const {
+    return impl_->world_;
 }
 
 float Game::getMouseNormalizedX() const {

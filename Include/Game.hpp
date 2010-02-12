@@ -8,6 +8,8 @@
 #include <memory>
 #include <Ogre.h>
 #include <OIS/OIS.h>
+#include <Bullet/btBulletDynamicsCommon.h>
+#include <Bullet/btBulletCollisionCommon.h>
 extern "C" { 
 #include <lua/lua.h> 
 }
@@ -56,8 +58,8 @@ public:
     /** Returns the overlays object */
     Overlays* getOverlays() const;
 
-    /** Returns the gravity constant */
-    float getGravity() const;
+    /** Returns the physics world */
+    btDynamicsWorld* getWorld() const;
 
     /** Returns the normalized mouse position in the range (-1, 1) */
     float getMouseNormalizedX() const;
