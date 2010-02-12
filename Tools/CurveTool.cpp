@@ -8,11 +8,11 @@ using namespace Ogre;
 using namespace std;
 
 
-#define PI 3.14159265
-#define SEGMENT_SIZE 0.5
-#define SEGMENT_ANGLE 15
-#define SEGMENT_STEPS 32
-#define SEGMENT_RADIUS 10
+#define PI 3.14159265f
+#define SEGMENT_SIZE 0.5f
+#define SEGMENT_ANGLE 5.0f
+#define SEGMENT_STEPS 64
+#define SEGMENT_RADIUS 10.0f
 
 
 Matrix4 trans = Matrix4::IDENTITY;
@@ -28,8 +28,8 @@ void generateRing() {
 	// Todo: write spine to a file
 
 	for (int i = 0; i < SEGMENT_STEPS; i++) {
-		float theta = 360/SEGMENT_STEPS*i;
-		Vector3 position(cosf(PI/180*theta)*SEGMENT_RADIUS, sinf(PI/180*theta)*SEGMENT_RADIUS, 0.0f);
+		float theta = 360.0f/SEGMENT_STEPS*i;
+		Vector3 position(cosf(PI/180.0*theta)*SEGMENT_RADIUS, sinf(PI/180.0*theta)*SEGMENT_RADIUS, 0.0f);
 		Vector4 normalh(-position.normalisedCopy());
 		normalh.w = 0;
 
