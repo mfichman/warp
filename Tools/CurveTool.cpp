@@ -9,9 +9,8 @@ using namespace std;
 
 
 #define PI 3.14159265f
-#define SEGMENT_SIZE 0.5f
 #define SEGMENT_ANGLE 5.0f
-#define SEGMENT_STEPS 64
+#define SEGMENT_STEPS 8
 #define SEGMENT_RADIUS 10.0f
 
 

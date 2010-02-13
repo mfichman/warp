@@ -69,13 +69,15 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
 
         data_.reset(new btTriangleIndexVertexArray(indices_.size()/3, &indices_.front(), 3*sizeof(int), vertices_.size(), (btScalar*)&vertices_.front(), sizeof(Vector3)));
 
-
         position_.setIdentity();
+       // shape_.reset(new btBvhTriangleMeshShape(data_.get(), true));
         shape_.reset(new btGImpactMeshShape(data_.get()));
-        shape_->setMargin(0.0f);
+        shape_->setMargin(0.02f);
         shape_->updateBound();
         object_.reset(new btCollisionObject());
         object_->setCollisionShape(shape_.get());
+		object_->setFriction(0.0f);
+		object_->setRestitution(0.0f);
         game_->getWorld()->addCollisionObject(object_.get());
 	}
 
