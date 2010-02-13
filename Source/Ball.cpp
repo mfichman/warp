@@ -35,6 +35,9 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 
         btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
         body_.reset(new btRigidBody(rbinfo));
+		body_->setFriction(0.0f);
+		body_->setRestitution(0.0f);
+		body_->setGravity(btVector3(0.0f, -50.0f, 0.0f));
 
         game_->getWorld()->addRigidBody(body_.get());
 
@@ -60,7 +63,36 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 	/** Called when a new frame is detected */
 	void onTimeStep() {
 
-		
+		btVector3 btforward = body_->getLinearVelocity().normalized();
+		btVector3 btposition = body_->getCenterOfMassPosition();
+		float speed = body_->getLinearVelocity().length();
+
+		Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;
+		Vector3 up = Vector3::UNIT_Y;
+		Vector3 right = up.crossProduct(forward);
+		Vector3 position(btposition.x(), btposition.y(), btposition.z());
+		position -= forward*3.0f;
+
+#define ALPHA 0.90f
+		forward = ALPHA * game_->getCamera()->getDirection() + (1-ALPHA) * forward;
+		position = ALPHA * game_->getCamera()->getPosition() + (1-ALPHA) * position;
+
+		game_->getCamera()->setDirection(forward);
+		game_->getCamera()->setPosition(position);
+
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
+			body_->applyCentralForce(-20*btVector3(right.x, right.y, right.z));
+		}
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
+			body_->applyCentralForce(20*btVector3(right.x, right.y, right.z));
+		}
+
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
+			body_->applyCentralForce(20*btforward);
+		}
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
+			body_->applyCentralForce(-20*btforward);
+		}
 	}
 
 	Game* game_;
