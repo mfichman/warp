@@ -24,7 +24,7 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-#define PHYSICSUPDATEINTERVAL	1.0f/60.0f // seconds
+#define PHYSICSUPDATEINTERVAL	0.01f // seconds
 #define PHYSICSMAXINTERVAL		0.25f // seconds
 
 
@@ -157,6 +157,15 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         broadphase_ = new btDbvtBroadphase();
         solver_ = new btSequentialImpulseConstraintSolver();
         world_ = new btDiscreteDynamicsWorld(dispatcher_, broadphase_, solver_, collisionConfiguration_);
+        world_->getSolverInfo().m_splitImpulse = true;
+        world_->getSolverInfo().m_splitImpulsePenetrationThreshold = 0.8f;
+        //world_->getSolverInfo().m_maxErrorReduction = 0.0f;
+        //world_->getSolverInfo().m_numIterations = 20;
+        world_->getSolverInfo().m_restitution = 0.0f;
+        world_->getSolverInfo().m_globalCfm = 1000.0f;
+        world_->getSolverInfo().m_erp = 1.00f;
+        world_->getSolverInfo().m_erp2 = 1.00f;
+        world_->setGravity(btVector3(0, -20, 0));
         btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 	}
 
@@ -185,6 +194,11 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         lua_pushcclosure(scriptState_, &Impl::luaGetSpineNodeId, 1);
         lua_setglobal(scriptState_, "wGetSpineNodeId");
 
+        if (luaL_dofile(scriptState_, "Scripts/Warp.lua")) {
+            string message(lua_tostring(scriptState_, -1));
+            lua_pop(scriptState_, 2);
+            throw runtime_error("Script error: " + message);
+        }
     }
 
 	/** Called when the main window is closed */
@@ -196,8 +210,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	bool frameRenderingQueued(const Ogre::FrameEvent& evt) { 
 		keyboard_->capture();
 		mouse_->capture();
-		
-
+	
 		if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 			root_->queueEndRendering();
 		}
