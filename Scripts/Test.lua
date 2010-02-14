@@ -20,11 +20,11 @@ function wWaitForSpineNode(id)
 end
 
 -- Waits for the next beat before returning
-function wWaitForBeat()
-    --local beat = wGetBeat()
-    --coroutine.yield(function()
-    --    return wGetBeat() >= beat
-    --end)
+function wWaitForBeat(id)
+    if (wGetBeat() == id) then return end
+    coroutine.yield(function()
+        return wGetBeat() == beat
+    end)
 end
 
 
@@ -36,5 +36,6 @@ print("Waiting")
 wWaitForSpineNode(10)
 print("Awake")
 
+wWaitForBeat(0)
 wSetLight("Light", {diffuse={1, 0, 0}})
 

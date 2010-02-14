@@ -7,9 +7,14 @@
 #include <Objects.hpp>
 #include <Script.hpp>
 
+#define DEBUG
+#define DEBUG_
+
 #include <OgreCEGUIRenderer.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <CEGUI/CEGUI.h>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
 extern "C" {
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
@@ -20,12 +25,25 @@ extern "C" {
 #include <algorithm>
 #include <utility>
 
+#include "OscListener.hpp"
+#include "OscSender.hpp"
+
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
 #define PHYSICSUPDATEINTERVAL	1.0f/60.0f // seconds
 #define PHYSICSMAXINTERVAL		0.25f // seconds
+
+#define SEND_PORT 6449
+#define LISTEN_PORT 7000
+
+// Not sure where to put this. make it global for now.
+int cur_beat_;
+void beatCallback(int beat) {
+	std::cout << "BEAT:" << beat << endl;
+    cur_beat_ = beat;
+}
 
 
 struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
@@ -48,7 +66,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 	/** Destroys subsystems */
 	~Impl() {
-        if (scriptState_) { lua_close(scriptState_); }
 		if (guiRenderer_) { delete guiRenderer_;	}
 		if (guiSystem_) { delete guiSystem_; }
 		if (root_) { delete root_; }
@@ -57,7 +74,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			if (mouse_) inputManager_->destroyInputObject(mouse_);
 			OIS::InputManager::destroyInputSystem(inputManager_);
 		}
-        
+        if (scriptState_) { lua_close(scriptState_); }
         
         if (world_) { delete world_; }
         if (solver_) { delete solver_; }
@@ -119,7 +136,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		Ogre::WindowEventUtilities::addWindowEventListener(window_, this);
 		
 		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-        
 	}
 
 	/** Loads the input manager */
@@ -185,7 +201,19 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         lua_pushcclosure(scriptState_, &Impl::luaGetSpineNodeId, 1);
         lua_setglobal(scriptState_, "wGetSpineNodeId");
 
+        lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
+        lua_pushcclosure(scriptState_, &Impl::luaGetBeat, 1);
+        lua_setglobal(scriptState_, "wGetBeat");
     }
+
+	/** load up osc interaction */
+	void loadOsc() {
+		// initialize sender
+		osc_sender_ = new OscSender(SEND_PORT);
+		osc_listener_ = new OscListener(LISTEN_PORT);
+
+		boost::thread oscThread(boost::bind(boost::mem_fn(&OscListener::StartBeatLoop), osc_listener_, &beatCallback));
+	}
 
 	/** Called when the main window is closed */
 	void windowClosed(Ogre::RenderWindow* rw) { 
@@ -222,6 +250,8 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 		return true;
 	}
+
+
 
     /** Lua callback.  Gets the given values for the node */
     static int luaGetNode(lua_State* env) {
@@ -313,12 +343,20 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         return 0;
     }
 
-    /** Lua callback.  Get the light state */
+	/** Lua callback.  Get the light state */
     static int luaGetSpineNodeId(lua_State* env) {
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
         lua_pushinteger(env, impl->spineNode_.index);
         return 1;
+	}
+    
+    /** Lua callback.  Gets the current beat as set by chuck */
+    static int luaGetBeat(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        lua_pushinteger(env, cur_beat_);
+        return 1;
     }
+
 
 	// Graphics objects
     Ogre::Root* root_;
@@ -350,6 +388,10 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     // Scripting objects
     lua_State* scriptState_;
 
+	// Osc object
+	OscSender* osc_sender_;
+	OscListener* osc_listener_;
+
     auto_ptr<Objects> objects_;
     auto_ptr<Overlays> overlays_;
 
@@ -364,6 +406,7 @@ Game::Game() : impl_(new Impl()) {
 	impl_->loadGraphics();
 	impl_->loadInput();
 	impl_->loadPhysics();
+	impl_->loadOsc();
     impl_->objects_.reset(new Objects(this));
     impl_->overlays_.reset(new Overlays(this));
 }
