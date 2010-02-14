@@ -140,7 +140,7 @@ Script::~Script() {
 }
 
 
-/** Methods for sending Ogre and ODE values to a script */
+/** Methods for sending Ogre values to a script */
 lua_State* Warp::operator<<(lua_State* env, const Ogre::Vector3& v) {
     lua_newtable(env);
     lua_pushnumber(env, v.x);
@@ -213,7 +213,7 @@ lua_State* Warp::operator<<(lua_State* env, const Ogre::ColourValue& c) {
 }
 
 
-/** Methods for reading Ogre and ODE values from a script */
+/** Methods for reading Ogre from a script */
 lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
     assert(lua_istable(env, -1));
     lua_rawgeti(env, -1, 1);

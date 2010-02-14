@@ -4,7 +4,7 @@
 
 -- Waits for the given amount of timesteps before returning
 function wSleep(time)
-    if (time <= 0) return;
+    if (time <= 0) then return end
     coroutine.yield(function()
         time = time - 1
         return time <= 0
@@ -13,7 +13,7 @@ end
 
 -- Waits for the player to pass the given spine node before returning
 function wWaitForSpineNode(id)
-    if (wGetSpineNode() >= id) return
+    if (wGetSpineNodeId() >= id) then return end
     coroutine.yield(function()
         return wGetSpineNodeId() >= id
     end)

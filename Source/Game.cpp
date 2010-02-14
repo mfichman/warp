@@ -48,6 +48,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 	/** Destroys subsystems */
 	~Impl() {
+        if (scriptState_) { lua_close(scriptState_); }
 		if (guiRenderer_) { delete guiRenderer_;	}
 		if (guiSystem_) { delete guiSystem_; }
 		if (root_) { delete root_; }
@@ -56,7 +57,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 			if (mouse_) inputManager_->destroyInputObject(mouse_);
 			OIS::InputManager::destroyInputSystem(inputManager_);
 		}
-        if (scriptState_) { lua_close(scriptState_); }
+        
         
         if (world_) { delete world_; }
         if (solver_) { delete solver_; }
@@ -358,11 +359,11 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 Game::Game() : impl_(new Impl()) {
 	impl_->root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
+    impl_->loadScripting();
 	impl_->loadResources();
 	impl_->loadGraphics();
 	impl_->loadInput();
 	impl_->loadPhysics();
-    impl_->loadScripting();
     impl_->objects_.reset(new Objects(this));
     impl_->overlays_.reset(new Overlays(this));
 }
