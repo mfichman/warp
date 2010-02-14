@@ -60,8 +60,8 @@ int main(int argc, char** argv) {
             Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), compositorName, false);
 
         }*/
-        Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
-        Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
+        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
+       //O/gre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
 
 		game->getRoot()->startRendering();
         

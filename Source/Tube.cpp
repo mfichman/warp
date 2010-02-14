@@ -51,20 +51,37 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
         HardwareIndexBufferSharedPtr ibuf = indexData->indexBuffer;
         int indexCount = indexData->indexCount;
         int indexSize = ibuf->getIndexSize();
-        assert(indexSize == sizeof(short));
-        short* iptr = ((short*)ibuf->lock(HardwareBuffer::HBL_READ_ONLY)) + indexData->indexStart;
-		for (int i = 2; i < indexCount; i++) {
-            if (i % 2 == 0) {
-                indices_.push_back(iptr[i-2]);
-                indices_.push_back(iptr[i-1]);
-                indices_.push_back(iptr[i]);
-            } else {
-                indices_.push_back(iptr[i]);
-                indices_.push_back(iptr[i-1]);
-                indices_.push_back(iptr[i-2]);
-            }
-            
-		}
+
+        if (indexSize == sizeof(short)) {
+            // Use this branch if indices are 16 bits (small objects)
+            short* iptr = ((short*)ibuf->lock(HardwareBuffer::HBL_READ_ONLY)) + indexData->indexStart;
+		    for (int i = 2; i < indexCount; i++) {
+                if (i % 2 == 0) {
+                    indices_.push_back(iptr[i-2]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i]);
+                } else {
+                    indices_.push_back(iptr[i]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i-2]);
+                }
+		    }
+        } else {
+            // Use this branch if indices are 32 bits (large objects)
+            assert(indexSize == sizeof(int));
+            int* iptr = ((int*)ibuf->lock(HardwareBuffer::HBL_READ_ONLY)) + indexData->indexStart;
+		    for (int i = 2; i < indexCount; i++) {
+                if (i % 2 == 0) {
+                    indices_.push_back(iptr[i-2]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i]);
+                } else {
+                    indices_.push_back(iptr[i]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i-2]);
+                }
+		    }
+        }
         ibuf->unlock();
 
         data_.reset(new btTriangleIndexVertexArray(indices_.size()/3, &indices_.front(), 3*sizeof(int), vertices_.size(), (btScalar*)&vertices_.front(), sizeof(Vector3)));
