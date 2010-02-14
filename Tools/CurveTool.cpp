@@ -26,7 +26,10 @@ public:
         v(0),
         input(input), 
         output(output),
-        out((output + ".spine").c_str()) {
+        out((output + ".spine").c_str()),
+        vertices(0),
+        triangles(0),
+        indices(0) {
 
 	    manual.begin("BaseWhite", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
 
@@ -39,6 +42,10 @@ public:
         Ogre::MeshPtr mesh = manual.convertToMesh(output);
 	    Ogre::MeshSerializer serializer;
 	    serializer.exportMesh(mesh.get(), output + ".mesh");
+
+        cout << "Vertices: " << vertices << endl;
+        cout << "Indices: " << indices << endl;
+        cout << "Triangles: " << triangles << endl;
     }
 
 private:
@@ -82,7 +89,7 @@ private:
 
         out << "position: " << spinePosition.x << " " << spinePosition.y << " " << spinePosition.z << endl;
         out << "forward: " << spineForward.x << " " << spineForward.y << " " << spineForward.z  << endl;
-        out << "up: " << spineUp.x << " " << spineForward.y << " " << spineForward.z << endl;
+        out << "up: " << spineUp.x << " " << spineUp.y << " " << spineUp.z << endl;
 
 	    // Todo: write spine to a file
 	    for (int i = 0; i < ringDivisions; i++) {
@@ -100,6 +107,7 @@ private:
 		    manual.position(position);
             manual.normal(normal);
             manual.textureCoord(u, v / (2 * PI * ringRadius));
+            vertices++;
 	    }
 	    rings++;
     }
@@ -129,8 +137,14 @@ private:
 		    for (int j = 0; j <= ringDivisions; j++) {
 			        manual.index(j % ringDivisions + i * ringDivisions);
 			        manual.index(j % ringDivisions + (i+1) * ringDivisions);
+                    indices += 2;
+                    triangles += 2;
 		    }
 	    }
+
+        // This accounts for the first two indices, which don't 
+        // create unique triangles
+        triangles -= 2; 
     }
 
     /** Current transform for the spine */
@@ -161,6 +175,11 @@ private:
     const float curveStep;
     const int ringDivisions;
     const float ringRadius;
+
+    /** Statistics  */
+    int vertices;
+    int triangles;
+    int indices;
 };
 
 
