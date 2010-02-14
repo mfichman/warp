@@ -6,20 +6,13 @@
 #include <Script.hpp>
 #include <PickingRay.hpp>
 #include <sstream>
-#include <boost/thread.hpp>
 
 using namespace Ogre;
 using namespace std;
 
-void threadpower() {
-
-}
-
 int main(int argc, char** argv) {
     try {
 		auto_ptr<Warp::Game> game(new Warp::Game()); 
-
-        boost::thread test(threadpower);
 		
 		game->getCamera()->setNearClipDistance(0.5);
 		//game->getCamera()->setFarClipDistance(400);
