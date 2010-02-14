@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 		light->setSpecularColour(ColourValue(2.0, 2.0, 2.0));
 		light->setDirection(Vector3(0, -1, 1)); 
 
-        //Warp::Script script(game.get(), "Scripts/Test.lua");
+        Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
         Warp::Ball ball(game.get());
         Warp::Tube tube(game.get(), "Test");

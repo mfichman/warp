@@ -12,8 +12,6 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-int last =0;
-
 struct Tube::Impl : public Game::Listener, public btMotionState {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
@@ -145,69 +143,72 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
 
 	/** Called when a new frame is detected */
 	void onTimeStep() {
-        const SpineNode& node = t->getClosestSpineNode(game_->getCamera()->getPosition(), last);
-
-        last = node.index;
-
-        cout << "Closest spine node: " << node.index << endl;
+        const SpineNode& node = getClosestSpineNode(game_->getCamera()->getPosition(), lastSpineNodeIndex_);
+        lastSpineNodeIndex_ = node.index;
+        game_->setSpineNode(node);
 	}
 
+    /** 
+     * Returns the spine that is closest to the given location.
+     * position: this function will find the closest spine to this position
+     * guess: where the function will start looking for the nearest spine
+     */
+    const SpineNode& getClosestSpineNode(const Vector3& pos, int guess) {
+        int i = guess;
+        assert(i >= 0 && i < (int)nodes_.size());
+
+        // To start, find which direction we should be searching
+        const SpineNode& prev = nodes_[max(0, i-1)];
+        const SpineNode& current = nodes_[max(0, i)];
+        const SpineNode& next = nodes_[min((int)nodes_.size()-1, i+1)];
+
+        float distancePrev = prev.position.distance(pos);
+        float distanceCurrent = current.position.distance(pos);
+        float distanceNext = next.position.distance(pos);
+
+        float best;
+        int direction;
+        if (distancePrev < distanceCurrent) {
+            best = distancePrev;
+            direction = -1;
+        } else if (distanceNext < distanceCurrent) {
+            best = distanceNext;
+            direction = 1;
+        } else {
+            return current;
+        }
+
+        while (true) {
+            if ((i + direction) < 0 || (i + direction) >= (int)nodes_.size()) return nodes_[i];
+
+            float distance = nodes_[i + direction].position.distance(pos);
+            if (distance > best) return nodes_[i];
+
+            best = distance;
+            i += direction;
+        }
+    }
+
 	Game* game_;
-    Tube* t;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
     auto_ptr<btTriangleIndexVertexArray> data_;
     auto_ptr<btGImpactMeshShape> shape_;
     auto_ptr<btCollisionObject> object_;
     btTransform position_;
-    std::vector<Tube::SpineNode> nodes_;
+    std::vector<SpineNode> nodes_;
+    int lastSpineNodeIndex_;
 
 };
 
 Tube::Tube(Game* game, const std::string& name) : impl_(new Impl()) {
 	impl_->game_ = game;
 	impl_->init(name);
+    impl_->lastSpineNodeIndex_ = 0;
 	game->addListener(impl_.get());
-    impl_->t = this;
+
 }
 
 Tube::~Tube() {
 
-}
-
-const Tube::SpineNode&
-Tube::getClosestSpineNode(const Vector3& pos, int guess) {
-    int i = guess;
-    assert(i >= 0 && i < (int)impl_->nodes_.size());
-
-    // To start, find which direction we should be searching
-    const SpineNode& prev = impl_->nodes_[max(0, i-1)];
-    const SpineNode& current = impl_->nodes_[max(0, i)];
-    const SpineNode& next = impl_->nodes_[min((int)impl_->nodes_.size()-1, i+1)];
-
-    float distancePrev = prev.position.distance(pos);
-    float distanceCurrent = current.position.distance(pos);
-    float distanceNext = next.position.distance(pos);
-
-    float best;
-    int direction;
-    if (distancePrev < distanceCurrent) {
-        best = distancePrev;
-        direction = -1;
-    } else if (distanceNext < distanceCurrent) {
-        best = distanceNext;
-        direction = 1;
-    } else {
-        return current;
-    }
-
-    while (true) {
-        if ((i + direction) < 0 || (i + direction) >= (int)impl_->nodes_.size()) return impl_->nodes_[i];
-
-        float distance = impl_->nodes_[i + direction].position.distance(pos);
-        if (distance > best) return impl_->nodes_[i];
-
-        best = distance;
-        i += direction;
-    }
 }

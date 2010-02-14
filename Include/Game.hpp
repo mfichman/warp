@@ -19,6 +19,15 @@ namespace Warp {
 class Overlays;
 class Objects;
 
+struct SpineNode {
+    SpineNode() : index(0) {}
+    Ogre::Vector3 position;
+    Ogre::Vector3 forward;
+    Ogre::Vector3 up;
+    int index;
+};
+
+
 class Game {
 public: 
 	struct Impl; 
@@ -72,6 +81,9 @@ public:
 
 	/** Removes an event listener */
 	void removeListener(Listener* listener);
+
+    /** Sets the current spine node */
+    void setSpineNode(const SpineNode& node);
     
 private:
 	std::auto_ptr<Impl> impl_;
@@ -91,5 +103,4 @@ public:
     virtual void onCollision() {}
 
 };
-
 }

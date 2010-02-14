@@ -17,6 +17,7 @@ extern "C" {
 
 struct Script::Impl : public Game::Listener {
 
+    enum Event { WAIT_BEAT, WAIT_SPINE_NODE, SLEEP };
 
     /** Initializes the script */
     void init() {
@@ -48,57 +49,88 @@ struct Script::Impl : public Game::Listener {
         lua_unref(game_->getScriptState(), coroutine_);
     }
 
-    /** Determines if the script should be restarted in this frame */
-    void onTimeStep() {
-        if (framesToWait_ < 0) {
-            lua_State* env = game_->getScriptState();
+    bool hasTriggerFired() {
+        if (!trigger_) return true;
+        lua_State* env = game_->getScriptState();
 
-            lua_getglobal(env, "coroutine");
-            lua_getfield(env, -1, "resume"); // Function to be called
-            lua_remove(env, -2); // Remove "coroutine" table
-            lua_getref(env, coroutine_); // Get reference to the coroutine object
-
-            // Resume the corutine
-            if (lua_pcall(env, 1, 2, 0)) {
-                string message(lua_tostring(env, -1));
-                lua_pop(env, 1);
-                throw runtime_error("Error calling script function: " + message);
-            }
-
-            // Get the time the coroutine will be run next
-            if (lua_isnumber(env, -1)) {
-                framesToWait_ = lua_tointeger(env, -1);
-            } else if (!lua_toboolean(env, -2)) {
-                string message(lua_tostring(env, -1));
-                lua_pop(env, 2);
-                throw runtime_error("Error calling script function: " + message);
-
-            } else {
-                // Script is complete, never run it again
-                game_->removeListener(this);
-            }
-            lua_pop(env, 2);
-
-            // Check the stack
-            assert(lua_gettop(env) == 0);
-
-        } else {
-            framesToWait_--;
+        // Call the trigger function.  It should return a 
+        // boolean on the stack.
+        lua_getref(env, trigger_);
+        if (lua_pcall(env, 0, 1, 0)) {
+            string message(lua_tostring(env, -1));
+            lua_pop(env, 1);
+            throw runtime_error("Error calling trigger: " + message);
         }
 
+        // Check the return value of the trigger function.
+        // True means the trigger fired, so the script will 
+        // start up again.  False means we have to wait until
+        // later
+        if (lua_isboolean(env, -1)) {
+#pragma warning(disable:4800)
+            bool result = lua_toboolean(env, -1);
+#pragma warning(default:4800)
+            lua_pop(env, lua_gettop(env));
+            return result;
+        } else {
+            throw runtime_error("Trigger returned an invalid value");
+        }
+    }
+
+    /** Determines if the script should be restarted in this frame */
+    void onTimeStep() {
+        lua_State* env = game_->getScriptState();
+
+        // Check trigger
+        if (!hasTriggerFired()) return;
+
+        // Get the coroutine.resume() Lua function
+        lua_getglobal(env, "coroutine");
+        lua_getfield(env, -1, "resume"); // Function to be called
+        lua_remove(env, -2); // Remove "coroutine" table
+        lua_getref(env, coroutine_); // Get reference to the coroutine object
+
+        // Resume the corutine
+        if (lua_pcall(env, 1, 2, 0)) {
+            string message(lua_tostring(env, -1));
+            lua_pop(env, 1);
+            throw runtime_error("Error calling script function: " + message);
+        }
+
+        // Get the trigger function
+        if (lua_isfunction(env, -1)) {
+            // Save a handle to the trigger function
+            trigger_ = luaL_ref(env, LUA_REGISTRYINDEX);
+            lua_pop(env, 1);
+
+        } else if (lua_isboolean(env, -2) && !lua_toboolean(env, -2)) {
+            // Coroutine returned with an error
+            string message(lua_tostring(env, -1));
+            lua_pop(env, 2);
+            throw runtime_error("Error calling script function: " + message);
+
+        } else {
+            // Script is complete, never run it again
+            game_->removeListener(this);
+            lua_pop(env, 2);
+        }
+
+        // Check the stack
+        assert(lua_gettop(env) == 0);
     }
 
     Game* game_;
 
     std::string path_;
-    int framesToWait_;
+    int trigger_;
     int coroutine_;
+    Event waitEvent_;
 };
 
 Script::Script(Game* game, const std::string& path) : impl_(new Impl()) {
     impl_->path_ = path;
     impl_->game_ = game;
-    impl_->framesToWait_ = 0;
+    impl_->trigger_ = 0;
     impl_->init();
     impl_->game_->addListener(impl_.get());
 }

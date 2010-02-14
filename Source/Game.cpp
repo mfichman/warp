@@ -166,29 +166,24 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
         lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
         lua_pushcclosure(scriptState_, &Impl::luaGetNode, 1);
-        lua_setglobal(scriptState_, "crGetNode");
+        lua_setglobal(scriptState_, "wGetNode");
 
         lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
         lua_pushcclosure(scriptState_, &Impl::luaSetNode, 1);
-        lua_setglobal(scriptState_, "crSetNode");
+        lua_setglobal(scriptState_, "wSetNode");
 
         lua_pushlightuserdata(scriptState_, this); // Modifies a light
         lua_pushcclosure(scriptState_, &Impl::luaGetLight, 1);
-        lua_setglobal(scriptState_, "crGetLight");
+        lua_setglobal(scriptState_, "wGetLight");
 
         lua_pushlightuserdata(scriptState_, this); // Modifies a light
         lua_pushcclosure(scriptState_, &Impl::luaSetLight, 1);
-        lua_setglobal(scriptState_, "crSetLight");
+        lua_setglobal(scriptState_, "wSetLight");
 
-        lua_pushlightuserdata(scriptState_, this); 
-        lua_pushinteger(scriptState_, Objects::TYPE_BALL);
-        lua_pushcclosure(scriptState_, &Impl::luaCreateObject, 2);
-        lua_setglobal(scriptState_, "crCreateBall");
+        lua_pushlightuserdata(scriptState_, this); // Gets the spine node
+        lua_pushcclosure(scriptState_, &Impl::luaGetSpineNodeId, 1);
+        lua_setglobal(scriptState_, "wGetSpineNodeId");
 
-        lua_pushlightuserdata(scriptState_, this); 
-        lua_pushinteger(scriptState_, Objects::TYPE_PLANE);
-        lua_pushcclosure(scriptState_, &Impl::luaCreateObject, 2);
-        lua_setglobal(scriptState_, "crCreatePlane");
     }
 
 	/** Called when the main window is closed */
@@ -317,6 +312,13 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         return 0;
     }
 
+    /** Lua callback.  Get the light state */
+    static int luaGetSpineNodeId(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        lua_pushinteger(env, impl->spineNode_.index);
+        return 1;
+    }
+
 	// Graphics objects
     Ogre::Root* root_;
     Ogre::Camera* camera_;
@@ -349,6 +351,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
     auto_ptr<Objects> objects_;
     auto_ptr<Overlays> overlays_;
+
+    // Current spine node
+    SpineNode spineNode_;
 };
 
 Game::Game() : impl_(new Impl()) {
@@ -433,4 +438,12 @@ void Game::removeListener(Listener* listener) {
 	if (i != impl_->listeners_.end()) {
 		impl_->listeners_.erase(i);
 	}
+}
+
+void Game::setSpineNode(const SpineNode& node) {
+    if (node.index != impl_->spineNode_.index) {
+        cout << "Current spine node: " << node.index << endl;
+    }
+    impl_->spineNode_ = node;
+
 }

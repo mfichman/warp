@@ -1,18 +1,40 @@
--- Criterium: CS248 Final Project
+-- Warp: CS248 Final Project
 -- Copyright (c) 2010 Matt Fichman
 
-crCreatePlane("Plane1", {})
---crCreatePlane("Plane2", {normal={ 1, 0, 0 }, depth=-1000})
---crCreatePlane("Plane3", {normal={ -1, 0, 0 }, depth=1000})
 
-for i=1,10 do
-
-crCreateBall("Ball"..i, { radius=10 })
-crSetNode("Ball"..i, { position={math.random(-20, 20), math.random(0, 300), math.random(-20, 20)} })
-
+-- Waits for the given amount of timesteps before returning
+function wSleep(time)
+    if (time <= 0) return;
+    coroutine.yield(function()
+        time = time - 1
+        return time <= 0
+    end)
 end
 
-coroutine.yield(100)
+-- Waits for the player to pass the given spine node before returning
+function wWaitForSpineNode(id)
+    if (wGetSpineNode() >= id) return
+    coroutine.yield(function()
+        return wGetSpineNodeId() >= id
+    end)
+end
 
-crSetLight("Light", {diffuse={1, 0, 0}})
+-- Waits for the next beat before returning
+function wWaitForBeat()
+    --local beat = wGetBeat()
+    --coroutine.yield(function()
+    --    return wGetBeat() >= beat
+    --end)
+end
+
+
+print("Sleeping")
+wSleep(100)
+print("Awake")
+
+print("Waiting")
+wWaitForSpineNode(10)
+print("Awake")
+
+wSetLight("Light", {diffuse={1, 0, 0}})
 
