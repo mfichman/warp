@@ -10,7 +10,7 @@ using namespace std;
 
 #define PI 3.14159265f
 #define SEGMENT_ANGLE 5.0f
-#define SEGMENT_STEPS 8
+#define SEGMENT_STEPS 32
 #define SEGMENT_RADIUS 10.0f
 
 
@@ -33,8 +33,8 @@ void generateRing() {
 
 	// Todo: write spine to a file
 	for (int i = 0; i < SEGMENT_STEPS; i++) {
-		float theta = 360.0f/SEGMENT_STEPS*i;
-        float u = i; //(float)i/(float)SEGMENT_STEPS * 2;
+		float theta = 360.0f/(SEGMENT_STEPS-1)*i;
+        float u = (float)i/(float)SEGMENT_STEPS * 2;
 		Vector3 position(cosf(PI/180.0*theta)*SEGMENT_RADIUS, sinf(PI/180.0*theta)*SEGMENT_RADIUS, 0.0f);
 		Vector4 normalh(-position.normalisedCopy());
 		normalh.w = 0;

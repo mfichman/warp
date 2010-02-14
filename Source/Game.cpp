@@ -118,6 +118,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		Ogre::WindowEventUtilities::addWindowEventListener(window_, this);
 		
 		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+        
 	}
 
 	/** Loads the input manager */

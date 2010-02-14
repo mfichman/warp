@@ -8,6 +8,7 @@ Include/boost/*
 Criterium.exe*
 RoadTool.exe*
 CurveTool.exe*
+Warp.exe*
 *.log
 *.pdb
 *.ilk

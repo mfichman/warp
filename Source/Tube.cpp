@@ -72,7 +72,7 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
         position_.setIdentity();
        // shape_.reset(new btBvhTriangleMeshShape(data_.get(), true));
         shape_.reset(new btGImpactMeshShape(data_.get()));
-        shape_->setMargin(0.02f);
+        shape_->setMargin(0.0f);
         shape_->updateBound();
         object_.reset(new btCollisionObject());
         object_->setCollisionShape(shape_.get());

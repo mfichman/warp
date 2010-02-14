@@ -8,8 +8,6 @@ material Scene/BeechMaterial
 		  lighting off
 		  scene_blend alpha_blend
 		  depth_write off
-		  depth_test off
-		  transparent_sorting force
 			texture_unit
 			{
 				texture Beech.png
@@ -27,8 +25,6 @@ material Scene/PineMaterial
 		  lighting off
 		  scene_blend alpha_blend
 		  depth_write off
-		  depth_test off
-		  transparent_sorting force
 			texture_unit
 			{
 				texture Pine.png
@@ -46,8 +42,6 @@ material Scene/EucalyptusMaterial
 		  lighting off
 		  scene_blend alpha_blend
 		  depth_write off
-		  depth_test off
-		  transparent_sorting force
 			texture_unit
 			{
 				texture Eucalyptus.png

@@ -6,16 +6,23 @@
 #include <Script.hpp>
 #include <PickingRay.hpp>
 #include <sstream>
+#include <boost/thread.hpp>
 
 using namespace Ogre;
 using namespace std;
 
+void threadpower() {
+
+}
+
 int main(int argc, char** argv) {
     try {
 		auto_ptr<Warp::Game> game(new Warp::Game()); 
+
+        boost::thread test(threadpower);
 		
 		game->getCamera()->setNearClipDistance(0.5);
-		game->getCamera()->setFarClipDistance(400);
+		//game->getCamera()->setFarClipDistance(400);
         game->getCamera()->setPosition(0, 0, -20);
         game->getCamera()->lookAt(0, -10, 100);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.6, 0.6, 1.0));
@@ -24,7 +31,7 @@ int main(int argc, char** argv) {
 		Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
 		light->setDiffuseColour(ColourValue(0.8, 0.8, 0.8));
-		light->setSpecularColour(ColourValue(0.0, 0.0, 0.0));
+		light->setSpecularColour(ColourValue(2.0, 2.0, 2.0));
 		light->setDirection(Vector3(0, -1, 1)); 
 
         //Warp::Script script(game.get(), "Scripts/Test.lua");
@@ -37,6 +44,31 @@ int main(int argc, char** argv) {
 		//Entity* entity = game->getSceneManager()->createEntity("Test", "Test.mesh");
 		//entity->setMaterialName("Test");
 		//node->attachObject(entity);
+
+       /* Ogre::CompositorManager::ResourceMapIterator resourceIterator = Ogre::CompositorManager::getSingleton().getResourceIterator();
+
+        // add all compositor resources to the view container
+        while (resourceIterator.hasMoreElements())
+        {
+            Ogre::ResourcePtr resource = resourceIterator.getNext();
+            const Ogre::String& compositorName = resource->getName();
+            // Don't add base Ogre/Scene compositor to view
+            if (compositorName == "Ogre/Scene")
+                continue;
+
+            cout << "@@@@@ " << compositorName << endl;
+			int addPosition = -1;
+			if (compositorName == "HDR")
+			{
+				// HDR must be first in the chain
+				addPosition = 0;
+			}
+            Ogre::CompositorInstance *instance = Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), compositorName, addPosition);
+            Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), compositorName, false);
+
+        }*/
+        Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
+        Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
 
 		game->getRoot()->startRendering();
         

@@ -13,6 +13,15 @@ using namespace std;
 #define BALLRADIUS 0.5f // meters
 #define BALLMASS 1000.0f // kilograms
 
+static bool Callback(btManifoldPoint& cp, const btCollisionObject* colObj0,int partId0,int index0,const btCollisionObject* colObj1,int partId1,int index1)
+{
+    cp.m_appliedImpulse *= 00.0f;
+    cp.m_combinedRestitution = -1.0f;
+    cp.m_combinedFriction = 0.0f;
+cout << "here" << endl;
+    return true;
+}
+
 Ogre::Vector3 last = Ogre::Vector3(0.0f, 0.0f, -3.0f);
 
 struct Ball::Impl : public Game::Listener, public btMotionState {
@@ -23,6 +32,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 		node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode("Ball");
 		node_->attachObject(game_->getSceneManager()->createEntity("Ball", "Ball.mesh"));
 
+        //gContactAddedCallback = Callback;
         
         position_.setIdentity();
         
@@ -38,8 +48,10 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 		body_->setFriction(0.0f);
 		body_->setRestitution(0.0f);
 		body_->setGravity(btVector3(0.0f, -30.0f, 0.0f));
+       // body_->setCollisionFlags(body_->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
         game_->getWorld()->addRigidBody(body_.get());
+        game_->getWorld()->setGravity(btVector3(0, -20, 0));
 
         front_ = btVector3(0, 0, 0);
 
@@ -75,6 +87,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 		Vector3 right = up.crossProduct(forward);
 		Vector3 position(btposition.x(), btposition.y(), btposition.z());
 		position -= forward*3.0f;
+        position += Vector3(0, 2, 0);
 
 #define ALPHA 0.90f
 		forward = ALPHA * game_->getCamera()->getDirection() + (1-ALPHA) * forward;
