@@ -14,3 +14,5 @@ Warp.exe*
 *.ilk
 *.dll
 *.orig
+*.swp
+*~
