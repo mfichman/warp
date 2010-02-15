@@ -20,7 +20,11 @@ struct Script::Impl : public Game::Listener {
     enum Event { WAIT_BEAT, WAIT_SPINE_NODE, SLEEP };
 
     /** Initializes the script */
-    void init() {
+    Impl(Game* game, const std::string& path) :
+        path_(path),
+        game_(game), 
+        trigger_(0) {    
+
         lua_State* env = game_->getScriptState();
 
         lua_getglobal(env, "coroutine");
@@ -43,10 +47,14 @@ struct Script::Impl : public Game::Listener {
 
         // Check the stack
         assert(lua_gettop(env) == 0);
+
+        // Add this object as a game listener
+        game_->addListener(this);
     }
 
     ~Impl() {
         lua_unref(game_->getScriptState(), coroutine_);
+        game_->removeListener(this);
     }
 
     bool hasTriggerFired() {
@@ -127,18 +135,12 @@ struct Script::Impl : public Game::Listener {
     Event waitEvent_;
 };
 
-Script::Script(Game* game, const std::string& path) : impl_(new Impl()) {
-    impl_->path_ = path;
-    impl_->game_ = game;
-    impl_->trigger_ = 0;
-    impl_->init();
-    impl_->game_->addListener(impl_.get());
+Script::Script(Game* game, const std::string& path) : impl_(new Impl(game, path)) {
 }
 
 Script::~Script() {
 
 }
-
 
 /** Methods for sending Ogre values to a script */
 lua_State* Warp::operator<<(lua_State* env, const Ogre::Vector3& v) {

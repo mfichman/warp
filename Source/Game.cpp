@@ -51,7 +51,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	Impl() : 
 		guiRenderer_(0), 
 		guiSystem_(0), 
-		root_(0), 
 		inputManager_(0),
 		keyboard_(0),
 		mouse_(0),
@@ -61,7 +60,15 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         broadphase_(0),
         solver_(0),
         world_(0),
-        physicsAccumulator_(0.0f) {
+        physicsAccumulator_(0.0f),
+        root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")) {
+    
+        loadScripting();
+	    loadResources();
+	    loadGraphics();
+	    loadInput();
+	    loadPhysics();
+	    loadOsc();
 	}
 
 	/** Destroys subsystems */
@@ -414,15 +421,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 };
 
 Game::Game() : impl_(new Impl()) {
-	impl_->root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
-    impl_->loadScripting();
-	impl_->loadResources();
-	impl_->loadGraphics();
-	impl_->loadInput();
-	impl_->loadPhysics();
-	impl_->loadOsc();
-    impl_->objects_.reset(new Objects(this));
-    impl_->overlays_.reset(new Overlays(this));
 }
 
 Game::~Game() {

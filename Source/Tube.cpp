@@ -12,11 +12,13 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-struct Tube::Impl : public Game::Listener, public btMotionState {
+struct Tube::Impl : public Game::Listener {
 
-	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
-	void init(const std::string& name) {
-		// Create the road mesh
+	/** Initializes the the tube */
+    Impl(Game* game, const std::string& name) :
+        game_(game),
+        name_(name),
+        lastSpineNodeIndex_(0) {
         
 		SceneNode* node = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode();
         Entity* entity = game_->getSceneManager()->createEntity(name, name + ".mesh");
@@ -26,6 +28,16 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
 
         initPhysics(entity->getMesh());
         initSpine(name);
+
+	    game_->addListener(this);
+    }
+
+    /** Destroys the tube */
+    ~Impl() {
+        game_->getSceneManager()->getRootSceneNode()->removeAndDestroyChild(name_);
+        game_->getSceneManager()->destroyEntity(name_);
+        game_->removeListener(this);
+        game_->getWorld()->removeCollisionObject(object_.get());
     }
 
     /** Loads the spines from the spine file */
@@ -43,7 +55,6 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
             in >> tag >> node.forward.x >> node.forward.y >> node.forward.z;
             in >> tag >> node.up.x >> node.up.y >> node.up.z;
             
-
             // Push a copy of the node
             nodes_.push_back(node);
             node.index++; 
@@ -124,23 +135,6 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
         game_->getWorld()->addCollisionObject(object_.get());
     }
 
-    ~Impl() {
-        game_->getWorld()->removeCollisionObject(object_.get());
-    }
-
-    /** Called by bullet to get the transform state */
-    void getWorldTransform(btTransform& transform) const {
-        transform = position_;
-    }
-
-    /** Called by Bullet to update the scene node */
-    void setWorldTransform(const btTransform& transform) {
-        //const btQuaternion& rotation = transform.getRotation();
-        //node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
-        //const btVector3& position = transform.getOrigin();
-        //node_->setPosition(position.x(), position.y(), position.z());
-    }
-
 	/** Called when a new frame is detected */
 	void onTimeStep() {
         const SpineNode& node = getClosestSpineNode(game_->getCamera()->getPosition(), lastSpineNodeIndex_);
@@ -190,6 +184,8 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
     }
 
 	Game* game_;
+    std::string name_;
+    Entity* entity_;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
     auto_ptr<btTriangleIndexVertexArray> data_;
@@ -201,12 +197,7 @@ struct Tube::Impl : public Game::Listener, public btMotionState {
 
 };
 
-Tube::Tube(Game* game, const std::string& name) : impl_(new Impl()) {
-	impl_->game_ = game;
-	impl_->init(name);
-    impl_->lastSpineNodeIndex_ = 0;
-	game->addListener(impl_.get());
-
+Tube::Tube(Game* game, const std::string& name) : impl_(new Impl(game, name)) {
 }
 
 Tube::~Tube() {

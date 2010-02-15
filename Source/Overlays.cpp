@@ -20,15 +20,20 @@ static String batches = "Batch Count: ";
 struct Overlays::Impl : public Game::Listener {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
-	void init() {
+	Impl(Game* game) {
+        // The overlays are created via script, we just reference it here
 		debug_ = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 		debug_->show();
-		
+	    game_->addListener(this);
 	}
+
+    /** Destroys the overlays and hides them */
+    ~Impl() {
+        debug_->hide();
+    }
 
 	/** Called when a new frame is detected */
 	void onTimeStep() {
-
 		OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Core/AverageFps");
 		OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Core/CurrFps");
 		OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Core/BestFps");
@@ -55,12 +60,8 @@ struct Overlays::Impl : public Game::Listener {
 
 };
 
-Overlays::Overlays(Game* game) : impl_(new Impl()) {
-	impl_->game_ = game;
-	impl_->init();
-	game->addListener(impl_.get());
+Overlays::Overlays(Game* game) : impl_(new Impl(game)) {
 }
 
 Overlays::~Overlays() {
-
 }

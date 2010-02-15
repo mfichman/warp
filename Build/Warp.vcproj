@@ -24,11 +24,11 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="nmake"
-				ReBuildCommandLine=""
-				CleanCommandLine=""
-				Output="Warp.exe"
+				ReBuildCommandLine="nmake clean &amp;&amp; nmake"
+				CleanCommandLine="nmake clean"
+				Output="..\Warp.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
-				IncludeSearchPath=""
+				IncludeSearchPath="D:\Bullet;C:\Bullet;D:\Include;C:\Include;C:\OgreSDK\Include;D:\OgreSDK\Include"
 				ForcedIncludes=""
 				AssemblySearchPath=""
 				ForcedUsingAssemblies=""
@@ -97,19 +97,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Source\PickingRay.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Tools\RoadTool.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\Source\Script.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Source\Terrain.cpp"
 				>
 			</File>
 			<File
@@ -159,15 +151,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Include\PickingRay.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Include\Script.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\Terrain.hpp"
 				>
 			</File>
 			<File
