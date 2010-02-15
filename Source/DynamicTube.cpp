@@ -19,15 +19,11 @@ struct DynamicTube::Impl : public Game::Listener {
         ringDivisions_(32),
         ringRadius_(10.0f),
         transform_(Matrix4::IDENTITY),
-        ringCount_(0),
         v_(0),
-        vertexCount_(0),
-        triangleCount_(0),
-        indexCount_(0),
         name_(name),
         manual_(game->getSceneManager()->createManualObject(name)),
-        data_(new btTriangleMesh(true, false)),
-        game_(game) {
+        game_(game),
+        lastSpineNodeIndex_(0) {
 
         // Generate the mesh data
         manual_->begin("Road", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
@@ -36,9 +32,11 @@ struct DynamicTube::Impl : public Game::Listener {
         manual_->end();
 
         // Initialize the graphical rep
-		SceneNode* node = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode();
+		SceneNode* node = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
         manual_->setCastShadows(false);
         node->attachObject(manual_);
+
+        data_.reset(new btTriangleIndexVertexArray(indices_.size()/3, &indices_.front(), 3*sizeof(int), vertices_.size(), (btScalar*)&vertices_.front(), sizeof(Vector3)));
 
         // Initialize the physics object
         position_.setIdentity();
@@ -114,16 +112,16 @@ struct DynamicTube::Impl : public Game::Listener {
 	    Vector4 spineForward = transform_ * Vector4(0, 0, 1, 0);
 	    Vector4 spineUp = transform_ * Vector4(0, 1, 0, 0);
 
-        if (ringCount_ != 0) {
+        if (nodes_.size() != 0) {
             v_ += lastSpinePosition_.distance(spinePosition);
         }
         lastSpinePosition_ = spinePosition;
 
         SpineNode node;
         node.position = spinePosition;
-        node.forward = Vector3(spineForward.x, spineForward.y, spineForward.z);
-        node.up = Vector3(spineUp.x, spineUp.y, spineUp.z);
-        node.index = ringCount_;
+        node.forward = Vector3(spineForward.x, spineForward.y, spineForward.z).normalisedCopy();
+        node.up = Vector3(spineUp.x, spineUp.y, spineUp.z).normalisedCopy();
+        node.index = nodes_.size();
         nodes_.push_back(node);
 	    
         // Generate the ring around the node
@@ -145,11 +143,8 @@ struct DynamicTube::Impl : public Game::Listener {
             manual_->textureCoord(u, v_ / (2 * Math::PI * ringRadius_));
 
             // Add vertex to the physics tri mesh
-            data_->findOrAddVertex(btVector3(position.x, position.y, position.z), false);
-
-            vertexCount_++;
+            vertices_.push_back(position);
 	    }
-	    ringCount_++;
     }
 
     /** Generates a straight tube segment */
@@ -171,41 +166,86 @@ struct DynamicTube::Impl : public Game::Listener {
         }
     }
 
-    /** Generates the indexCount_ for the mesh */
+    /** Generates the indices for the mesh */
     void generateIndices() {
-	    for (int i = 0; i < ringCount_-1; i++) {
+	    for (size_t i = 0; i < nodes_.size()-1; i++) {
 		    for (int j = 0; j <= ringDivisions_; j++) {
 
-                    // Add index to the visible mesh
-			        manual_->index(j % ringDivisions_ + i * ringDivisions_);
-			        manual_->index(j % ringDivisions_ + (i+1) * ringDivisions_);
+                // Add index to the visible mesh
+		        manual_->index(j % ringDivisions_ + i * ringDivisions_);
+		        manual_->index(j % ringDivisions_ + (i+1) * ringDivisions_);
 
-                    // Add indices to the physical mesh
-                    data_->addIndex(j % ringDivisions_ + i * ringDivisions_);
-                    data_->addIndex(j % ringDivisions_ + (i+1) * ringDivisions_);
-                    data_->addIndex(j % (ringDivisions_+1) + ringDivisions_);
 
-                    data_->addIndex(j % (ringDivisions_+1) + ringDivisions_);
-                    data_->addIndex(j % ringDivisions_ + (i+1) * ringDivisions_);
-                    data_->addIndex(j % (ringDivisions_+1) + (i+1) * ringDivisions_);
+                // j == ring division num
+                // i == ring num
 
-                    indexCount_ += 2;
-                    triangleCount_ += 2;
+                // Add indices to the physical mesh
+                //indices_.push_back(j % ringDivisions_ + i * ringDivisions_);
+                //indices_.push_back(j
+        
+
+                indices_.push_back(j % ringDivisions_ + i * ringDivisions_);
+                indices_.push_back(j % ringDivisions_ + (i+1) * ringDivisions_);
+                indices_.push_back((j+1) % ringDivisions_ + i * ringDivisions_);
+
+                indices_.push_back((j+1) % ringDivisions_ + i * ringDivisions_);
+                indices_.push_back(j % ringDivisions_ + (i+1) * ringDivisions_);
+                indices_.push_back((j+1) % ringDivisions_ + (i+1) * ringDivisions_);
 		    }
 	    }
+    }
 
-        // This accounts for the first two indexCount_, which don't 
-        // create unique triangleCount_
-        triangleCount_ -= 2; 
+    /** Called when a new frame is detected */
+	void onTimeStep() {
+        const SpineNode& node = getClosestSpineNode(game_->getCamera()->getPosition(), lastSpineNodeIndex_);
+        lastSpineNodeIndex_ = node.index;
+        game_->setSpineNode(node);
+	}
+
+    /** 
+     * Returns the spine that is closest to the given location.
+     * position: this function will find the closest spine to this position
+     * guess: where the function will start looking for the nearest spine
+     */
+    const SpineNode& getClosestSpineNode(const Vector3& pos, int guess) {
+        int i = guess;
+        assert(i >= 0 && i < (int)nodes_.size());
+
+        // To start, find which direction we should be searching
+        const SpineNode& prev = nodes_[max(0, i-1)];
+        const SpineNode& current = nodes_[max(0, i)];
+        const SpineNode& next = nodes_[min((int)nodes_.size()-1, i+1)];
+
+        float distancePrev = prev.position.distance(pos);
+        float distanceCurrent = current.position.distance(pos);
+        float distanceNext = next.position.distance(pos);
+
+        float best;
+        int direction;
+        if (distancePrev < distanceCurrent) {
+            best = distancePrev;
+            direction = -1;
+        } else if (distanceNext < distanceCurrent) {
+            best = distanceNext;
+            direction = 1;
+        } else {
+            return current;
+        }
+
+        while (true) {
+            if ((i + direction) < 0 || (i + direction) >= (int)nodes_.size()) return nodes_[i];
+
+            float distance = nodes_[i + direction].position.distance(pos);
+            if (distance > best) return nodes_[i];
+
+            best = distance;
+            i += direction;
+        }
     }
 
     /** These parameters are exclusively for vertex generation */
     Matrix4 transform_;
     std::string name_;
-    int vertexCount_;
-    int triangleCount_;
-    int indexCount_;
-    int ringCount_;
     float v_;
     Vector3 lastSpinePosition_;
     float curveStep_;
@@ -215,7 +255,9 @@ struct DynamicTube::Impl : public Game::Listener {
     /** These variables are for the loaded scene objects */
     Game* game_;
     ManualObject* manual_;
-    auto_ptr<btTriangleMesh> data_;
+    auto_ptr<btTriangleIndexVertexArray> data_;
+    std::vector<Ogre::Vector3> vertices_;
+	std::vector<int> indices_;
     auto_ptr<btGImpactMeshShape> shape_;
     auto_ptr<btCollisionObject> object_;
     btTransform position_;
