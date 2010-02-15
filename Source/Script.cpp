@@ -352,7 +352,7 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
 }
 
 /** This is a convenience method for reading into a string from lua */
-lua_State* operator>>(lua_State* env, std::string& s) {
+lua_State* Warp::operator>>(lua_State* env, std::string& s) {
     assert(lua_isstring(env, -1)); // Make sure the top of the stack is a string.  -1 == top of stack
     s.assign(lua_tostring(env, -1)); // Get the string
     lua_pop(env, 1); // Pop the string value off the lua stack

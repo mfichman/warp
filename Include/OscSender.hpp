@@ -30,6 +30,21 @@ public:
         socket = new UdpTransmitSocket(host);
     }
 
+    void beginMsg(const char* location) {
+        op_stream->Clear();
+        *op_stream << osc::BeginMessage(location);
+    }
+
+    void addString(const char* str) {
+        *op_stream << str;
+    }
+
+    void sendMsg() {
+        *op_stream << osc::EndMessage;
+        socket->Send(op_stream->Data(), op_stream->Size());
+    }
+
+    /*
     void SendFloat(char* location, float data) {
         std::cout << "sending " << data << "to " << location << std::endl;
         op_stream->Clear();
@@ -43,12 +58,13 @@ public:
         *op_stream << osc::BeginMessage(location) << data << osc::EndMessage;
         socket->Send(op_stream->Data(), op_stream->Size());
     }
+    */
 
-    osc::OutboundPacketStream & GetPacketStream() {
+    osc::OutboundPacketStream & getPacketStream() {
         return *op_stream;
     }
 
-    UdpTransmitSocket & GetSocket() {
+    UdpTransmitSocket & getSocket() {
         return *socket;
     }
 };

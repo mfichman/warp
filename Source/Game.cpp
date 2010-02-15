@@ -217,9 +217,13 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         lua_pushcclosure(scriptState_, &Impl::luaGetSpineNodeId, 1);
         lua_setglobal(scriptState_, "wGetSpineNodeId");
 
-        lua_pushlightuserdata(scriptState_, this); // Gets the spine node
+        lua_pushlightuserdata(scriptState_, this); // Gets the current beat
         lua_pushcclosure(scriptState_, &Impl::luaGetBeat, 1);
         lua_setglobal(scriptState_, "wGetBeat");
+
+        lua_pushlightuserdata(scriptState_, this); // tell chuck to enqueue loop
+        lua_pushcclosure(scriptState_, &Impl::luaQueueStartLoop, 1);
+        lua_setglobal(scriptState_, "wQueueStartLoop");
 
         if (luaL_dofile(scriptState_, "Scripts/Warp.lua")) {
             string message(lua_tostring(scriptState_, -1));
@@ -367,6 +371,27 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     static int luaGetBeat(lua_State* env) {
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
         lua_pushinteger(env, cur_beat_);
+        return 1;
+    }
+
+    /** Lua callback.  Sends chuck the message to start a loop
+     *  It gives a string id for the loop and the pathname to find it
+     */
+    static int luaQueueStartLoop(lua_State* env) {
+        // get msg
+        string id;
+        string path_name;
+
+        env >> path_name; // pops back to front
+        env >> id;
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+
+        // send msg
+        OscSender* sender = impl->osc_sender_;
+        sender->beginMsg("/loop/start");
+        sender->addString(id.c_str());
+        sender->addString(path_name.c_str());
+        sender->sendMsg();
         return 1;
     }
 
