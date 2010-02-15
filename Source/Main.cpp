@@ -32,8 +32,8 @@ int main(int argc, char** argv) {
         Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
         Warp::Ball ball(game.get());
-        //Warp::StaticTube tube(game.get(), "Test");
-        Warp::DynamicTube tube(game.get(), "Tube2");
+        Warp::StaticTube tube(game.get(), "Test");
+        //Warp::DynamicTube tube(game.get(), "Tube2");
         Warp::FreeCamera camera(game.get());
 
 		//SceneNode* node = game->getSceneManager()->getRootSceneNode()->createChildSceneNode("Test");
