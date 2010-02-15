@@ -210,6 +210,10 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         lua_pushcclosure(scriptState_, &Impl::luaGetSpineNodeId, 1);
         lua_setglobal(scriptState_, "wGetSpineNodeId");
 
+        lua_pushlightuserdata(scriptState_, this); // Gets the list
+        lua_pushcclosure(scriptState_, &Impl::luaGetBeat, 1);
+        lua_setglobal(scriptState_, "wGetBeat");
+
         if (luaL_dofile(scriptState_, "Scripts/Warp.lua")) {
             string message(lua_tostring(scriptState_, -1));
             lua_pop(scriptState_, 2);

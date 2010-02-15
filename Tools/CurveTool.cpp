@@ -192,11 +192,11 @@ int main(int argc, char** argv) {
         cout << "    --ring-divisions: number of vertices per ring" << endl;
         cout << "    --ring-radius: radius of the ring in meters" << endl;
         return 0;
-    }
-    if (argc < 3) throw runtime_error(std::string("Usage: ") + argv[0] + " <input file> <output file> <options>");
+	}
 
     // Hack to get Ogre to load without the render system
     try {
+		if (argc < 3) throw runtime_error(std::string("Usage: ") + argv[0] + " <input file> <output file> <options>");
         std::auto_ptr<LogManager> logManager(new LogManager());
         logManager->createLog("curve.log", false, false);
         std::auto_ptr<DefaultHardwareBufferManager> bufferManager(new DefaultHardwareBufferManager());
