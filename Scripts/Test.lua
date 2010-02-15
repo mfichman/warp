@@ -11,6 +11,9 @@ while (true) do
 print("Waiting")
 wWaitForSpineNode(10)
 print("Awake")
+
+wQueueStartLoop("loop1", "loops/Effected Beat 01.wav")
+
 wWaitForBeat()
 wSetLight("Light", {diffuse={1, 0, 0}})
 print("Waiting")
