@@ -17,10 +17,13 @@ using namespace std;
 struct Ball::Impl : public Game::Listener, public btMotionState {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
-	void init() {
+    Impl(Game* game, const string& name) :
+        game_(game),
+        name_(name) {
+
 		// Set up OGRE scene nodes
-		node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode("Ball");
-		node_->attachObject(game_->getSceneManager()->createEntity("Ball", "Ball.mesh"));
+		node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
+		node_->attachObject(game_->getSceneManager()->createEntity(name_, "Ball.mesh"));
         
         position_.setIdentity();
         
@@ -43,11 +46,15 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
         //game_->getWorld()->setGravity(btVector3(0, -20, 0));
 
         front_ = btVector3(0, 0, 0);
+        game_->addListener(this);
 
 	}
 
     ~Impl() {
+        game_->getSceneManager()->getRootSceneNode()->removeAndDestroyChild(name_);
+        game_->getSceneManager()->destroyEntity(name_);
         game_->getWorld()->removeCollisionObject(body_.get());
+        game_->removeListener(this);
     }
 
     /** Called by bullet to get the transform state */
@@ -113,6 +120,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 	}
 
 	Game* game_;
+    string name_;
     SceneNode* node_;
     btVector3 front_;
     auto_ptr<btCollisionShape> shape_;
@@ -121,10 +129,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 
 };
 
-Ball::Ball(Game* game) : impl_(new Impl()) {
-	impl_->game_ = game;
-	impl_->init();
-	game->addListener(impl_.get());
+Ball::Ball(Game* game, const string& name) : impl_(new Impl(game, name)) {
 }
 
 Ball::~Ball() {

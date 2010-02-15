@@ -21,6 +21,9 @@ public:
     ~StaticTube();
 
 private:
+    StaticTube(const StaticTube&);
+    StaticTube& operator=(const StaticTube&);
+
 	std::auto_ptr<Impl> impl_;
 };
 

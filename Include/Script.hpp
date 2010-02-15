@@ -20,6 +20,9 @@ public:
     ~Script();
 
 private:
+    Script(const Script&);
+    Script& operator=(const Script&);
+
 	std::auto_ptr<Impl> impl_;
 };
 
@@ -37,6 +40,6 @@ lua_State* operator>>(lua_State* env, Ogre::Quaternion& q);
 lua_State* operator>>(lua_State* env, Ogre::SceneNode& n);
 lua_State* operator>>(lua_State* env, Ogre::Light& l);
 lua_State* operator>>(lua_State* env, Ogre::ColourValue& c);
-lua_State* operator>>(lua_State* env, const std::string& s);
+lua_State* operator>>(lua_State* env, std::string& s);
 
 }

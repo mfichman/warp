@@ -10,7 +10,7 @@
 
 namespace Warp {
 
-class DynamicTube  {
+class DynamicTube {
 public:
 	struct Impl;
 
@@ -21,6 +21,9 @@ public:
     ~DynamicTube();
 
 private:
+    DynamicTube(const DynamicTube&);
+    DynamicTube& operator=(const DynamicTube&);
+
 	std::auto_ptr<Impl> impl_;
 };
 

@@ -4,8 +4,9 @@
  ******************************************************************************/
 #pragma once
 
-#include <memory>
+
 #include <Game.hpp>
+#include <memory>
 
 namespace Warp {
 
@@ -14,7 +15,7 @@ public:
 	struct Impl;
 
 	/** Creates a new ball */
-    Ball(Game* game);
+    Ball(Game* game, const std::string& name);
 
     /** Destructor */
     ~Ball();
