@@ -37,5 +37,6 @@ lua_State* operator>>(lua_State* env, Ogre::Quaternion& q);
 lua_State* operator>>(lua_State* env, Ogre::SceneNode& n);
 lua_State* operator>>(lua_State* env, Ogre::Light& l);
 lua_State* operator>>(lua_State* env, Ogre::ColourValue& c);
+lua_State* operator>>(lua_State* env, const std::string& s);
 
 }
