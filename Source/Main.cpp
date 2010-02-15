@@ -1,10 +1,9 @@
 #include <Game.hpp>
 #include <Ball.hpp>
-#include <Tube.hpp>
+#include <StaticTube.hpp>
 #include <FreeCamera.hpp>
 #include <Overlays.hpp>
 #include <Script.hpp>
-#include <PickingRay.hpp>
 #include <sstream>
 
 using namespace Ogre;
@@ -27,10 +26,12 @@ int main(int argc, char** argv) {
 		light->setSpecularColour(ColourValue(2.0, 2.0, 2.0));
 		light->setDirection(Vector3(0, -1, 1)); 
 
+        
+        //Warp::Overlays overlays(game.get());
         Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
         Warp::Ball ball(game.get());
-        Warp::Tube tube(game.get(), "Test");
+        Warp::StaticTube tube(game.get(), "Test");
         Warp::FreeCamera camera(game.get());
 
 		//SceneNode* node = game->getSceneManager()->getRootSceneNode()->createChildSceneNode("Test");

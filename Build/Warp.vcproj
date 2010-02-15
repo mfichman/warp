@@ -73,6 +73,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\DynamicTube.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\FreeCamera.cpp"
 				>
 			</File>
@@ -105,7 +109,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Source\Tube.cpp"
+				RelativePath="..\Source\StaticTube.cpp"
 				>
 			</File>
 		</Filter>
@@ -116,6 +120,10 @@
 			>
 			<File
 				RelativePath="..\Include\Ball.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\DynamicTube.hpp"
 				>
 			</File>
 			<File
@@ -155,7 +163,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Include\Tube.hpp"
+				RelativePath="..\Include\StaticTube.hpp"
 				>
 			</File>
 		</Filter>
