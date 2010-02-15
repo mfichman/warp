@@ -87,7 +87,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         if (solver_) { delete solver_; }
         if (broadphase_) { delete broadphase_; }
         if (dispatcher_) { delete dispatcher_; }
-        if (collisionConfiguration_) { delete collisionConfiguration_; }
+        if (collisionConfiguration_) { delete collisionConfiguration_; }        
 	}
 
 	/** Loads resource configuration files */
@@ -351,15 +351,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     /** Lua callback.  Creates an object */
     static int luaCreateObject(lua_State* env) {
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
-        Objects::Type type = (Objects::Type)lua_tointeger(env, lua_upvalueindex(2));
-        
-        string name = lua_isstring(env, 1) ? lua_tostring(env, 1) : "Object";
-        int reference = lua_ref(env, LUA_REGISTRYINDEX);
 
-        switch (type) {
-            case Objects::TYPE_BALL: impl->objects_->createBall(name, reference); break;
-            case Objects::TYPE_PLANE: impl->objects_->createPlane(name, reference); break;
-        }
 
         return 0;
     }
@@ -413,9 +405,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	OscSender* osc_sender_;
 	OscListener* osc_listener_;
 
-    auto_ptr<Objects> objects_;
-    auto_ptr<Overlays> overlays_;
-
     // Current spine node
     SpineNode spineNode_;
 };
@@ -425,14 +414,6 @@ Game::Game() : impl_(new Impl()) {
 
 Game::~Game() {
 
-}
-
-Objects* Game::getObjects() const {
-    return impl_->objects_.get();
-}
-
-Overlays* Game::getOverlays() const {
-    return impl_->overlays_.get();
 }
 
 OIS::Keyboard* Game::getKeyboard() const { 

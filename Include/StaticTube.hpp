@@ -10,15 +10,15 @@
 
 namespace Warp {
 
-class Tube  {
+class StaticTube  {
 public:
 	struct Impl;
 
-	/** Initializes the Tube */
-	Tube(Game* game, const std::string& name);
+	/** Initializes the StaticTube */
+	StaticTube(Game* game, const std::string& name);
 
     /** Destructor */
-    ~Tube();
+    ~StaticTube();
 
 private:
 	std::auto_ptr<Impl> impl_;

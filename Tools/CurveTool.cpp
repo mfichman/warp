@@ -17,19 +17,19 @@ class CurveTool {
 public:
 
     CurveTool(const std::string input, const std::string output, float step, int divisions, float radius) : 
-        curveStep(step),
-        ringDivisions(divisions),
-        ringRadius(radius),
-        transform(Matrix4::IDENTITY),
+        curveStep_(step),
+        ringDivisions_(divisions),
+        ringRadius_(radius),
+        transform_(Matrix4::IDENTITY),
         manual(output),
-        rings(0),
-        v(0),
+        rings_(0),
+        v_(0),
         input(input), 
         output(output),
         out((output + ".spine").c_str()),
-        vertices(0),
-        triangles(0),
-        indices(0) {
+        vertices_(0),
+        triangles_(0),
+        indices_(0) {
 
 	    manual.begin("BaseWhite", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
 
@@ -43,9 +43,9 @@ public:
 	    Ogre::MeshSerializer serializer;
 	    serializer.exportMesh(mesh.get(), output + ".mesh");
 
-        cout << "Vertices: " << vertices << endl;
-        cout << "Indices: " << indices << endl;
-        cout << "Triangles: " << triangles << endl;
+        cout << "Vertices: " << vertices_ << endl;
+        cout << "Indices: " << indices_ << endl;
+        cout << "Triangles: " << triangles_ << endl;
     }
 
 private:
@@ -76,16 +76,16 @@ private:
         }
     }
 
-    /** Generates one ring around the current spine point using the transform */
+    /** Generates one ring around the current spine point using the transform_ */
     void generateRing() {
-	    Vector3 spinePosition = transform * Vector3::ZERO;
+	    Vector3 spinePosition = transform_ * Vector3::ZERO;
 
         // Use 'normal'-style transformation, discard the w coordinate
-	    Vector4 spineForward = transform * Vector4(0, 0, 1, 0); //Vector3::UNIT_Z;
-	    Vector4 spineUp = transform * Vector4(0, 1, 0, 0); // Vector3::UNIT_Y;
+	    Vector4 spineForward = transform_ * Vector4(0, 0, 1, 0); //Vector3::UNIT_Z;
+	    Vector4 spineUp = transform_ * Vector4(0, 1, 0, 0); // Vector3::UNIT_Y;
 
-        if (rings != 0) {
-            v += lastSpinePosition.distance(spinePosition);
+        if (rings_ != 0) {
+            v_ += lastSpinePosition.distance(spinePosition);
         }
         lastSpinePosition = spinePosition;
 
@@ -94,75 +94,75 @@ private:
         out << "up: " << spineUp.x << " " << spineUp.y << " " << spineUp.z << endl;
 
 	    // Todo: write spine to a file
-	    for (int i = 0; i < ringDivisions; i++) {
-		    float theta = 360.0f/(ringDivisions-1)*i + 45.0f;
-            float u = (float)i/(float)ringDivisions * 2;
-		    Vector3 position(cosf(PI/180.0*theta)*ringRadius, sinf(PI/180.0*theta)*ringRadius, 0.0f);
+	    for (int i = 0; i < ringDivisions_; i++) {
+		    float theta = 360.0f/(ringDivisions_-1)*i + 45.0f;
+            float u = (float)i/(float)ringDivisions_ * 2;
+		    Vector3 position(cosf(PI/180.0*theta)*ringRadius_, sinf(PI/180.0*theta)*ringRadius_, 0.0f);
 		    Vector4 normalh(-position.normalisedCopy());
 		    normalh.w = 0;
 
-		    position = transform * position;
-		    normalh = transform * normalh;
+		    position = transform_ * position;
+		    normalh = transform_ * normalh;
 
 		    Vector3 normal(normalh.x, normalh.y, normalh.z);
     		
 		    manual.position(position);
             manual.normal(normal);
-            manual.textureCoord(u, v / (2 * PI * ringRadius));
-            vertices++;
+            manual.textureCoord(u, v_ / (2 * PI * ringRadius_));
+            vertices_++;
 	    }
-	    rings++;
+	    rings_++;
     }
 
     /** Generates a straight tube segment */
     void generateStraight(float length) {
-	    transform = transform.concatenate(Matrix4::getTrans(0, 0, length));
+	    transform_ = transform_.concatenate(Matrix4::getTrans(0, 0, length));
         generateRing();
     }
 
     /** Generates a curved tube segment */
     void generateCurve(const Vector3& normal, float angle, float radius) {
-	    for (float t = 0; t < angle; t += curveStep) {
+	    for (float t = 0; t < angle; t += curveStep_) {
 		    Vector3 right = normal.crossProduct(Vector3::UNIT_Z);
 		    right.normalise();
 
-		    transform = transform.concatenate(Matrix4::getTrans(radius * right));
-		    transform = transform.concatenate(Matrix4(Quaternion(Degree(curveStep), normal)));
-	        transform = transform.concatenate(Matrix4::getTrans(-radius * right));	
+		    transform_ = transform_.concatenate(Matrix4::getTrans(radius * right));
+		    transform_ = transform_.concatenate(Matrix4(Quaternion(Degree(curveStep_), normal)));
+	        transform_ = transform_.concatenate(Matrix4::getTrans(-radius * right));	
 	        generateRing();
         }
     }
 
-    /** Generates the indices for the mesh */
+    /** Generates the indices_ for the mesh */
     void generateIndices() {
-	    for (int i = 0; i < rings-1; i++) {
-		    for (int j = 0; j <= ringDivisions; j++) {
-			        manual.index(j % ringDivisions + i * ringDivisions);
-			        manual.index(j % ringDivisions + (i+1) * ringDivisions);
-                    indices += 2;
-                    triangles += 2;
+	    for (int i = 0; i < rings_-1; i++) {
+		    for (int j = 0; j <= ringDivisions_; j++) {
+			        manual.index(j % ringDivisions_ + i * ringDivisions_);
+			        manual.index(j % ringDivisions_ + (i+1) * ringDivisions_);
+                    indices_ += 2;
+                    triangles_ += 2;
 		    }
 	    }
 
-        // This accounts for the first two indices, which don't 
-        // create unique triangles
-        triangles -= 2; 
+        // This accounts for the first two indices_, which don't 
+        // create unique triangles_
+        triangles_ -= 2; 
     }
 
-    /** Current transform for the spine */
-    Matrix4 transform;
+    /** Current transform_ for the spine */
+    Matrix4 transform_;
 
     /** OGRE manual object used to build the mesh */
     ManualObject manual;
 
-    /** Total number of rings in the curve */
-    int rings;
+    /** Total number of rings_ in the curve */
+    int rings_;
 
-    /** Last spine location, used for wrapping the v texcoord */
+    /** Last spine location, used for wrapping the v_ texcoord */
     Vector3 lastSpinePosition;
 
     /** V texcoord */
-    int v;
+    int v_;
 
     /** Name of the output file */
     std::string output;
@@ -174,14 +174,14 @@ private:
     std::ofstream out;
             
     /** Mesh generation parameters */
-    const float curveStep;
-    const int ringDivisions;
-    const float ringRadius;
+    const float curveStep_;
+    const int ringDivisions_;
+    const float ringRadius_;
 
     /** Statistics  */
-    int vertices;
-    int triangles;
-    int indices;
+    int vertices_;
+    int triangles_;
+    int indices_;
 };
 
 
@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
     if (argc >=2 && string(argv[1]) == "/?" || string(argv[1]) == "--help" || string(argv[1]) == "-h") { 
         cout << "Usage: " << argv[0] << " <input file> <output file> <options>" << endl;
         cout << "    --curve-step: degrees between each ring on a curve" << endl;
-        cout << "    --ring-divisions: number of vertices per ring" << endl;
+        cout << "    --ring-divisions: number of vertices_ per ring" << endl;
         cout << "    --ring-radius: radius of the ring in meters" << endl;
         return 0;
 	}
@@ -206,24 +206,24 @@ int main(int argc, char** argv) {
         std::auto_ptr<MeshManager> meshManager(new MeshManager());
                
 
-        float curveStep = 5.0f;
-        int ringDivisions = 32;
-        float ringRadius = 10.0f;
+        float curveStep_ = 5.0f;
+        int ringDivisions_ = 32;
+        float ringRadius_ = 10.0f;
 
         for (int i = 4; i < argc; i += 2) {
             if (string(argv[i-1]) == "--curve-step") {
                 stringstream ss(argv[i]);
-                ss >> curveStep;
+                ss >> curveStep_;
             } else if (string(argv[i-1]) == "--ring-divisions") {
                 stringstream ss(argv[i]);
-                ss >> ringDivisions;
+                ss >> ringDivisions_;
             } else if (string(argv[i-1]) == "--ring-radius") {
                 stringstream ss(argv[i]);
-                ss >> ringRadius;
+                ss >> ringRadius_;
             }
         }
 
-        CurveTool tool(argv[1], argv[2], curveStep, ringDivisions+1, ringRadius);
+        CurveTool tool(argv[1], argv[2], curveStep_, ringDivisions_+1, ringRadius_);
     } catch (Exception& ex) {
         cout << "Ogre initialization error: " << ex.getDescription() << endl;
         return -1;

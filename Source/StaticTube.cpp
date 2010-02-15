@@ -3,7 +3,7 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <Tube.hpp>
+#include <StaticTube.hpp>
 #include <Objects.hpp>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
@@ -12,7 +12,7 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-struct Tube::Impl : public Game::Listener {
+struct StaticTube::Impl : public Game::Listener {
 
 	/** Initializes the the tube */
     Impl(Game* game, const std::string& name) :
@@ -20,7 +20,7 @@ struct Tube::Impl : public Game::Listener {
         name_(name),
         lastSpineNodeIndex_(0) {
         
-		SceneNode* node = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode();
+		SceneNode* node = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name);
         Entity* entity = game_->getSceneManager()->createEntity(name, name + ".mesh");
         entity->setCastShadows(false);
         entity->setMaterialName("Road");
@@ -185,7 +185,6 @@ struct Tube::Impl : public Game::Listener {
 
 	Game* game_;
     std::string name_;
-    Entity* entity_;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
     auto_ptr<btTriangleIndexVertexArray> data_;
@@ -197,9 +196,9 @@ struct Tube::Impl : public Game::Listener {
 
 };
 
-Tube::Tube(Game* game, const std::string& name) : impl_(new Impl(game, name)) {
+StaticTube::StaticTube(Game* game, const std::string& name) : impl_(new Impl(game, name)) {
 }
 
-Tube::~Tube() {
+StaticTube::~StaticTube() {
 
 }
