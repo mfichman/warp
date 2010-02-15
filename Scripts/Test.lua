@@ -11,6 +11,7 @@ while (true) do
 print("Waiting")
 wWaitForSpineNode(10)
 print("Awake")
+wWaitForBeat()
 wSetLight("Light", {diffuse={1, 0, 0}})
 print("Waiting")
 wWaitForSpineNodeReverse(10)

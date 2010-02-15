@@ -27,8 +27,9 @@ end
 
 -- Waits for the next beat before returning
 function wWaitForBeat()
-    --local beat = wGetBeat()
-    --coroutine.yield(function()
-    --    return wGetBeat() >= beat
-    --end)
+    local beat = wGetBeat()
+    coroutine.yield(function()
+        print(wGetBeat())
+        return wGetBeat() == 0
+    end)
 end
