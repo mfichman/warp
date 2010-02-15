@@ -1,6 +1,6 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 #pragma once
 
@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-namespace Criterium {
+namespace Warp {
 
 class Game;
 

@@ -17,6 +17,8 @@ include_directories(D:\\OgreSDK\\samples\\include)
 include_directories(C:\\OgreSDK\\samples\\include)
 include_directories(D:\\Include)
 include_directories(C:\\Include)
+include_directories(D:\\Include\\Bullet)
+include_directories(C:\\Include\\Bullet)
 
 link_directories(D:\\Libraries)
 link_directories(C:\\Libraries)

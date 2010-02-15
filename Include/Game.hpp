@@ -1,6 +1,6 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 #pragma once 
 
@@ -8,15 +8,25 @@
 #include <memory>
 #include <Ogre.h>
 #include <OIS/OIS.h>
-#include <ode/ode.h>
+#include <Bullet/btBulletDynamicsCommon.h>
+#include <Bullet/btBulletCollisionCommon.h>
 extern "C" { 
 #include <lua/lua.h> 
 }
 
-namespace Criterium {
+namespace Warp {
 
 class Overlays;
 class Objects;
+
+struct SpineNode {
+    SpineNode() : index(0) {}
+    Ogre::Vector3 position;
+    Ogre::Vector3 forward;
+    Ogre::Vector3 up;
+    int index;
+};
+
 
 class Game {
 public: 
@@ -35,12 +45,6 @@ public:
 
 	/** Returns the mouse state object */
     OIS::Mouse*	getMouse() const;
-
-	/** Returns the ODE physics world */
-    dWorldID getWorld() const;
-
-	/** Returns the ODE collision space */
-    dSpaceID getSpace() const;
 
 	/** Returns the OGRE root renderer object */
     Ogre::Root*	getRoot() const;
@@ -63,8 +67,8 @@ public:
     /** Returns the overlays object */
     Overlays* getOverlays() const;
 
-    /** Returns the gravity constant */
-    float getGravity() const;
+    /** Returns the physics world */
+    btDynamicsWorld* getWorld() const;
 
     /** Returns the normalized mouse position in the range (-1, 1) */
     float getMouseNormalizedX() const;
@@ -77,6 +81,12 @@ public:
 
 	/** Removes an event listener */
 	void removeListener(Listener* listener);
+
+    /** Sets the current spine node */
+    void setSpineNode(const SpineNode& node);
+
+	/** Gets the current spine node */
+	const SpineNode& getSpineNode() const;
     
 private:
 	std::auto_ptr<Impl> impl_;
@@ -93,8 +103,7 @@ class Game::Collidable {
 public:
     
     /** Called when an object collides with another object */
-    virtual void onCollision(dGeomID other, dContactGeom& contact) {}
+    virtual void onCollision() {}
 
 };
-
 }

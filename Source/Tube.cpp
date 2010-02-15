@@ -1,16 +1,18 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
 #include <Tube.hpp>
 #include <Objects.hpp>
 
-using namespace Criterium;
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
+
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-struct Tube::Impl : public Game::Listener {
+struct Tube::Impl : public Game::Listener, public btMotionState {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
 	void init(const std::string& name) {
@@ -22,8 +24,35 @@ struct Tube::Impl : public Game::Listener {
         entity->setMaterialName("Road");
         node->attachObject(entity);
 
+        initPhysics(entity->getMesh());
+        initSpine(name);
+    }
 
-		MeshPtr mesh = entity->getMesh();
+    /** Loads the spines from the spine file */
+    void initSpine(const std::string& name) {
+        std::ifstream in((name + ".spine").c_str());
+
+        cout << name + ".spine" << endl;
+
+        if (!in.is_open()) throw runtime_error("Unable to read file");
+        SpineNode node;
+        node.index = 0;
+        while (!in.eof() && !in.fail()) {
+            std::string tag;
+            in >> tag >> node.position.x >> node.position.y >> node.position.z;
+            in >> tag >> node.forward.x >> node.forward.y >> node.forward.z;
+            in >> tag >> node.up.x >> node.up.y >> node.up.z;
+            
+
+            // Push a copy of the node
+            nodes_.push_back(node);
+            node.index++; 
+        }
+
+    }
+
+    /** Loads the vertices into Bullet's triangle mesh object */
+    void initPhysics(MeshPtr mesh) {
 		SubMesh* submesh = mesh->getSubMesh(0);
 
 		// Prepare to read vertex data from the hardware mesh buffer
@@ -42,69 +71,144 @@ struct Tube::Impl : public Game::Listener {
 		}
 		vbuf->unlock();
 
-		
 		// Read indices into a temporary array...this assumes the vertices are stored
 		// as a triangle strip!
         IndexData* indexData = submesh->indexData;
         HardwareIndexBufferSharedPtr ibuf = indexData->indexBuffer;
         int indexCount = indexData->indexCount;
         int indexSize = ibuf->getIndexSize();
-        assert(indexSize == sizeof(short));
-        short* iptr = ((short*)ibuf->lock(HardwareBuffer::HBL_READ_ONLY)) + indexData->indexStart;
-		for (int i = 2; i < indexCount; i++) {
-            if (i % 2 == 0) {
-                indices_.push_back(iptr[i-2]);
-                indices_.push_back(iptr[i-1]);
-                indices_.push_back(iptr[i]);
-            } else {
-                indices_.push_back(iptr[i]);
-                indices_.push_back(iptr[i-1]);
-                indices_.push_back(iptr[i-2]);
-            }
-            
-		}
+
+        if (indexSize == sizeof(short)) {
+            // Use this branch if indices are 16 bits (small objects)
+            short* iptr = ((short*)ibuf->lock(HardwareBuffer::HBL_READ_ONLY)) + indexData->indexStart;
+		    for (int i = 2; i < indexCount; i++) {
+                if (i % 2 == 0) {
+                    indices_.push_back(iptr[i-2]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i]);
+                } else {
+                    indices_.push_back(iptr[i]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i-2]);
+                }
+		    }
+        } else {
+            // Use this branch if indices are 32 bits (large objects)
+            assert(indexSize == sizeof(int));
+            int* iptr = ((int*)ibuf->lock(HardwareBuffer::HBL_READ_ONLY)) + indexData->indexStart;
+		    for (int i = 2; i < indexCount; i++) {
+                if (i % 2 == 0) {
+                    indices_.push_back(iptr[i-2]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i]);
+                } else {
+                    indices_.push_back(iptr[i]);
+                    indices_.push_back(iptr[i-1]);
+                    indices_.push_back(iptr[i-2]);
+                }
+		    }
+        }
         ibuf->unlock();
-		
-		// Lock buffers, read, and build the index
-		data_ = dGeomTriMeshDataCreate();
-		dGeomTriMeshDataBuildSingle(data_, &vertices_.front(), sizeof(Vector3), vertices_.size(), &indices_.front(), indices_.size(), sizeof(int));		
-		tube_ = dCreateTriMesh(game_->getSpace(), data_, 0, 0, 0);
-        dGeomSetCategoryBits(tube_, Objects::TYPE_TERRAIN);
-		dGeomSetCollideBits(tube_, Objects::TYPE_BALL);
 
-		// Setup the height map
-		/*Ogre::TubeSceneManager* mgr = static_cast<Ogre::TubeSceneManager*>(game_->getSceneManager());
-		heightfield_ = dGeomHeightfieldDataCreate();
+        data_.reset(new btTriangleIndexVertexArray(indices_.size()/3, &indices_.front(), 3*sizeof(int), vertices_.size(), (btScalar*)&vertices_.front(), sizeof(Vector3)));
 
-		dGeomHeightfieldDataBuildCallback (heightfield_, mgr, &Impl::onHeightfieldQuery, 3000.0, 3000.0, 2, 2, 1.0, 0.0, 0, 0);
-		dGeomHeightfieldDataSetBounds(heightfield_, 0.0f,  100.0f);
+        position_.setIdentity();
+       // shape_.reset(new btBvhTriangleMeshShape(data_.get(), true));
+        shape_.reset(new btGImpactMeshShape(data_.get()));
+        shape_->setMargin(0.0f);
+        shape_->updateBound();
+        object_.reset(new btCollisionObject());
+        object_->setCollisionShape(shape_.get());
+		object_->setFriction(0.0f);
+		object_->setRestitution(0.0f);
+        game_->getWorld()->addCollisionObject(object_.get());
+    }
 
-		tube_ = dCreateHeightfield(game_->getSpace(), heightfield_, 0);
-		dGeomSetCategoryBits(road_, TYPEROAD);
-		dGeomSetCollideBits(road_, TYPEBALL | TYPEWHEEL);*/
-	}
+    ~Impl() {
+        game_->getWorld()->removeCollisionObject(object_.get());
+    }
 
+    /** Called by bullet to get the transform state */
+    void getWorldTransform(btTransform& transform) const {
+        transform = position_;
+    }
+
+    /** Called by Bullet to update the scene node */
+    void setWorldTransform(const btTransform& transform) {
+        //const btQuaternion& rotation = transform.getRotation();
+        //node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
+        //const btVector3& position = transform.getOrigin();
+        //node_->setPosition(position.x(), position.y(), position.z());
+    }
+
+	/** Called when a new frame is detected */
 	void onTimeStep() {
-		//dMatrix4 matrix;
-		//memset(matrix, 0, sizeof(matrix));
-		//matrix[0] = 1.0f;
-		//matrix[5] = 1.0f;
-		//matrix[10] = 1.0f;
-		//matrix[15] = 1.0f;
-		//dGeomTriMeshSetLastTransform(geom_, matrix);
-
-		//cout << dGeomTriMeshGetTriangleCount(geom_) << endl;
+        const SpineNode& node = getClosestSpineNode(game_->getCamera()->getPosition(), lastSpineNodeIndex_);
+        lastSpineNodeIndex_ = node.index;
+        game_->setSpineNode(node);
 	}
+
+    /** 
+     * Returns the spine that is closest to the given location.
+     * position: this function will find the closest spine to this position
+     * guess: where the function will start looking for the nearest spine
+     */
+    const SpineNode& getClosestSpineNode(const Vector3& pos, int guess) {
+        int i = guess;
+        assert(i >= 0 && i < (int)nodes_.size());
+
+        // To start, find which direction we should be searching
+        const SpineNode& prev = nodes_[max(0, i-1)];
+        const SpineNode& current = nodes_[max(0, i)];
+        const SpineNode& next = nodes_[min((int)nodes_.size()-1, i+1)];
+
+        float distancePrev = prev.position.distance(pos);
+        float distanceCurrent = current.position.distance(pos);
+        float distanceNext = next.position.distance(pos);
+
+        float best;
+        int direction;
+        if (distancePrev < distanceCurrent) {
+            best = distancePrev;
+            direction = -1;
+        } else if (distanceNext < distanceCurrent) {
+            best = distanceNext;
+            direction = 1;
+        } else {
+            return current;
+        }
+
+        while (true) {
+            if ((i + direction) < 0 || (i + direction) >= (int)nodes_.size()) return nodes_[i];
+
+            float distance = nodes_[i + direction].position.distance(pos);
+            if (distance > best) return nodes_[i];
+
+            best = distance;
+            i += direction;
+        }
+    }
 
 	Game* game_;
-	dTriMeshDataID data_;
-	dGeomID tube_;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
+    auto_ptr<btTriangleIndexVertexArray> data_;
+    auto_ptr<btGImpactMeshShape> shape_;
+    auto_ptr<btCollisionObject> object_;
+    btTransform position_;
+    std::vector<SpineNode> nodes_;
+    int lastSpineNodeIndex_;
+
 };
 
 Tube::Tube(Game* game, const std::string& name) : impl_(new Impl()) {
 	impl_->game_ = game;
 	impl_->init(name);
+    impl_->lastSpineNodeIndex_ = 0;
 	game->addListener(impl_.get());
+
+}
+
+Tube::~Tube() {
+
 }

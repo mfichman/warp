@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Criterium"
-	ProjectGUID="{BA244061-3728-42D5-AF45-2CEDF6B2BE13}"
+	Name="Warp"
+	ProjectGUID="{6A9A390C-57FD-4B70-BE0D-F9BEAC54C897}"
 	Keyword="MakeFileProj"
 	TargetFrameworkVersion="196613"
 	>
@@ -24,9 +24,9 @@
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="nmake"
-				ReBuildCommandLine="nmake clean &amp;&amp; nmake"
-				CleanCommandLine="nmake clean"
-				Output="..\Criterium.exe"
+				ReBuildCommandLine=""
+				CleanCommandLine=""
+				Output="Warp.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -43,10 +43,10 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="nmake"
-				ReBuildCommandLine="nmake clean &amp;&amp; nmake"
-				CleanCommandLine="nmake clean"
-				Output="Criterium.exe"
+				BuildCommandLine=""
+				ReBuildCommandLine=""
+				CleanCommandLine=""
+				Output="Warp.exe"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -73,7 +73,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\FreeCamera.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\Game.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Source\Level.cpp"
 				>
 			</File>
 			<File
@@ -119,11 +127,31 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Include\FreeCamera.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\Game.hpp"
 				>
 			</File>
 			<File
+				RelativePath="..\Include\Level.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Object.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\Objects.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\OscListener.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\OscSender.hpp"
 				>
 			</File>
 			<File

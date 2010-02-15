@@ -1,149 +1,124 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
 #include <Ball.hpp>
 #include <Objects.hpp>
 
-using namespace Criterium;
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
 #define BALLRADIUS 0.5f // meters
-#define BALLMASS 1.0f // kilograms
+#define BALLMASS 1000.0f // kilograms
 
-struct Ball::Impl : public Game::Listener {
+
+struct Ball::Impl : public Game::Listener, public btMotionState {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
 	void init() {
-
-		dMass mass;
-		dMassSetSphereTotal(&mass, BALLMASS, BALLRADIUS);
-
 		// Set up OGRE scene nodes
-		SceneNode* root = game_->getSceneManager()->getRootSceneNode();
-		SceneNode* node = root->createChildSceneNode("Ball");
-		node->attachObject(game_->getSceneManager()->createEntity("Ball", "Ball.mesh"));
+		node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode("Ball");
+		node_->attachObject(game_->getSceneManager()->createEntity("Ball", "Ball.mesh"));
+        
+        position_.setIdentity();
+        
+        position_.setOrigin(btVector3(0, -5, 40));
+        shape_.reset(new btSphereShape(BALLRADIUS));
 
-		// Set up ODE bodies
-		body_ = dBodyCreate(game_->getWorld());		
-		dBodySetMass(body_, &mass);
-		dBodySetData(body_, node);
-		dBodySetMaxAngularSpeed(body_, 0);
-		dBodySetMovedCallback(body_, &Impl::onBodyMoved);
-        dBodySetPosition(body_, 0, 0, 20);
+        btScalar mass(BALLMASS);
+        btVector3 inertia(0.0f, 0.0f, 0.0f);
+        shape_->calculateLocalInertia(mass, inertia);
 
-		// Set up ODE geom
-		geom_ = dCreateSphere(game_->getSpace(), BALLRADIUS);
-		dGeomSetBody(geom_, body_);
-        dGeomSetCategoryBits(geom_, Objects::TYPE_BALL);
-		dGeomSetCollideBits(geom_, Objects::TYPE_TERRAIN);	
+        btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
+        body_.reset(new btRigidBody(rbinfo));
+		body_->setFriction(0.0f);
+		body_->setRestitution(0.0f);
+		//body_->setPosition(btVector(0, 5, 0));
+		//body_->setGravity(btVector3(0.0f, -30.0f, 0.0f));
+       // body_->setCollisionFlags(body_->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+
+        game_->getWorld()->addRigidBody(body_.get());
+        //game_->getWorld()->setGravity(btVector3(0, -20, 0));
+
+        front_ = btVector3(0, 0, 0);
+
 	}
 
-	Ogre::Vector3 last;
+    ~Impl() {
+        game_->getWorld()->removeCollisionObject(body_.get());
+    }
+
+    /** Called by bullet to get the transform state */
+    void getWorldTransform(btTransform& transform) const {
+        transform = position_;
+    }
+
+    /** Called by Bullet to update the scene node */
+    void setWorldTransform(const btTransform& transform) {
+        const btQuaternion& rotation = transform.getRotation();
+        node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
+        const btVector3& position = transform.getOrigin();
+        node_->setPosition(position.x(), position.y(), position.z());
+        position_ = transform;
+    }
 
 	/** Called when a new frame is detected */
 	void onTimeStep() {
 
-		const dReal* vel = dBodyGetLinearVel(body_);
-		Ogre::Vector3 front(vel[0], vel[1], vel[2]);
+		btVector3 btforward = body_->getLinearVelocity().normalized();
+		btVector3 btposition = body_->getCenterOfMassPosition();
+		float speed = body_->getLinearVelocity().length();
+		Vector3 position(btposition.x(), btposition.y(), btposition.z());
+
+		const SpineNode& node = game_->getSpineNode();
+
+        Vector3 forward = node.forward.normalisedCopy();
+		//Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;
+
+        // up points toward spine
+		Vector3 up = (node.position - position).normalisedCopy(); //Vector3::UNIT_Y;
+		Vector3 right = up.crossProduct(forward).normalisedCopy();
+
+		Vector3 gravity = -20 * up;
+		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
+
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
+			body_->applyCentralForce(-20000*btVector3(right.x, right.y, right.z));
+        }                               
 		
-
-		float alpha = 0.1f;
-		float alphay = 0.02f;
-		Vector3 front2;
-		front2.x = alpha*front.x + (1-alpha)*last.x;
-		front2.y = alphay*front.y + (1-alphay)*last.y;
-		front2.z = alpha*front.z + (1-alpha)*last.z;
-		last = front2;
-
-		front.normalise();
-		front2.normalise();
-
-		const dReal* pos = dBodyGetPosition(body_);
-		Ogre::Vector3 p(pos[0], pos[1], pos[2]);
-
-
-
-		Ogre::Vector3 newpos = -6*front2 + p + Ogre::Vector3(0, 2, 0);
-		Ogre::Vector3 newlook = 6*front2 + p;
-
-		float alpha2 = 0.5;
-		newpos = (alpha2)*newpos + (1-alpha2)*game_->getCamera()->getPosition();
-
-
-		game_->getCamera()->lookAt(newlook);
-		game_->getCamera()->setPosition(newpos);
-
-		Ogre::Vector3 right = front.crossProduct(Ogre::Vector3(0, 1, 0));
-		Ogre::Vector3 left = front.crossProduct(Ogre::Vector3(0, -1, 0));
-
-		right.normalise();
-		left.normalise();
-
-		right *= 20;
-		left *= 20;
-		front *= 20;
-
-
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_RETURN)) {
-			//dBodySetPosition(body_, game_->getCamera()->getPosition().x, game_->getCamera()->getPosition().y,  game_->getCamera()->getPosition().z);
-			//dBodySetPosition(body_, 629, 75, 546); 
-            dBodySetPosition(body_, 0, 0, 20);
-
-
-			//dBodySetPosition(body_, 89.635, 51, 178.7);
-
-			dBodySetLinearVel(body_, 0.0f, 0.0f, 0.0f);
-			dBodySetAngularVel(body_, 0.0f, 0.0f, 0.0f);
-
-			/*
-			const Ogre::Vector3& p = game_->getCamera()->getPosition();
-			dBodySetPosition(body_, p.x, p.y, p.z);
-			dBodySetLinearVel(body_, 0.0f, 0.0f, 0.0f);
-			dBodySetAngularVel(body_, 0.0f, 0.0f, 0.0f);*/
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
+			body_->applyCentralForce(20000*btVector3(right.x, right.y, right.z));
 		}
-
-		float speed2 = vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2];
-
-
-		dBodyAddForce(body_, -front.x*speed2*0.0005, -front.y*speed2*0.0005, -front.z*speed2*0.0005);
-
-
+        
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
-			dBodyAddForce(body_, front.x, front.y, front.z);
+			body_->applyCentralForce(20000*btVector3(forward.x, forward.y, forward.z));
 		}
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
-			dBodyAddForce(body_, -front.x, -front.y, -front.z);
+			body_->applyCentralForce(-20000*btVector3(forward.x, forward.y, forward.z));
 		}
 
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
-			dBodyAddForce(body_, left.x, left.y, left.z);
-		}
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
-			dBodyAddForce(body_, right.x, right.y, right.z);
-		}
-	}
+		//position -= forward*3.0f;
+        //position += up;
 
-	
-	/** Called when the body is moved to move the corresponding scene node */
-	static void onBodyMoved(dBodyID body) {
+        // set the camera
+#define ALPHA 0.95f
+		forward = ALPHA * game_->getCamera()->getDirection() + (1-ALPHA) * forward;
+		position = ALPHA * game_->getCamera()->getPosition() + (1-ALPHA) * position;
 
-		// Update the position of the scene node attached to this body.
-		// Position is in global coordinates.
-		SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
-		const dReal* pos = dBodyGetPosition(body);
-		const dReal* quat = dBodyGetQuaternion(body);
-	    
-		// N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
-		node->setPosition(pos[0], pos[1], pos[2]);
-		node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
+        game_->getCamera()->setDirection(forward);
+		game_->getCamera()->setPosition(position);
+
 	}
 
 	Game* game_;
-    dBodyID body_;
-    dGeomID geom_;
+    SceneNode* node_;
+    btVector3 front_;
+    auto_ptr<btCollisionShape> shape_;
+    auto_ptr<btRigidBody> body_;
+    btTransform position_;
+
 };
 
 Ball::Ball(Game* game) : impl_(new Impl()) {

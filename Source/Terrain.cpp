@@ -1,13 +1,13 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
 #include <Terrain.hpp>
 #include <fstream>
 #include <OgreTerrainSceneManager.h>
 
-using namespace Criterium;
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
@@ -31,7 +31,6 @@ struct Terrain::Impl : public Game::Listener {
 		entity = game_->getSceneManager()->createEntity(name + "Top", name + "Top.mesh");
 		entity->setCastShadows(false);
         node->attachObject(entity);
-
 
 		MeshPtr mesh = entity->getMesh();
 		SubMesh* submesh = mesh->getSubMesh(0);
@@ -67,49 +66,12 @@ struct Terrain::Impl : public Game::Listener {
 				indices_.push_back(i);
 			}
 		}
-		
-		// Lock buffers, read, and build the index
-		data_ = dGeomTriMeshDataCreate();
-		dGeomTriMeshDataBuildSingle(data_, &vertices_.front(), sizeof(Vector3), vertices_.size(), &indices_.front(), indices_.size(), sizeof(int));		
-		road_ = dCreateTriMesh(game_->getSpace(), data_, 0, 0, 0);
-		dGeomSetCategoryBits(road_, 0);
-		dGeomSetCollideBits(road_, 0);
-
-		// Setup the height map
-		/*Ogre::TerrainSceneManager* mgr = static_cast<Ogre::TerrainSceneManager*>(game_->getSceneManager());
-		heightfield_ = dGeomHeightfieldDataCreate();
-
-		dGeomHeightfieldDataBuildCallback (heightfield_, mgr, &Impl::onHeightfieldQuery, 3000.0, 3000.0, 2, 2, 1.0, 0.0, 0, 0);
-		dGeomHeightfieldDataSetBounds(heightfield_, 0.0f,  100.0f);
-
-		terrain_ = dCreateHeightfield(game_->getSpace(), heightfield_, 0);
-		dGeomSetCategoryBits(road_, TYPEROAD);
-		dGeomSetCollideBits(road_, TYPEBALL | TYPEWHEEL);*/
 	}
 
 	void onTimeStep() {
-		//dMatrix4 matrix;
-		//memset(matrix, 0, sizeof(matrix));
-		//matrix[0] = 1.0f;
-		//matrix[5] = 1.0f;
-		//matrix[10] = 1.0f;
-		//matrix[15] = 1.0f;
-		//dGeomTriMeshSetLastTransform(geom_, matrix);
-
-		//cout << dGeomTriMeshGetTriangleCount(geom_) << endl;
-	}
-
-	static float onHeightfieldQuery(void* data, int x, int z) {
-		cout << x << ", " << z << endl;
-		Ogre::TerrainSceneManager* mgr = static_cast<Ogre::TerrainSceneManager*>(data);
-		return mgr->getHeightAt(x * 3000/1024, z * 3000/1024);
 	}
 
 	Game* game_;
-	dTriMeshDataID data_;
-	dHeightfieldDataID heightfield_;
-	dGeomID road_;
-	dGeomID terrain_;
 	std::vector<Ogre::Vector3> vertices_;
 	std::vector<int> indices_;
 };

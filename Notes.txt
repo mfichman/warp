@@ -1,0 +1,12 @@
+* Enemies with multiple parts
+* Level loader
+* Move curve tool into level loader
+* Sandbox mode?
+* Reload files w/o restarting game (level loader)
+* OSC events
+* User interface
+* Reintegrate terrain
+* Enemy loader (Lua)
+
+* Reverse
+* Slow-motion

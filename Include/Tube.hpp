@@ -1,13 +1,14 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 #pragma once
 
 #include <Game.hpp>
 #include <memory>
+#include <string>
 
-namespace Criterium {
+namespace Warp {
 
 class Tube  {
 public:
@@ -15,6 +16,9 @@ public:
 
 	/** Initializes the Tube */
 	Tube(Game* game, const std::string& name);
+
+    /** Destructor */
+    ~Tube();
 
 private:
 	std::auto_ptr<Impl> impl_;

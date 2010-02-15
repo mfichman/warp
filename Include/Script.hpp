@@ -1,13 +1,13 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 #pragma once
 
 #include <Game.hpp>
 #include <memory>
 
-namespace Criterium {
+namespace Warp {
 
 class Script {
 public:

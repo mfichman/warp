@@ -1,14 +1,20 @@
 /******************************************************************************
- * Criterium: CS248 Final Project                                             *
- * Copyright (c) 2010 Matt Fichman                                            *
+ * Warp: CS248 Final Project                                                  *
+ * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
 #include <Game.hpp>
 #include <Objects.hpp>
 #include <Script.hpp>
 
+#define DEBUG
+#define DEBUG_
+
 #include <OgreCEGUIRenderer.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <CEGUI/CEGUI.h>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
 extern "C" {
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
@@ -19,12 +25,25 @@ extern "C" {
 #include <algorithm>
 #include <utility>
 
-using namespace Criterium;
+#include "OscListener.hpp"
+#include "OscSender.hpp"
+
+using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
 #define PHYSICSUPDATEINTERVAL	0.01f // seconds
 #define PHYSICSMAXINTERVAL		0.25f // seconds
+
+#define SEND_PORT 6449
+#define LISTEN_PORT 7000
+
+// Not sure where to put this. make it global for now.
+int cur_beat_;
+void beatCallback(int beat) {
+	std::cout << "BEAT:" << beat << endl;
+    cur_beat_ = beat;
+}
 
 
 struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
@@ -33,12 +52,16 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		guiRenderer_(0), 
 		guiSystem_(0), 
 		root_(0), 
-		world_(0), 
-		space_(0), 
 		inputManager_(0),
 		keyboard_(0),
 		mouse_(0),
-        scriptState_(0) {
+        scriptState_(0),
+        collisionConfiguration_(0),
+        dispatcher_(0),
+        broadphase_(0),
+        solver_(0),
+        world_(0),
+        physicsAccumulator_(0.0f) {
 	}
 
 	/** Destroys subsystems */
@@ -46,14 +69,18 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 		if (guiRenderer_) { delete guiRenderer_;	}
 		if (guiSystem_) { delete guiSystem_; }
 		if (root_) { delete root_; }
-		if (world_) { dWorldDestroy(world_); }
-		if (space_) { dSpaceDestroy(space_); }
 		if (inputManager_) { 
 			if (keyboard_) inputManager_->destroyInputObject(keyboard_);
 			if (mouse_) inputManager_->destroyInputObject(mouse_);
 			OIS::InputManager::destroyInputSystem(inputManager_);
 		}
         if (scriptState_) { lua_close(scriptState_); }
+        
+        if (world_) { delete world_; }
+        if (solver_) { delete solver_; }
+        if (broadphase_) { delete broadphase_; }
+        if (dispatcher_) { delete dispatcher_; }
+        if (collisionConfiguration_) { delete collisionConfiguration_; }
 	}
 
 	/** Loads resource configuration files */
@@ -141,14 +168,21 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 	/** Loads the physics world and collision space */
 	void loadPhysics() {
-		world_ = dWorldCreate();
-		space_ = dSimpleSpaceCreate(0);
-		contactJointGroup_ = dJointGroupCreate(32);
-
-		//dGeomID plane = dCreatePlane(space_, 0.0, 1.0, 0.0, -0.742);
-		//dGeomSetCategoryBits(plane, TYPETERRAIN);
-		//dGeomSetCollideBits(plane, TYPEWHEEL | TYPEBALL);
-		dWorldSetGravity(world_, 0.0, -20, 0.0);   
+        collisionConfiguration_ = new btDefaultCollisionConfiguration();
+        dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
+        broadphase_ = new btDbvtBroadphase();
+        solver_ = new btSequentialImpulseConstraintSolver();
+        world_ = new btDiscreteDynamicsWorld(dispatcher_, broadphase_, solver_, collisionConfiguration_);
+        world_->getSolverInfo().m_splitImpulse = true;
+        world_->getSolverInfo().m_splitImpulsePenetrationThreshold = 0.8f;
+        //world_->getSolverInfo().m_maxErrorReduction = 0.0f;
+        //world_->getSolverInfo().m_numIterations = 20;
+        world_->getSolverInfo().m_restitution = 0.0f;
+        world_->getSolverInfo().m_globalCfm = 1000.0f;
+        world_->getSolverInfo().m_erp = 1.00f;
+        world_->getSolverInfo().m_erp2 = 1.00f;
+        world_->setGravity(btVector3(0, 0, 0));
+        btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 	}
 
     /** Loads the scripting engine */
@@ -158,30 +192,43 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
         lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
         lua_pushcclosure(scriptState_, &Impl::luaGetNode, 1);
-        lua_setglobal(scriptState_, "crGetNode");
+        lua_setglobal(scriptState_, "wGetNode");
 
         lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
         lua_pushcclosure(scriptState_, &Impl::luaSetNode, 1);
-        lua_setglobal(scriptState_, "crSetNode");
+        lua_setglobal(scriptState_, "wSetNode");
 
         lua_pushlightuserdata(scriptState_, this); // Modifies a light
         lua_pushcclosure(scriptState_, &Impl::luaGetLight, 1);
-        lua_setglobal(scriptState_, "crGetLight");
+        lua_setglobal(scriptState_, "wGetLight");
 
         lua_pushlightuserdata(scriptState_, this); // Modifies a light
         lua_pushcclosure(scriptState_, &Impl::luaSetLight, 1);
-        lua_setglobal(scriptState_, "crSetLight");
+        lua_setglobal(scriptState_, "wSetLight");
 
-        lua_pushlightuserdata(scriptState_, this); 
-        lua_pushinteger(scriptState_, Objects::TYPE_BALL);
-        lua_pushcclosure(scriptState_, &Impl::luaCreateObject, 2);
-        lua_setglobal(scriptState_, "crCreateBall");
+        lua_pushlightuserdata(scriptState_, this); // Gets the spine node
+        lua_pushcclosure(scriptState_, &Impl::luaGetSpineNodeId, 1);
+        lua_setglobal(scriptState_, "wGetSpineNodeId");
 
-        lua_pushlightuserdata(scriptState_, this); 
-        lua_pushinteger(scriptState_, Objects::TYPE_PLANE);
-        lua_pushcclosure(scriptState_, &Impl::luaCreateObject, 2);
-        lua_setglobal(scriptState_, "crCreatePlane");
+        lua_pushlightuserdata(scriptState_, this); // Gets the spine node
+        lua_pushcclosure(scriptState_, &Impl::luaGetBeat, 1);
+        lua_setglobal(scriptState_, "wGetBeat");
+
+        if (luaL_dofile(scriptState_, "Scripts/Warp.lua")) {
+            string message(lua_tostring(scriptState_, -1));
+            lua_pop(scriptState_, 2);
+            throw runtime_error("Script error: " + message);
+        }
     }
+
+	/** load up osc interaction */
+	void loadOsc() {
+		// initialize sender
+		osc_sender_ = new OscSender(SEND_PORT);
+		osc_listener_ = new OscListener(LISTEN_PORT);
+
+		boost::thread oscThread(boost::bind(boost::mem_fn(&OscListener::StartBeatLoop), osc_listener_, &beatCallback));
+	}
 
 	/** Called when the main window is closed */
 	void windowClosed(Ogre::RenderWindow* rw) { 
@@ -192,38 +239,16 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	bool frameRenderingQueued(const Ogre::FrameEvent& evt) { 
 		keyboard_->capture();
 		mouse_->capture();
-		
-
+	
 		if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 			root_->queueEndRendering();
 		}
-	    
+
 		// Prevent physics from running while game doesn't have focus
 		physicsAccumulator_ += evt.timeSinceLastFrame;
 		physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
 
-			// hack hack hack
-			/*const OIS::MouseState& state = mouse_->getMouseState();
-			camera_->pitch(Radian(-state.Y.rel/100.0));
-			camera_->yaw(Radian(-state.X.rel/100.0));
-
-            if (keyboard_->isKeyDown(OIS::KC_RSHIFT)) {
-				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, -500 * PHYSICSUPDATEINTERVAL));
-				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, 500 * PHYSICSUPDATEINTERVAL));
-				}
-			} else {
-				if (keyboard_->isKeyDown(OIS::KC_PGUP)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, -22.18 * PHYSICSUPDATEINTERVAL));
-				} else if (keyboard_->isKeyDown(OIS::KC_PGDOWN)) {
-					camera_->moveRelative(Vector3(0.0, 0.0, 22.18 * PHYSICSUPDATEINTERVAL));
-				}
-			}*/
-
-		// Run fixed time steps using time in accumulator
-		while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
-        
+        while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
             list<Listener*>::iterator i = listeners_.begin();
             while (i != listeners_.end()) {
                 Listener* listener = *i;
@@ -231,74 +256,16 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
                 listener->onTimeStep();
             }
 
-	        
-			// Run collision detection 
-			dSpaceCollide(space_, this, &Impl::onGeomCollision);
-	        
-			// Step world
-			dWorldStep(world_, PHYSICSUPDATEINTERVAL);
-	        
-			// Clean up
-			dJointGroupEmpty(contactJointGroup_);
-			physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
-		}
+            // Step the world using the fixed timestep
+            world_->stepSimulation(PHYSICSUPDATEINTERVAL, 0);
+
+            physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
+        }
+
 		return true;
 	}
 
-	/** Called when to geometric objects collide */
-	static void onGeomCollision(void* data, dGeomID o1, dGeomID o2) {
-		Impl* impl = static_cast<Impl*>(data);
 
-		dContactGeom geom[10];
-		int num = dCollide(o1, o2, 10, geom, sizeof(dContactGeom));
-		if (num <= 0) return;
-	    
-		// Look up the surface params for these object types
-		int t1 = dGeomGetCategoryBits(o1);
-		int t2 = dGeomGetCategoryBits(o2);
-
-        Collidable* c1 = static_cast<Collidable*>(dGeomGetData(o1));
-        Collidable* c2 = static_cast<Collidable*>(dGeomGetData(o2));
-
-        if (c1) {
-            c1->onCollision(o2, geom[0]);
-        }
-        if (c2) {
-            c2->onCollision(o1, geom[0]);
-        }
-
-        if (t1 == Objects::TYPE_RAY || t2 == Objects::TYPE_RAY) {
-            return;
-        }
-
-	    
-		for (int i = 0; i < num; i++) {
-			dContact contact;
-			memset(&contact, 0, sizeof(dContact));
-			contact.geom = geom[i];
-	        
-			contact.surface.mode = dContactApprox1;// | dContactBounce;
-			contact.surface.mu = 0.0f;
-            //contact.surface.bounce = 1.0f;
-	        
-			// Add a contact joint
-			dJointID joint = dJointCreateContact(impl->world_, impl->contactJointGroup_, &contact);
-			dJointAttach(joint, dGeomGetBody(o1), dGeomGetBody(o2));
-		}
-	}
-
-    /** Geom moved callback.  Called to copy position from ODE to Ogre  */
-    static void onBodyMoved(dBodyID body) {
-		// Update the position of the scene node attached to this body.
-		// Position is in global coordinates.
-		SceneNode* node = static_cast<SceneNode*>(dBodyGetData(body));
-		const dReal* pos = dBodyGetPosition(body);
-		const dReal* quat = dBodyGetQuaternion(body);
-	    
-		// N.B.: ODE orders the quat as (w, x, y, z) (so quat[0] = w)
-		node->setPosition(pos[0], pos[1], pos[2]);
-		node->setOrientation(quat[0], quat[1], quat[2], quat[3]);
-    }
 
     /** Lua callback.  Gets the given values for the node */
     static int luaGetNode(lua_State* env) {
@@ -390,6 +357,21 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         return 0;
     }
 
+	/** Lua callback.  Get the light state */
+    static int luaGetSpineNodeId(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        lua_pushinteger(env, impl->spineNode_.index);
+        return 1;
+	}
+    
+    /** Lua callback.  Gets the current beat as set by chuck */
+    static int luaGetBeat(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        lua_pushinteger(env, cur_beat_);
+        return 1;
+    }
+
+
 	// Graphics objects
     Ogre::Root* root_;
     Ogre::Camera* camera_;
@@ -407,10 +389,12 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     OIS::Mouse*	mouse_;
     
 	// Physics objects
-	float physicsAccumulator_;
-    dWorldID world_;
-    dSpaceID space_;
-    dJointGroupID contactJointGroup_;
+    btBroadphaseInterface* broadphase_;
+    btCollisionDispatcher* dispatcher_;
+    btConstraintSolver* solver_;
+    btDefaultCollisionConfiguration* collisionConfiguration_;
+    btDiscreteDynamicsWorld* world_;
+    float physicsAccumulator_;
     
 	// Game objects
 	list<Listener*> listeners_;
@@ -418,18 +402,25 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     // Scripting objects
     lua_State* scriptState_;
 
+	// Osc object
+	OscSender* osc_sender_;
+	OscListener* osc_listener_;
+
     auto_ptr<Objects> objects_;
     auto_ptr<Overlays> overlays_;
+
+    // Current spine node
+    SpineNode spineNode_;
 };
 
 Game::Game() : impl_(new Impl()) {
 	impl_->root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
-	impl_->physicsAccumulator_ = 0;
+    impl_->loadScripting();
 	impl_->loadResources();
 	impl_->loadGraphics();
 	impl_->loadInput();
 	impl_->loadPhysics();
-    impl_->loadScripting();
+	impl_->loadOsc();
     impl_->objects_.reset(new Objects(this));
     impl_->overlays_.reset(new Overlays(this));
 }
@@ -454,14 +445,6 @@ OIS::Mouse*	Game::getMouse() const {
 	return impl_->mouse_; 
 }
 
-dWorldID Game::getWorld() const { 
-	return impl_->world_; 
-}
-
-dSpaceID Game::getSpace() const { 
-	return impl_->space_; 
-}
-
 Ogre::Root* Game::getRoot() const { 
 	return impl_->root_; 
 }
@@ -482,10 +465,8 @@ lua_State* Game::getScriptState() const {
     return impl_->scriptState_;
 }
 
-float Game::getGravity() const {
-    dReal gravityVector[3];
-    dWorldGetGravity(impl_->world_, gravityVector);
-    return dLENGTH(gravityVector);
+btDynamicsWorld* Game::getWorld() const {
+    return impl_->world_;
 }
 
 float Game::getMouseNormalizedX() const {
@@ -515,4 +496,16 @@ void Game::removeListener(Listener* listener) {
 	if (i != impl_->listeners_.end()) {
 		impl_->listeners_.erase(i);
 	}
+}
+
+void Game::setSpineNode(const SpineNode& node) {
+    if (node.index != impl_->spineNode_.index) {
+        cout << "Current spine node: " << node.index << endl;
+    }
+    impl_->spineNode_ = node;
+
+}
+
+const SpineNode& Game::getSpineNode() const {
+	return impl_->spineNode_;
 }
