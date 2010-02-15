@@ -73,17 +73,36 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 		Vector3 position(btposition.x(), btposition.y(), btposition.z());
 
 		const SpineNode& node = game_->getSpineNode();
-		Vector3 gravity = 20*(position - node.position).normalisedCopy();
+
+        Vector3 forward = node.forward.normalisedCopy();
+		//Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;
+
+        // up points toward spine
+		Vector3 up = (node.position - position).normalisedCopy(); //Vector3::UNIT_Y;
+		Vector3 right = up.crossProduct(forward).normalisedCopy();
+
+		Vector3 gravity = -20 * up;
 		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
 
-
-		Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;
-		Vector3 up = (node.position - position).normalisedCopy();//Vector3::UNIT_Y;
-		Vector3 right = up.crossProduct(forward);
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
+			body_->applyCentralForce(-20000*btVector3(right.x, right.y, right.z));
+        }                               
 		
-		position -= forward*3.0f;
-        position += Vector3(0, 2, 0);
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
+			body_->applyCentralForce(20000*btVector3(right.x, right.y, right.z));
+		}
+        
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
+			body_->applyCentralForce(20000*btVector3(forward.x, forward.y, forward.z));
+		}
+		if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
+			body_->applyCentralForce(-20000*btVector3(forward.x, forward.y, forward.z));
+		}
 
+		//position -= forward*3.0f;
+        //position += up;
+
+        // set the camera
 #define ALPHA 0.95f
 		forward = ALPHA * game_->getCamera()->getDirection() + (1-ALPHA) * forward;
 		position = ALPHA * game_->getCamera()->getPosition() + (1-ALPHA) * position;
@@ -91,22 +110,6 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
         game_->getCamera()->setDirection(forward);
 		game_->getCamera()->setPosition(position);
 
-
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
-			body_->applyCentralForce(-20000*btVector3(right.x, right.y, right.z));
-        }
-		
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
-			body_->applyCentralForce(20000*btVector3(right.x, right.y, right.z));
-		}
-        
-
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
-			body_->applyCentralForce(20000*btforward);
-		}
-		if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
-			body_->applyCentralForce(-20000*btforward);
-		}
 	}
 
 	Game* game_;
