@@ -23,7 +23,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine=""
+				BuildCommandLine="nmake"
 				ReBuildCommandLine=""
 				CleanCommandLine=""
 				Output="Warp.exe"

@@ -24,7 +24,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
         
         position_.setIdentity();
         
-        position_.setOrigin(btVector3(0, 0, 40));
+        position_.setOrigin(btVector3(0, -5, 40));
         shape_.reset(new btSphereShape(BALLRADIUS));
 
         btScalar mass(BALLMASS);
@@ -35,11 +35,12 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
         body_.reset(new btRigidBody(rbinfo));
 		body_->setFriction(0.0f);
 		body_->setRestitution(0.0f);
+		//body_->setPosition(btVector(0, 5, 0));
 		//body_->setGravity(btVector3(0.0f, -30.0f, 0.0f));
        // body_->setCollisionFlags(body_->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
         game_->getWorld()->addRigidBody(body_.get());
-        game_->getWorld()->setGravity(btVector3(0, -20, 0));
+        //game_->getWorld()->setGravity(btVector3(0, -20, 0));
 
         front_ = btVector3(0, 0, 0);
 
@@ -69,11 +70,17 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 		btVector3 btforward = body_->getLinearVelocity().normalized();
 		btVector3 btposition = body_->getCenterOfMassPosition();
 		float speed = body_->getLinearVelocity().length();
+		Vector3 position(btposition.x(), btposition.y(), btposition.z());
+
+		const SpineNode& node = game_->getSpineNode();
+		Vector3 gravity = 20*(position - node.position).normalisedCopy();
+		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
+
 
 		Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;
-		Vector3 up = Vector3::UNIT_Y;
+		Vector3 up = (node.position - position).normalisedCopy();//Vector3::UNIT_Y;
 		Vector3 right = up.crossProduct(forward);
-		Vector3 position(btposition.x(), btposition.y(), btposition.z());
+		
 		position -= forward*3.0f;
         position += Vector3(0, 2, 0);
 

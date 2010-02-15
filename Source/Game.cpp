@@ -181,7 +181,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         world_->getSolverInfo().m_globalCfm = 1000.0f;
         world_->getSolverInfo().m_erp = 1.00f;
         world_->getSolverInfo().m_erp2 = 1.00f;
-        world_->setGravity(btVector3(0, -20, 0));
+        world_->setGravity(btVector3(0, 0, 0));
         btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 	}
 
@@ -504,4 +504,8 @@ void Game::setSpineNode(const SpineNode& node) {
     }
     impl_->spineNode_ = node;
 
+}
+
+const SpineNode& Game::getSpineNode() const {
+	return impl_->spineNode_;
 }
