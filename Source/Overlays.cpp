@@ -20,7 +20,7 @@ static String batches = "Batch Count: ";
 struct Overlays::Impl : public Game::Listener {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
-	Impl(Game* game) {
+    Impl(Game* game) : game_(game) {
         // The overlays are created via script, we just reference it here
 		debug_ = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 		debug_->show();

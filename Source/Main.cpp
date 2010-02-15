@@ -28,41 +28,15 @@ int main(int argc, char** argv) {
 		light->setDirection(Vector3(0, -1, 1)); 
 
         
-        //Warp::Overlays overlays(game.get());
+        
         Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
         Warp::Ball ball(game.get());
         Warp::StaticTube tube(game.get(), "Test");
         //Warp::DynamicTube tube(game.get(), "Tube2");
         Warp::FreeCamera camera(game.get());
+        Warp::Overlays overlays(game.get());
 
-		//SceneNode* node = game->getSceneManager()->getRootSceneNode()->createChildSceneNode("Test");
-		//Entity* entity = game->getSceneManager()->createEntity("Test", "Test.mesh");
-		//entity->setMaterialName("Test");
-		//node->attachObject(entity);
-
-       /* Ogre::CompositorManager::ResourceMapIterator resourceIterator = Ogre::CompositorManager::getSingleton().getResourceIterator();
-
-        // add all compositor resources to the view container
-        while (resourceIterator.hasMoreElements())
-        {
-            Ogre::ResourcePtr resource = resourceIterator.getNext();
-            const Ogre::String& compositorName = resource->getName();
-            // Don't add base Ogre/Scene compositor to view
-            if (compositorName == "Ogre/Scene")
-                continue;
-
-            cout << "@@@@@ " << compositorName << endl;
-			int addPosition = -1;
-			if (compositorName == "HDR")
-			{
-				// HDR must be first in the chain
-				addPosition = 0;
-			}
-            Ogre::CompositorInstance *instance = Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), compositorName, addPosition);
-            Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), compositorName, false);
-
-        }*/
         //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
        //O/gre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
 
