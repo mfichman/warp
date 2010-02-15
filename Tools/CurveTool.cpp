@@ -79,8 +79,10 @@ private:
     /** Generates one ring around the current spine point using the transform */
     void generateRing() {
 	    Vector3 spinePosition = transform * Vector3::ZERO;
-	    Vector3 spineForward = transform * Vector3::UNIT_Z;
-	    Vector3 spineUp = transform * Vector3::UNIT_Y;
+
+        // Use 'normal'-style transformation, discard the w coordinate
+	    Vector4 spineForward = transform * Vector4(0, 0, 1, 0); //Vector3::UNIT_Z;
+	    Vector4 spineUp = transform * Vector4(0, 1, 0, 0); // Vector3::UNIT_Y;
 
         if (rings != 0) {
             v += lastSpinePosition.distance(spinePosition);

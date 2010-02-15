@@ -81,6 +81,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\Level.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\Main.cpp"
 				>
 			</File>
@@ -128,6 +132,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\Game.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Level.hpp"
 				>
 			</File>
 			<File
