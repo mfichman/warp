@@ -23,7 +23,6 @@ struct SpineNode {
     SpineNode() : index(0) {}
     Ogre::Vector3 position;
     Ogre::Vector3 forward;
-    Ogre::Vector3 up;
     int index;
 };
 

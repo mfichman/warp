@@ -90,8 +90,6 @@ private:
         lastSpinePosition = spinePosition;
 
         out << "position: " << spinePosition.x << " " << spinePosition.y << " " << spinePosition.z << endl;
-        out << "forward: " << spineForward.x << " " << spineForward.y << " " << spineForward.z  << endl;
-        out << "up: " << spineUp.x << " " << spineUp.y << " " << spineUp.z << endl;
 
 	    // Todo: write spine to a file
 	    for (int i = 0; i < ringDivisions_; i++) {

@@ -193,8 +193,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 
         spineNode_.position = Vector3::ZERO;
-        spineNode_.forward = Vector3::UNIT_Z;
-        spineNode_.up = Vector3::UNIT_Y;
+        spineNode_.forward = -Vector3::UNIT_Z;
         spineNode_.index = 0;
 	}
 

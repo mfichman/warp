@@ -52,7 +52,6 @@ struct DynamicTube::Impl : public Game::Listener {
         game_->getWorld()->addCollisionObject(object_.get());
 
 	    game_->addListener(this);
-
         //nodes_.pop_back(); // Last node is a duplicate of the first for ring-like structures
     }
     
@@ -206,22 +205,29 @@ struct DynamicTube::Impl : public Game::Listener {
         // Find best node
         int prevIndex = 0;
         int nextIndex = 1;
+
+        int searched = 0; // optimization
+        bool found = false; // optimization
         
         float minDistance = FLT_MAX;
-        for (int i = 0; i < nodes_.size()-1; i++) {
+        int start = game_->getSpineNode().index;
+        int end = mod(start-1, nodes_.size());
+        for (int i = start; i != end; i = (i+1) % nodes_.size()) {
             Vector3 v0 = position - nodes_[i];
             Vector3 v1 = nodes_[mod(i+1, nodes_.size())] - nodes_[i];
             
             float distance = nodes_[i].distance(position);
             if (distance < minDistance) {                    
-                if (v0.angleBetween(v1) < Radian(Math::PI/2)) {
+                if (v0.angleBetween(v1) <= Radian(Math::PI/2)) {
                     minDistance = distance;
                     prevIndex = i;
                     nextIndex = i+1;//mod(i+1, nodes_.size());
+                    found = true; // optimization
                 }
             }
+            if (searched > 10 && found) break; // optimization
+            searched++; // optimization
         }
-
        
         if (prevIndex > nextIndex && prevIndex != nodes_.size()-1 && nextIndex != 0) {
             std::swap(nextIndex, prevIndex);

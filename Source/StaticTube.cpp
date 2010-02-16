@@ -52,8 +52,6 @@ struct StaticTube::Impl : public Game::Listener {
         while (!in.eof() && !in.fail()) {
             std::string tag;
             in >> tag >> node.position.x >> node.position.y >> node.position.z;
-            in >> tag >> node.forward.x >> node.forward.y >> node.forward.z;
-            in >> tag >> node.up.x >> node.up.y >> node.up.z;
             
             // Push a copy of the node
             nodes_.push_back(node);
