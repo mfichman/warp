@@ -109,7 +109,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 
 
 
-		Vector3 gravity = -10 * BALLMASS * up;
+		Vector3 gravity = -20 * BALLMASS * up;
 		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
 
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
@@ -131,7 +131,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
         //position += up;
 
         // set the camera
-#define ALPHA 0.85f
+#define ALPHA 0.95f
 #define BETA 0.05f
         //cout << "forward: " << forward << endl;
         //cout << "up: " << up << endl;
@@ -150,7 +150,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
         //game_->getCamera()->setDirection(forward);
 
         //game_->getCamera()->lookAt(position);
-		game_->getCamera()->setPosition(position - forward + up*0.5);
+		game_->getCamera()->setPosition(position - forward*0.5 + up*0.25);
 
 	}
 

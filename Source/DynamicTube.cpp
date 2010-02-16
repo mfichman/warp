@@ -150,13 +150,19 @@ struct DynamicTube::Impl : public Game::Listener {
 
     /** Generates a curved tube segment */
     void generateCurve(const Vector3& normal, float angle, float radius) {
-	    for (float t = 0; t < angle; t += curveStep_) {
-		    Vector3 right = normal.crossProduct(Vector3::UNIT_Z);
-		    right.normalise();
+        Vector3 right = normal.crossProduct(Vector3::UNIT_Z);
+		right.normalise();
 
-		    transform_ = transform_.concatenate(Matrix4::getTrans(radius * right));
+	    for (float t = 0; t < angle; t += curveStep_) {
+            
+            transform_ = transform_.concatenate(Matrix4::getTrans(radius * right));
 		    transform_ = transform_.concatenate(Matrix4(Quaternion(Degree(curveStep_), normal)));
 	        transform_ = transform_.concatenate(Matrix4::getTrans(-radius * right));	
+		   
+
+		    //transform_ = transform_.concatenate(Matrix4::getTrans(radius * right));
+		    //transform_ = transform_.concatenate(Matrix4(Quaternion(Degree(curveStep_), normal)));
+	        //transform_ = transform_.concatenate(Matrix4::getTrans(-radius * right));	
 	        generateRing();
         }
     }

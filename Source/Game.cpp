@@ -182,7 +182,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         solver_ = new btSequentialImpulseConstraintSolver();
         world_ = new btDiscreteDynamicsWorld(dispatcher_, broadphase_, solver_, collisionConfiguration_);
         world_->getSolverInfo().m_splitImpulse = true;
-        world_->getSolverInfo().m_splitImpulsePenetrationThreshold = 0.8f;
+        world_->getSolverInfo().m_splitImpulsePenetrationThreshold = 00.0f;
         //world_->getSolverInfo().m_maxErrorReduction = 0.0f;
         //world_->getSolverInfo().m_numIterations = 20;
         world_->getSolverInfo().m_restitution = 0.0f;

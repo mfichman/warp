@@ -1,21 +1,45 @@
-curve 0 1 0 45 200
+step 2.5
+straight 300
+curve 0 1 0 45 600
 straight 100
-curve 0 -1 0 90 200
+curve 0 -1 0 90 600
 straight 100
-curve 0 1 0 90 200
-curve 1 0 0 15 100
-curve -1 0 0 15 100
+curve 0 1 0 90 600
+curve 1 0 0 15 400
+curve -1 0 0 15 400
 straight 100
-curve 1 0 0 15 200
+curve 1 0 0 15 600
 straight 500
-curve -1 0 0 15 200
-curve 0 1 0 45 200
+curve -1 0 0 15 600
+curve 0 1 0 45 600
 straight 100
-curve 0 -1 0 90 200
+curve 0 -1 0 90 600
 straight 100
-curve 0 1 0 90 200
-curve 1 0 0 15 100
-curve -1 0 0 15 100
+curve 0 1 0 90 600
+curve 1 0 0 15 400
+curve -1 0 0 15 400
+straight 200
+curve 1 0 0 15 600
+straight 1000
+straight 300
+curve 0 1 0 45 600
 straight 100
-curve 1 0 0 15 200
+curve 0 -1 0 90 600
+straight 100
+curve 0 1 0 90 600
+curve 1 0 0 15 400
+curve -1 0 0 15 400
+straight 100
+curve 1 0 0 15 600
 straight 500
+curve -1 0 0 15 600
+curve 0 1 0 45 600
+straight 100
+curve 0 -1 0 90 600
+straight 100
+curve 0 1 0 90 600
+curve 1 0 0 15 400
+curve -1 0 0 15 400
+straight 200
+curve 1 0 0 15 600
+straight 1000
