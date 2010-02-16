@@ -60,6 +60,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         broadphase_(0),
         solver_(0),
         world_(0),
+        playerPosition_(Vector3::ZERO),
         physicsAccumulator_(0.0f),
         root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")) {
     
@@ -190,6 +191,11 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         world_->getSolverInfo().m_erp2 = 1.00f;
         world_->setGravity(btVector3(0, 0, 0));
         btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
+
+        spineNode_.position = Vector3::ZERO;
+        spineNode_.forward = Vector3::UNIT_Z;
+        spineNode_.up = Vector3::UNIT_Y;
+        spineNode_.index = 0;
 	}
 
     /** Loads the scripting engine */
@@ -432,6 +438,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
     // Current spine node
     SpineNode spineNode_;
+    Vector3 playerPosition_;
 };
 
 Game::Game() : impl_(new Impl()) {
@@ -512,4 +519,11 @@ void Game::setSpineNode(const SpineNode& node) {
 
 const SpineNode& Game::getSpineNode() const {
 	return impl_->spineNode_;
+}
+void Game::setPlayerPosition(const Vector3& pos) {
+    impl_->playerPosition_ = pos;
+}
+
+const Vector3& Game::getPlayerPosition() const {
+    return impl_->playerPosition_;
 }

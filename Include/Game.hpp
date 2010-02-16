@@ -87,6 +87,12 @@ public:
 
 	/** Gets the current spine node */
 	const SpineNode& getSpineNode() const;
+
+    /** Sets the current player position */
+    void setPlayerPosition(const Ogre::Vector3& pos);
+
+    /** Gets the current player position */
+    const Ogre::Vector3& getPlayerPosition() const;
     
 private:
 	std::auto_ptr<Impl> impl_;

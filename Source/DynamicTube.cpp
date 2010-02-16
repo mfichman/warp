@@ -5,6 +5,7 @@
 
 #include <DynamicTube.hpp>
 #include <Objects.hpp>
+#include <cfloat>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
@@ -51,6 +52,8 @@ struct DynamicTube::Impl : public Game::Listener {
         game_->getWorld()->addCollisionObject(object_.get());
 
 	    game_->addListener(this);
+
+        //nodes_.pop_back(); // Last node is a duplicate of the first for ring-like structures
     }
     
     ~Impl() {
@@ -78,7 +81,7 @@ struct DynamicTube::Impl : public Game::Listener {
         // Read the input file
         std::ifstream in((name_ + ".tube").c_str());
 
-        if (!in.is_open()) throw runtime_error("Unable to read tube file");
+        if (!in.is_open()) throw runtime_error("Unable to open tube file");
         while (!in.eof()) {
             std::string type;
             in >> type;
@@ -100,7 +103,7 @@ struct DynamicTube::Impl : public Game::Listener {
                 in >> curveStep_;
             }   
 
-            if (in.fail()) throw runtime_error("Unable to read tube file");
+            if (in.fail()) break;
         }
     }
 
@@ -109,20 +112,12 @@ struct DynamicTube::Impl : public Game::Listener {
 
         // Generate the spine node
 	    Vector3 spinePosition = transform_ * Vector3::ZERO;
-	    Vector4 spineForward = transform_ * Vector4(0, 0, 1, 0);
-	    Vector4 spineUp = transform_ * Vector4(0, 1, 0, 0);
 
         if (nodes_.size() != 0) {
             v_ += lastSpinePosition_.distance(spinePosition);
         }
         lastSpinePosition_ = spinePosition;
-
-        SpineNode node;
-        node.position = spinePosition;
-        node.forward = Vector3(spineForward.x, spineForward.y, spineForward.z).normalisedCopy();
-        node.up = Vector3(spineUp.x, spineUp.y, spineUp.z).normalisedCopy();
-        node.index = nodes_.size();
-        nodes_.push_back(node);
+        nodes_.push_back(spinePosition);
 	    
         // Generate the ring around the node
 	    for (int i = 0; i < ringDivisions_; i++) {
@@ -179,10 +174,7 @@ struct DynamicTube::Impl : public Game::Listener {
                 // j == ring division num
                 // i == ring num
 
-                // Add indices to the physical mesh
-                //indices_.push_back(j % ringDivisions_ + i * ringDivisions_);
-                //indices_.push_back(j
-        
+                // Add indices to the physical mesh    
 
                 indices_.push_back(j % ringDivisions_ + i * ringDivisions_);
                 indices_.push_back(j % ringDivisions_ + (i+1) * ringDivisions_);
@@ -195,53 +187,54 @@ struct DynamicTube::Impl : public Game::Listener {
 	    }
     }
 
+    int mod(int num, int divisor) {
+        int remainder = num % divisor;
+        if (remainder < 0) remainder += divisor;
+        return remainder;
+    }
+
     /** Called when a new frame is detected */
 	void onTimeStep() {
-        const SpineNode& node = getClosestSpineNode(game_->getCamera()->getPosition(), lastSpineNodeIndex_);
-        lastSpineNodeIndex_ = node.index;
+        const Vector3& position = game_->getPlayerPosition();
+
+        // Find best node
+        int prevIndex = 0;
+        int nextIndex = 1;
+        
+        float minDistance = FLT_MAX;
+        for (int i = 0; i < nodes_.size()-1; i++) {
+            Vector3 v0 = position - nodes_[i];
+            Vector3 v1 = nodes_[mod(i+1, nodes_.size())] - nodes_[i];
+            
+            float distance = nodes_[i].distance(position);
+            if (distance < minDistance) {                    
+                if (v0.angleBetween(v1) < Radian(Math::PI/2)) {
+                    minDistance = distance;
+                    prevIndex = i;
+                    nextIndex = i+1;//mod(i+1, nodes_.size());
+                }
+            }
+        }
+
+       
+        if (prevIndex > nextIndex && prevIndex != nodes_.size()-1 && nextIndex != 0) {
+            std::swap(nextIndex, prevIndex);
+        }
+
+        const Vector3& prev = nodes_[prevIndex];
+        const Vector3& next = nodes_[nextIndex];
+
+        float alpha = next.distance(position)/next.distance(prev);
+
+
+        SpineNode node;
+        node.position = (alpha)*(prev) + (1-alpha)*(next);
+        node.forward = next - prev;
+        node.forward.normalise();
+        node.index = prevIndex;
+
         game_->setSpineNode(node);
 	}
-
-    /** 
-     * Returns the spine that is closest to the given location.
-     * position: this function will find the closest spine to this position
-     * guess: where the function will start looking for the nearest spine
-     */
-    const SpineNode& getClosestSpineNode(const Vector3& pos, int guess) {
-        int i = guess;
-        assert(i >= 0 && i < (int)nodes_.size());
-
-        // To start, find which direction we should be searching
-        const SpineNode& prev = nodes_[max(0, i-1)];
-        const SpineNode& current = nodes_[max(0, i)];
-        const SpineNode& next = nodes_[min((int)nodes_.size()-1, i+1)];
-
-        float distancePrev = prev.position.distance(pos);
-        float distanceCurrent = current.position.distance(pos);
-        float distanceNext = next.position.distance(pos);
-
-        float best;
-        int direction;
-        if (distancePrev < distanceCurrent) {
-            best = distancePrev;
-            direction = -1;
-        } else if (distanceNext < distanceCurrent) {
-            best = distanceNext;
-            direction = 1;
-        } else {
-            return current;
-        }
-
-        while (true) {
-            if ((i + direction) < 0 || (i + direction) >= (int)nodes_.size()) return nodes_[i];
-
-            float distance = nodes_[i + direction].position.distance(pos);
-            if (distance > best) return nodes_[i];
-
-            best = distance;
-            i += direction;
-        }
-    }
 
     /** These parameters are exclusively for vertex generation */
     Matrix4 transform_;
@@ -261,7 +254,7 @@ struct DynamicTube::Impl : public Game::Listener {
     auto_ptr<btGImpactMeshShape> shape_;
     auto_ptr<btCollisionObject> object_;
     btTransform position_;
-    std::vector<SpineNode> nodes_;
+    std::vector<Vector3> nodes_;
     int lastSpineNodeIndex_;
 };
 
