@@ -12,7 +12,7 @@ print("Waiting")
 wWaitForSpineNode(10)
 print("Awake")
 
-wQueueStartLoop("loop1", "loops/Effected Beat 01.wav")
+wQueueStartLoop("loop1", {path="loops/Effected Beat 01.wav", bpm=113, n_beats=16})
 
 wWaitForBeat()
 wSetLight("Light", {diffuse={1, 0, 0}})

@@ -27,6 +27,7 @@ extern "C" {
 
 #include "OscListener.hpp"
 #include "OscSender.hpp"
+#include "BeatLoop.hpp"
 
 using namespace Warp;
 using namespace Ogre;
@@ -385,18 +386,18 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
      */
     static int luaQueueStartLoop(lua_State* env) {
         // get msg
-        string id;
-        string path_name;
-
-        env >> path_name; // pops back to front
-        env >> id;
+        BeatLoop beat_loop;
+   
+        env >> beat_loop;
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
-
+   
         // send msg
         OscSender* sender = impl->osc_sender_;
         sender->beginMsg("/loop/start");
-        sender->addString(id.c_str());
-        sender->addString(path_name.c_str());
+        sender->addString(beat_loop.name);
+        sender->addString(beat_loop.path_name);
+        sender->addInt(beat_loop.bpm);
+        sender->addInt(beat_loop.n_beats);
         sender->sendMsg();
         return 1;
     }

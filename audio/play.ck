@@ -1,3 +1,6 @@
+// BASIC PATCH
+Gain master_gain => dac;
+
 ////////////
 // GLOBALS
 ////////////
@@ -38,7 +41,7 @@ OscRecv recv;
 // start listening (launch thread)
 recv.listen();
 
-recv.event( "/loop/start, s s" ) @=> OscEvent @ loop_start_e;
+recv.event( "/loop/start, s s i i" ) @=> OscEvent @ loop_start_e;
 
 fun void loop_start_listener() {
     while( true )
@@ -49,15 +52,24 @@ fun void loop_start_listener() {
         // grab the next message from the queue. 
         while( loop_start_e.nextMsg() )
         { 
-            string id;
+            string name;
             string path_name;
+            int bpm;
+            int n_beats;
 
-            // getFloat fetches the expected float (as indicated by "i f")
-            loop_start_e.getString() => id;
+            loop_start_e.getString() => name;
             loop_start_e.getString() => path_name;
+            loop_start_e.getInt() => bpm;
+            loop_start_e.getInt() => n_beats;
 
             // print
-            <<< "got (via OSC):", id, path_name >>>;
+            <<< "got (via OSC):", name, path_name >>>;
+
+            SndBuf sndbuf => master_gain;
+            path_name => sndbuf.read;
+            1 => sndbuf.rate;
+            1 => sndbuf.loop;
+            //sndbuf => loops[name];
         }
     }
 }
