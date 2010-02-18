@@ -17,7 +17,7 @@ struct DynamicTube::Impl : public Game::Listener {
 
     Impl(Game* game, const std::string& name) :
         curveStep_(5.0f),
-        ringDivisions_(32),
+        ringDivisions_(16),
         ringRadius_(10.0f),
         transform_(Matrix4::IDENTITY),
         v_(0),
@@ -202,6 +202,8 @@ struct DynamicTube::Impl : public Game::Listener {
 	void onTimeStep() {
         const Vector3& position = game_->getPlayerPosition();
 
+
+		// BEGIN FIND NEAREST NODES
         // Find best node
         int prevIndex = 0;
         int nextIndex = 1;
@@ -235,13 +237,18 @@ struct DynamicTube::Impl : public Game::Listener {
 
         const Vector3& prev = nodes_[prevIndex];
         const Vector3& next = nodes_[nextIndex];
+		const Vector3& nextnext = nodes_[mod(nextIndex+1, nodes_.size())];
+		Vector3 forward1 = (next - prev).normalisedCopy();
+		Vector3 forward2 = (nextnext - next).normalisedCopy();
+
+		// END FIND NEAREST NODES
 
         float alpha = next.distance(position)/next.distance(prev);
 
 
         SpineNode node;
-        node.position = (alpha)*(prev) + (1-alpha)*(next);
-        node.forward = next - prev;
+        node.position = (alpha)*prev + (1-alpha)*next;
+        node.forward = (alpha)*forward1 + (1-alpha)*forward2;
         node.forward.normalise();
         node.index = prevIndex;
 
