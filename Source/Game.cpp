@@ -122,12 +122,13 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 		// Create scene manager
 		sceneManager_ = root_->createSceneManager(ST_EXTERIOR_CLOSE, "Default");
-		sceneManager_->setShadowTechnique(SHADOWTYPE_STENCIL_MODULATIVE);
+	    sceneManager_->setShadowTechnique(SHADOWTYPE_STENCIL_MODULATIVE);
         //sceneManager_->setShadowFarDistance(10.0f);
 
 		// Create the main camera
 		camera_ = sceneManager_->createCamera("Camera");
-		camera_->setNearClipDistance(0.1);
+		camera_->setNearClipDistance(0.5);
+		camera_->setFarClipDistance(400);
 
 		// Initialize resources
 		TextureManager::getSingleton().setDefaultNumMipmaps(5);

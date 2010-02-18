@@ -14,12 +14,10 @@ int main(int argc, char** argv) {
     try {
 		auto_ptr<Warp::Game> game(new Warp::Game()); 
 		
-		game->getCamera()->setNearClipDistance(0.5);
-		//game->getCamera()->setFarClipDistance(400);
         game->getCamera()->setPosition(0, 0, -20);
         game->getCamera()->lookAt(0, -10, 100);
-		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.6, 0.6, 1.0));
-		//game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.6, 0.6, 1.0), 0.0, 200, 400);
+		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.0, 0.0, 0.0));
+		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.0, 0.0, 0.0), 0.0, 0, 300);
 
 		Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);

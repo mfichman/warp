@@ -221,7 +221,7 @@ struct DynamicTube::Impl : public Game::Listener {
                 if (v0.angleBetween(v1) <= Radian(Math::PI/2)) {
                     minDistance = distance;
                     prevIndex = i;
-                    nextIndex = i+1;//mod(i+1, nodes_.size());
+                    nextIndex = mod(i+1, nodes_.size());
                     found = true; // optimization
                 }
             }
