@@ -1,24 +1,19 @@
 -- Warp: CS248 Final Project
 -- Copyright (c) 2010 Matt Fichman
 
-while (true) do
-
+wQueueStartLoop("loop2", {path="loops/Effected Beat 02.wav", bpm=110, n_beats=1})
 wQueueStartLoop("loop1", {path="loops/Effected Beat 01.wav", bpm=113, n_beats=16})
+while (true) do
 
 wStartBeatServer({bpm="120"});
 
-print("Waiting")
-wWaitForSpineNode(4)
-print("Awake")
+--print("Waiting")
+--wWaitForSpineNode(4)
+--print("Awake")
 
-wQueueStartLoop("loop2", {path="loops/Effected Beat 02.wav", bpm=110, n_beats=16})
-
-wWaitForBeat()
+wWaitForDownbeat()
 wSetLight("Light", {diffuse={1, 0, 0}})
-print("Waiting")
-wWaitForSpineNodeReverse(10)
-print("Awake")
+wWaitForDownbeat()
 wSetLight("Light", {diffuse={0, 1, 0}})
-
 end
 

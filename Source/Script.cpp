@@ -365,31 +365,28 @@ lua_State* Warp::operator>>(lua_State* env, std::string& s) {
 lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
     assert(lua_istable(env, -1));
 
-    lua_getfield(env, -1, "name");
-    if (!lua_isnil(env, -1)) {
-        env >> bl.name;
-    } else {
-        lua_pop(env, 1);
-    }
-
     lua_getfield(env, -1, "path");
     if (!lua_isnil(env, -1)) {
         env >> bl.path_name;
     } else {
         lua_pop(env, 1);
     }
-
-    lua_getfield(env, -1, "n_beats");
-    if (!lua_isnil(env, -1)) {
-        bl.n_beats = lua_tointeger(env, -1); 
-    }
-    lua_pop(env, 1); 
-
+  
     lua_getfield(env, -1, "bpm");
     if (!lua_isnil(env, -1)) {
         bl.bpm = lua_tointeger(env, -1);
     }
     lua_pop(env, 1); 
+   
+    lua_getfield(env, -1, "n_beats");
+    if (!lua_isnil(env, -1)) {
+        bl.n_beats = lua_tointeger(env, -1); 
+    }
+    lua_pop(env, 1); 
+    // pop off the table
+    lua_pop(env, 1); 
+
+    env >> bl.name;
 
     return env;
 }
