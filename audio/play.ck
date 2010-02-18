@@ -1,10 +1,14 @@
+// BASIC PATCH
+Gain master_gain => dac;
+.4 => master_gain.gain;
+
 ////////////
 // GLOBALS
 ////////////
-SndBuf loops[0];
-120 => float bpm;
-8 => int n_beats;
-60.0 / bpm * n_beats::second => dur length;
+SndBuf g_loops[0];
+120 => float g_bpm;
+8 => int g_n_beats;
+0 => int g_server_started;
 
 ////////////////
 // BEAT SENDER
@@ -17,12 +21,12 @@ OscSend xmit;
 xmit.setHost( "localhost", 7000 );
 
 fun void beat_loop() {
-    while (true) {
-        for (0 => int i; i < n_beats; i++) {
+    while (g_server_started) {
+        for (0 => int i; i < g_n_beats; i++) {
             xmit.startMsg("/", "i");
             i => xmit.addInt;
-            <<<"beat","">>>;
-            length / n_beats => now;
+            <<<"beat: ", i,"">>>;
+            1::minute / g_bpm => now;
         }
     }
 }
@@ -38,7 +42,27 @@ OscRecv recv;
 // start listening (launch thread)
 recv.listen();
 
-recv.event( "/loop/start, s s" ) @=> OscEvent @ loop_start_e;
+recv.event( "/loop/start, s s i i" ) @=> OscEvent @ loop_start_e;
+recv.event( "/server/start, i" ) @=> OscEvent @ start_server_e;
+recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
+
+fun void start_server_listener() {
+    while(true) {
+        start_server_e => now;
+        start_server_e.nextMsg();
+        start_server_e.getInt() => g_bpm;
+        1 => g_server_started;
+        beat_loop();
+    }
+}
+
+fun void stop_server_listener() {
+    while(true) {
+        stop_server_e => now;
+        stop_server_e.nextMsg();
+        0 => g_server_started;
+    }
+}
 
 fun void loop_start_listener() {
     while( true )
@@ -49,15 +73,24 @@ fun void loop_start_listener() {
         // grab the next message from the queue. 
         while( loop_start_e.nextMsg() )
         { 
-            string id;
+            string name;
             string path_name;
+            int bpm;
+            int n_beats;
 
-            // getFloat fetches the expected float (as indicated by "i f")
-            loop_start_e.getString() => id;
+            loop_start_e.getString() => name;
             loop_start_e.getString() => path_name;
+            loop_start_e.getInt() => bpm;
+            loop_start_e.getInt() => n_beats;
 
             // print
-            <<< "got (via OSC):", id, path_name >>>;
+            <<< "got (via OSC):", name, path_name >>>;
+
+            SndBuf sndbuf => master_gain;
+            path_name => sndbuf.read;
+            1 => sndbuf.rate;
+            1 => sndbuf.loop;
+            //sndbuf => loops[name];
         }
     }
 }
@@ -67,6 +100,7 @@ fun void loop_start_listener() {
 // PLAY
 /////////
 
-spork ~ beat_loop();
+spork ~ start_server_listener();
+spork ~ stop_server_listener();
 spork ~ loop_start_listener();
 1::day => now;

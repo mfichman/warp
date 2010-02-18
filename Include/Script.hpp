@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Game.hpp>
+#include "BeatLoop.hpp"
 #include <memory>
 
 namespace Warp {
@@ -41,5 +42,6 @@ lua_State* operator>>(lua_State* env, Ogre::SceneNode& n);
 lua_State* operator>>(lua_State* env, Ogre::Light& l);
 lua_State* operator>>(lua_State* env, Ogre::ColourValue& c);
 lua_State* operator>>(lua_State* env, std::string& s);
+lua_State* operator>>(lua_State* env, Warp::BeatLoop & bl);
 
 }

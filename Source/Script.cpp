@@ -5,6 +5,7 @@
 
 #include <Script.hpp>
 #include <stdexcept>
+#include "BeatLoop.hpp"
 
 using namespace Warp;
 using namespace Ogre;
@@ -353,10 +354,42 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
 
 /** This is a convenience method for reading into a string from lua */
 lua_State* Warp::operator>>(lua_State* env, std::string& s) {
-    assert(lua_isstring(env, -1)); // Make sure the top of the stack is a string.  -1 == top of stack
+    assert(lua_isstring(env, -1)); // Make sure the top of the stack is a string. -1 == top of stack
     s.assign(lua_tostring(env, -1)); // Get the string
     lua_pop(env, 1); // Pop the string value off the lua stack
 
     return env;
+}
 
+/** reads beat loop info from an id and table of values */
+lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
+    assert(lua_istable(env, -1));
+
+    lua_getfield(env, -1, "name");
+    if (!lua_isnil(env, -1)) {
+        env >> bl.name;
+    } else {
+        lua_pop(env, 1);
+    }
+
+    lua_getfield(env, -1, "path");
+    if (!lua_isnil(env, -1)) {
+        env >> bl.path_name;
+    } else {
+        lua_pop(env, 1);
+    }
+
+    lua_getfield(env, -1, "n_beats");
+    if (!lua_isnil(env, -1)) {
+        bl.n_beats = lua_tointeger(env, -1); 
+    }
+    lua_pop(env, 1); 
+
+    lua_getfield(env, -1, "bpm");
+    if (!lua_isnil(env, -1)) {
+        bl.bpm = lua_tointeger(env, -1);
+    }
+    lua_pop(env, 1); 
+
+    return env;
 }

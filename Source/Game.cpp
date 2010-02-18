@@ -27,6 +27,7 @@ extern "C" {
 
 #include "OscListener.hpp"
 #include "OscSender.hpp"
+#include "BeatLoop.hpp"
 
 using namespace Warp;
 using namespace Ogre;
@@ -231,6 +232,10 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         lua_pushcclosure(scriptState_, &Impl::luaQueueStartLoop, 1);
         lua_setglobal(scriptState_, "wQueueStartLoop");
 
+        lua_pushlightuserdata(scriptState_, this); // tell chuck to enqueue loop
+        lua_pushcclosure(scriptState_, &Impl::luaStartBeatServer, 1);
+        lua_setglobal(scriptState_, "wStartBeatServer");
+
         if (luaL_dofile(scriptState_, "Scripts/Warp.lua")) {
             string message(lua_tostring(scriptState_, -1));
             lua_pop(scriptState_, 2);
@@ -376,7 +381,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     /** Lua callback.  Gets the current beat as set by chuck */
     static int luaGetBeat(lua_State* env) {
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
-        lua_pushinteger(env, cur_beat_);
+        lua_pushinteger(env, cur_beat_); // TODO: make this in impl
         return 1;
     }
 
@@ -385,22 +390,37 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
      */
     static int luaQueueStartLoop(lua_State* env) {
         // get msg
-        string id;
-        string path_name;
-
-        env >> path_name; // pops back to front
-        env >> id;
+        BeatLoop beat_loop;
+   
+        env >> beat_loop;
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
-
+   
         // send msg
         OscSender* sender = impl->osc_sender_;
         sender->beginMsg("/loop/start");
-        sender->addString(id.c_str());
-        sender->addString(path_name.c_str());
+        sender->addString(beat_loop.name);
+        sender->addString(beat_loop.path_name);
+        sender->addInt(beat_loop.bpm);
+        sender->addInt(beat_loop.n_beats);
         sender->sendMsg();
         return 1;
     }
 
+    static int luaStartBeatServer(lua_State* env) {
+        Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
+        OscSender* sender = impl->osc_sender_;
+
+        int bpm = 120; // default value
+        lua_getfield(env, -1, "bpm");
+        if (!lua_isnil(env, -1)) {
+            bpm = lua_tointeger(env, -1);
+        }
+        lua_pop(env, 1); 
+        sender->beginMsg("/server/start");
+        sender->addInt(bpm);
+        sender->sendMsg();
+        return 1;
+    }
 
 	// Graphics objects
     Ogre::Root* root_;

@@ -9,6 +9,7 @@
 #include <liboscpack/ip/UdpSocket.h>
 #include <liboscpack/ip/IpEndpointName.h>
 #include <iostream>
+#include <string>
 
 #define IP_MTU_SIZE 1536
 
@@ -35,8 +36,13 @@ public:
         *op_stream << osc::BeginMessage(location);
     }
 
-    void addString(const char* str) {
-        *op_stream << str;
+    void addString(const std::string & str) {
+        const char* cstr = str.c_str();
+        *op_stream << cstr;
+    }
+
+    void addInt(int i) {
+        *op_stream << i;
     }
 
     void sendMsg() {
