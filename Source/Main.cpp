@@ -1,5 +1,6 @@
 #include <Game.hpp>
 #include <Ball.hpp>
+#include <Level.hpp>
 #include <StaticTube.hpp>
 #include <DynamicTube.hpp>
 #include <FreeCamera.hpp>
@@ -27,11 +28,12 @@ int main(int argc, char** argv) {
 
         
         
-        Warp::Script script(game.get(), "Scripts/Test.lua");
+        //Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
+		Warp::Level level(game.get(), "Tube1");
         Warp::Ball ball(game.get(), "Ball");
         //Warp::StaticTube tube(game.get(), "Test");
-        Warp::DynamicTube tube(game.get(), "Tube1");
+        //Warp::DynamicTube tube(game.get(), "Tube1");
         Warp::FreeCamera camera(game.get());
         Warp::Overlays overlays(game.get());
 

@@ -16,8 +16,8 @@ using namespace std;
 struct DynamicTube::Impl : public Game::Listener {
 
     Impl(Game* game, const std::string& name) :
-        curveStep_(5.0f),
-        ringDivisions_(16),
+        curveStep_(2.0f),
+        ringDivisions_(10),
         ringRadius_(10.0f),
         transform_(Matrix4::IDENTITY),
         v_(0),
@@ -78,7 +78,7 @@ struct DynamicTube::Impl : public Game::Listener {
         generateStraight(0);
 
         // Read the input file
-        std::ifstream in((name_ + ".tube").c_str());
+        std::ifstream in((name_).c_str());
 
         if (!in.is_open()) throw runtime_error("Unable to open tube file");
         while (!in.eof()) {
