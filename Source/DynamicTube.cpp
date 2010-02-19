@@ -243,12 +243,12 @@ struct DynamicTube::Impl : public Game::Listener {
 
 		// END FIND NEAREST NODES
 
-        float alpha = next.distance(position)/next.distance(prev);
+        float alpha = forward1.dotProduct(position - prev)/next.distance(prev);
 
 
         SpineNode node;
-        node.position = (alpha)*prev + (1-alpha)*next;
-        node.forward = (alpha)*forward1 + (1-alpha)*forward2;
+        node.position = (1 - alpha)*prev + (alpha)*next;
+        node.forward = (1 - alpha)*forward1 + (alpha)*forward2;
         node.forward.normalise();
         node.index = prevIndex;
 
