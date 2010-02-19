@@ -78,9 +78,9 @@ struct DynamicTube::Impl : public Game::Listener {
         generateStraight(0);
 
         // Read the input file
-        std::ifstream in((name_ + ".tube").c_str());
+        std::ifstream in((name_).c_str());
 
-        if (!in.is_open()) throw runtime_error("Unable to open tube file");
+        if (!in.is_open()) throw runtime_error("Unable to open tube file " + name_);
         while (!in.eof()) {
             std::string type;
             in >> type;
