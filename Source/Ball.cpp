@@ -75,7 +75,6 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 	/** Called when a new frame is detected */
 	void onTimeStep() {
 
-
 		btVector3 btposition = body_->getCenterOfMassPosition();
 		btVector3 btvelocity = body_->getLinearVelocity();
 		Vector3 position(btposition.x(), btposition.y(), btposition.z());
@@ -83,7 +82,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 
 		const SpineNode& node = game_->getSpineNode();
         
-        		//float speed = body_->getLinearVelocity().length();
+        //float speed = body_->getLinearVelocity().length();
 		//Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;
 
         assert(node.forward != Vector3::ZERO);
@@ -108,18 +107,9 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 
         Vector3 right = up.crossProduct(forward);
 
-
+        // Apply gravity and hover forces:
 		// We want the ship to hover at 2.0 meters above the ground
 		float distance = (node.position - position).length();
-
-		//cout << distance << endl;
-		//if (distance > 0) {
-		
-
-		
-
-		//Vector3 force = 20f * (distance - 8.0f) * BALLMASS * up;
-		//body_->applyCentralForce(btVector3(force.x, force.y, force.z));
 
 		Vector3 gravity = -20.0f * BALLMASS * up;
 		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
@@ -130,17 +120,7 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 			body_->applyCentralForce(btVector3(force.x, force.y, force.z));
 		}
 
-		//Vector3 force = 20.0f / pow((10.0f - distance), 2.0f) * BALLMASS * up;
-		
-
-		//if (distance > 8.0f) {
-		//	Vector3 force = (-2.0f * powf(velocity.dotProduct(up), 3.0f)) * up;
-		//	body_->applyCentralForce(btVector3(force.x, force.y, force.z));
-		//}
-		//if (distance < 0) {
-		//	Vector3 force = BALLMASS * up * -distance;
-		///	body_->applyCentralForce(btVector3(force.x, force.y, force.z));
-		//}
+        // Apply user control forces
 
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
 			body_->applyCentralForce(-20*btVector3(right.x, right.y, right.z));
@@ -156,9 +136,6 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
 			body_->applyCentralForce(-20*btVector3(forward.x, forward.y, forward.z));
 		}
-
-		//position -= forward*3.0f;
-        //position += up;
 
         // set the camera
 #define ALPHA 0.80f

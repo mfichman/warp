@@ -3,9 +3,8 @@
 
 wQueueStartLoop("loop2", {path="loops/Effected Beat 02.wav", bpm=110, n_beats=1})
 wQueueStartLoop("loop1", {path="loops/Effected Beat 01.wav", bpm=113, n_beats=16})
+wStartBeatServer({bpm="220"});
 while (true) do
-
-wStartBeatServer({bpm="120"});
 
 --print("Waiting")
 --wWaitForSpineNode(4)

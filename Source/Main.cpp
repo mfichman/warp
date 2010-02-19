@@ -1,6 +1,5 @@
 #include <Game.hpp>
 #include <Ball.hpp>
-#include <StaticTube.hpp>
 #include <DynamicTube.hpp>
 #include <FreeCamera.hpp>
 #include <Overlays.hpp>
