@@ -1,3 +1,11 @@
+wEntity = {}
+
+function wEntity:new()
+
+
+end
+
+
 
 -- Waits for the given amount of timesteps before returning
 function wSleep(time)
