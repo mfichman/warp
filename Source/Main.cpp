@@ -30,7 +30,6 @@ int main(int argc, char** argv) {
         //Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
         game->loadLevel("Tube1");
-        Warp::Ball ball(game.get(), "Ball");
         //Warp::StaticTube tube(game.get(), "Test");
         //Warp::DynamicTube tube(game.get(), "Tube1");
         Warp::FreeCamera camera(game.get());

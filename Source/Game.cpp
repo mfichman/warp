@@ -545,12 +545,13 @@ void Game::setSpineNode(const SpineNode& node) {
 const SpineNode& Game::getSpineNode() const {
 	return impl_->spineNode_;
 }
+
 void Game::setPlayerPosition(const Vector3& pos) {
-    impl_->playerPosition_ = pos;
+    impl_->level_->getPlayer()->setPosition(pos);
 }
 
 const Vector3& Game::getPlayerPosition() const {
-    return impl_->playerPosition_;
+    return impl_->level_->getPlayer()->getPosition();
 }
 
 void Game::loadLevel(std::string name) {

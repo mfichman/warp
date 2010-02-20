@@ -5,20 +5,24 @@
 #pragma once
 
 
-#include <Game.hpp>
+#include <Ogre.h>
+#include "Game.hpp"
 #include <memory>
 
 namespace Warp {
 
-class Ball  {
+class Player  {
 public:
 	struct Impl;
 
 	/** Creates a new ball */
-    Ball(Game* game, const std::string& name);
+    Player(Game* game, const std::string& name);
 
     /** Destructor */
-    ~Ball();
+    ~Player();
+
+    void setPosition(const Ogre::Vector3& pos);
+    const Ogre::Vector3& getPosition() const;
 
 private:
     std::auto_ptr<Impl> impl_;

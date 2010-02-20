@@ -14,12 +14,14 @@ using namespace std;
 #define BALLMASS 1.0f // kilograms
 
 
-struct Ball::Impl : public Game::Listener, public btMotionState {
+struct Player::Impl : public Game::Listener, public btMotionState {
 
 	/** Initializes the OGRE scene nodes, and the attached rigid bodies */
     Impl(Game* game, const string& name) :
         game_(game),
-        name_(name) {
+        name_(name),
+        playerPosition_(Vector3::ZERO)
+    {
 
 		// Set up OGRE scene nodes
 		node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
@@ -168,11 +170,19 @@ struct Ball::Impl : public Game::Listener, public btMotionState {
     auto_ptr<btCollisionShape> shape_;
     auto_ptr<btRigidBody> body_;
     btTransform position_;
+    Vector3 playerPosition_;
 
 };
 
-Ball::Ball(Game* game, const string& name) : impl_(new Impl(game, name)) {
+Player::Player(Game* game, const string& name) : impl_(new Impl(game, name)) {
 }
 
-Ball::~Ball() {
+Player::~Player() {
+}
+
+void Player::setPosition(const Vector3& pos) {
+    impl_->playerPosition_ = pos;
+}
+const Vector3& Player::getPosition() const {
+    return impl_->playerPosition_;
 }

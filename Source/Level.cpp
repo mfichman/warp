@@ -3,10 +3,11 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <Level.hpp>
-#include <DynamicTube.hpp>
-#include <Objects.hpp>
-#include <Script.hpp>
+#include "Level.hpp"
+#include "DynamicTube.hpp"
+#include "Player.hpp"
+#include "Objects.hpp"
+#include "Script.hpp"
 #include <list>
 #include <map>
 #include <memory>
@@ -22,8 +23,9 @@ struct Level::Impl : public Game::Listener {
     Impl(Game* game, const std::string& name) :
         game_(game),
         tube_(new DynamicTube(game, "Levels/" + name + ".tube")),
-        script_(new Script(game, "Scripts/" + name + ".lua")) {
-
+        script_(new Script(game, "Scripts/" + name + ".lua")),
+        player_(new Player(game, "Ball"))
+    {
         game_->addListener(this);
     }
 
@@ -39,6 +41,7 @@ struct Level::Impl : public Game::Listener {
     Game* game_;
     auto_ptr<DynamicTube> tube_;
     auto_ptr<Script> script_;
+    auto_ptr<Player> player_;
 
     //map<string, shared_ptr<Enemy>> enemies_;
 };
@@ -47,4 +50,8 @@ Level::Level(Game* game, const std::string& name) : impl_(new Impl(game, name)) 
 }
 
 Level::~Level() {
+}
+
+Player* Level::getPlayer() {
+    return impl_->player_.get();
 }
