@@ -1,3 +1,6 @@
+-- Warp: CS248 Final Project
+-- Matt Fichman & Francesco Georg
+
 wEntity = {}
 
 function wEntity:new()
@@ -31,6 +34,11 @@ function wWaitForSpineNodeReverse(id)
         return wGetSpineNodeId() < id
     end)
 end
+
+
+-----------------
+-- MUSIC STUFF --
+-----------------
 
 -- Waits for the next beat before returning
 function wWaitForBeat()

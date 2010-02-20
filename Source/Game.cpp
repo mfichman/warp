@@ -3,9 +3,14 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <Game.hpp>
-#include <Objects.hpp>
-#include <Script.hpp>
+#include "Warp.hpp"
+#include "Game.hpp"
+#include "Objects.hpp"
+#include "Script.hpp"
+#include "Level.hpp"
+#include "Player.hpp"
+#include "OscBeatListener.hpp"
+#include "OscSender.hpp"
 
 #define DEBUG
 #define DEBUG_
@@ -13,8 +18,6 @@
 #include <OgreCEGUIRenderer.h>
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 #include <CEGUI/CEGUI.h>
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
 extern "C" {
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
@@ -25,10 +28,6 @@ extern "C" {
 #include <algorithm>
 #include <utility>
 
-#include "OscListener.hpp"
-#include "OscSender.hpp"
-#include "Level.hpp"
-#include "Player.hpp"
 
 using namespace Warp;
 using namespace Ogre;
@@ -37,15 +36,9 @@ using namespace std;
 #define PHYSICSUPDATEINTERVAL	0.01f // seconds
 #define PHYSICSMAXINTERVAL		0.25f // seconds
 
+// for OSC interface to chuck
 #define SEND_PORT 6449
 #define LISTEN_PORT 7000
-
-// Not sure where to put this. make it global for now.
-int cur_beat_;
-void beatCallback(int beat) {
-	std::cout << "BEAT:" << beat << endl;
-    cur_beat_ = beat;
-}
 
 
 struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
@@ -245,9 +238,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	void loadOsc() {
 		// initialize sender
 		osc_sender_ = new OscSender(SEND_PORT);
-		osc_listener_ = new OscListener(LISTEN_PORT);
-
-		boost::thread oscThread(boost::bind(boost::mem_fn(&OscListener::StartBeatLoop), osc_listener_, &beatCallback));
+		osc_listener_ = new OscBeatListener(LISTEN_PORT);
 	}
 
 	/** Called when the main window is closed */
@@ -380,7 +371,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
     /** Lua callback.  Gets the current beat as set by chuck */
     static int luaGetBeat(lua_State* env) {
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
-        lua_pushinteger(env, cur_beat_); // TODO: make this in impl
+        lua_pushinteger(env, impl->osc_listener_->getCurBeat());
         return 1;
     }
 
@@ -453,7 +444,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 	// Osc object
 	OscSender* osc_sender_;
-	OscListener* osc_listener_;
+	OscBeatListener* osc_listener_;
 
     // Current Level object:
     auto_ptr<Level> level_;

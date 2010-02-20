@@ -1,25 +1,26 @@
 -- Warp: CS248 Final Project
--- Copyright (c) 2010 Matt Fichman
+-- Matt Fichman & Francesco Georg
 
 --print("Sleeping")
 --wSleep(100)
 --print("Awake")
+wQueueStartLoop("loop1", {path="loops/Effected Beat 01.wav", bpm=113, n_beats=16})
+wStartBeatServer({bpm=110});
 
 print("Waiting")
-wWaitForSpineNode(10)
+wWaitForSpineNode(5)
 print("Awake")
+
+wQueueStartLoop("loop2", {path="loops/Effected Beat 02.wav", bpm=110, n_beats=16})
+wWaitForBeatSet()
+wSetLight("Light", {diffuse={0, 0, 1}})
 
 while (true) do
 
-wSetLight("Light", {diffuse={0, 0, 1}})
-
-wQueueStartLoop("loop1", "loops/Effected Beat 01.wav", {bmp=113, n_beats=16})
-
 wWaitForBeat()
 wSetLight("Light", {diffuse={1, 0, 0}})
-print("Waiting")
-wWaitForSpineNodeReverse(10)
-print("Awake")
+
+wWaitForBeat()
 wSetLight("Light", {diffuse={0, 1, 0}})
 
 end
