@@ -28,6 +28,7 @@ extern "C" {
 #include "OscListener.hpp"
 #include "OscSender.hpp"
 #include "BeatLoop.hpp"
+#include "Level.hpp"
 
 using namespace Warp;
 using namespace Ogre;
@@ -61,6 +62,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         broadphase_(0),
         solver_(0),
         world_(0),
+        level_(0),
         playerPosition_(Vector3::ZERO),
         physicsAccumulator_(0.0f),
         root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")) {
@@ -456,6 +458,9 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	OscSender* osc_sender_;
 	OscListener* osc_listener_;
 
+    // Current Level object:
+    auto_ptr<Level> level_;
+
     // Current spine node
     SpineNode spineNode_;
     Vector3 playerPosition_;
@@ -546,4 +551,8 @@ void Game::setPlayerPosition(const Vector3& pos) {
 
 const Vector3& Game::getPlayerPosition() const {
     return impl_->playerPosition_;
+}
+
+void Game::loadLevel(std::string name) {
+    impl_->level_.reset(new Level(this, name));
 }

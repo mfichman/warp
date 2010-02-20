@@ -92,6 +92,8 @@ public:
 
     /** Gets the current player position */
     const Ogre::Vector3& getPlayerPosition() const;
+
+    void loadLevel(std::string name);
     
 private:
 	std::auto_ptr<Impl> impl_;

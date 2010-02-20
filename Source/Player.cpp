@@ -3,7 +3,7 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <Ball.hpp>
+#include <Player.hpp>
 #include <Objects.hpp>
 
 using namespace Warp;

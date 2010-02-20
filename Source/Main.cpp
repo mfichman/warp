@@ -1,5 +1,5 @@
 #include <Game.hpp>
-#include <Ball.hpp>
+#include <Player.hpp>
 #include <Level.hpp>
 #include <DynamicTube.hpp>
 #include <FreeCamera.hpp>
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         
         //Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
-		Warp::Level level(game.get(), "Tube1");
+        game->loadLevel("Tube1");
         Warp::Ball ball(game.get(), "Ball");
         //Warp::StaticTube tube(game.get(), "Test");
         //Warp::DynamicTube tube(game.get(), "Tube1");

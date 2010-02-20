@@ -242,9 +242,10 @@ struct DynamicTube::Impl : public Game::Listener {
 		Vector3 forward2 = (nextnext - next).normalisedCopy();
 
 		// END FIND NEAREST NODES
-
+                                         
+        // projection of relative position in the direction of motion
+        // divided by distance to the next node
         float alpha = forward1.dotProduct(position - prev)/next.distance(prev);
-
 
         SpineNode node;
         node.position = (1 - alpha)*prev + (alpha)*next;
