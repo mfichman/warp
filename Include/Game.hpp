@@ -70,12 +70,6 @@ public:
 	/** Removes an event listener */
 	void removeListener(Listener* listener);
 
-    /** Sets the current spine node */
-    void setSpineNode(const SpineNode& node);
-
-	/** Gets the current spine node */
-	const SpineNode& getSpineNode() const;
-
     /** Gets the player's position */
     const Ogre::Vector3& getPlayerPosition() const;
 

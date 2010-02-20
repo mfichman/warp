@@ -527,17 +527,6 @@ void Game::removeListener(Listener* listener) {
 	}
 }
 
-void Game::setSpineNode(const SpineNode& node) {
-    if (node.index != getSpineNode().index) {
-        cout << "Current spine node: " << node.index << endl;
-    }
-    impl_->level_->getPlayer()->setSpineNode(node);
-}
-
-const SpineNode& Game::getSpineNode() const {
-	return impl_->level_->getPlayer()->getSpineNode();
-}
-
 const Vector3& Game::getPlayerPosition() const {
     return impl_->level_->getPlayer()->getPosition();
 }

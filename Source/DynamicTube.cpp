@@ -227,8 +227,6 @@ DynamicTube::~DynamicTube() {
 }
 
 SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) const {
-    SpineProjection result;
-
     int prev_i = 0;
     int next_i = 0;
 
@@ -259,7 +257,7 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) 
         break;
     }
     // return the value by reference
-    node_i = closest_i;
+    node_i = prev_i;
 
     // get the previous and next node indexes
     Vector3 forward = (nodes[mod(closest_i + 1, n_nodes)] - nodes[closest_i]).normalisedCopy();
@@ -283,14 +281,9 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) 
     float alpha = prevForward.dotProduct(v - prev)/next.distance(prev);
 
     // interpolate
-    SpineNode node;
-    node.position = (1 - alpha)*prev + (alpha)*next;
-    node.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
-    node.forward.normalise();
-    node.index = prev_i;
-
-    impl_->game_->setSpineNode(node);
-    result.position = node.position;
-    result.forward = node.forward;
+    SpineProjection result;
+    result.position = (1 - alpha)*prev + (alpha)*next;
+    result.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
+    result.forward.normalise();
     return result;
 }

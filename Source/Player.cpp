@@ -198,10 +198,6 @@ const Vector3& Player::getPosition() const {
     return impl_->position_;
 }
 
-void Player::setSpineNode(const SpineNode& node) {
-    impl_->spineNode_ = node;
-}
-
-const SpineNode& Player::getSpineNode() const {
-    return impl_->spineNode_;
+int Player::getSpineNode() const {
+    return impl_->spineNode_i_;
 }
