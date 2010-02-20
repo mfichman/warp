@@ -22,7 +22,7 @@ public:
     /** Destructor */
     ~Level();
 
-    Player* getPlayer(); // no const so that other classes can mutate the data
+    const Player* getPlayer() const;
 
     const DynamicTube* getTube() const;
 private:

@@ -372,7 +372,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	/** Lua callback.  Get the light state */
     static int luaGetSpineNodeId(lua_State* env) {
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
-        int index = 0; // static right now
+        int index = impl->level_->getPlayer()->getSpineNode();
         lua_pushinteger(env, index);
         return 1;
 	}
@@ -525,10 +525,6 @@ void Game::removeListener(Listener* listener) {
 	if (i != impl_->listeners_.end()) {
 		impl_->listeners_.erase(i);
 	}
-}
-
-const Vector3& Game::getPlayerPosition() const {
-    return impl_->level_->getPlayer()->getPosition();
 }
 
 void Game::loadLevel(std::string name) {

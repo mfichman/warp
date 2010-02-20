@@ -52,7 +52,7 @@ Level::Level(Game* game, const std::string& name) : impl_(new Impl(game, name)) 
 Level::~Level() {
 }
 
-Player* Level::getPlayer() {
+const Player* Level::getPlayer() const {
     return impl_->player_.get();
 }
 

@@ -70,9 +70,6 @@ public:
 	/** Removes an event listener */
 	void removeListener(Listener* listener);
 
-    /** Gets the player's position */
-    const Ogre::Vector3& getPlayerPosition() const;
-
     /** Attach a new level object (call to change levels) */
     void loadLevel(std::string name);
 

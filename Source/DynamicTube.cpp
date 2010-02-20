@@ -256,8 +256,6 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) 
 
         break;
     }
-    // return the value by reference
-    node_i = prev_i;
 
     // get the previous and next node indexes
     Vector3 forward = (nodes[mod(closest_i + 1, n_nodes)] - nodes[closest_i]).normalisedCopy();
@@ -269,6 +267,10 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) 
         prev_i = mod(closest_i - 1, n_nodes);
         next_i = closest_i;
     }
+
+    // return the value by reference
+    if (node_i != prev_i) printf("NEW NODE: %d\n", prev_i);
+    node_i = prev_i;
 
     // compute location and forward vectors
     Vector3 prev = nodes[prev_i];
