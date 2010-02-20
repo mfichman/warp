@@ -227,35 +227,34 @@ DynamicTube::~DynamicTube() {
 }
 
 SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) const {
-    int prev_i = 0;
-    int next_i = 0;
 
     const std::vector<Vector3>& nodes = impl_->nodes_;
     const int n_nodes = nodes.size();
 
-    // find the closest node to v near node_i
     int closest_i = node_i;
-    float minDistance = nodes[node_i].distance(v);
-
-    // this loop will discover the local min in distance
-    while(true) {
-        // try the node in front and behind:
-        float nextDistance = nodes[mod(closest_i+1, n_nodes)].distance(v);
-        if (nextDistance < minDistance) {
-            minDistance = nextDistance;
-            closest_i = mod(closest_i + 1, n_nodes);
-            continue;
+    { /* find the closest node to v near node_i */
+        float minDistance = nodes[node_i].squaredDistance(v);
+        // this loop will discover the local min in distance around node_i
+        while(true) {
+            // try the node in front and behind:
+            float nextDistance = nodes[mod(closest_i+1, n_nodes)].squaredDistance(v);
+            if (nextDistance < minDistance) {
+                minDistance = nextDistance;
+                closest_i = mod(closest_i + 1, n_nodes);
+                continue;
+            }
+            float prevDistance = nodes[mod(closest_i-1, n_nodes)].squaredDistance(v);
+            if (prevDistance < minDistance) {
+                minDistance = prevDistance;
+                closest_i = mod(closest_i - 1, n_nodes);
+                continue;
+            }
+            break;
         }
-
-        float prevDistance = nodes[mod(closest_i-1, n_nodes)].distance(v);
-        if (prevDistance < minDistance) {
-            minDistance = prevDistance;
-            closest_i = mod(closest_i - 1, n_nodes);
-            continue;
-        }
-
-        break;
     }
+
+    int prev_i;
+    int next_i;
 
     // get the previous and next node indexes
     Vector3 forward = (nodes[mod(closest_i + 1, n_nodes)] - nodes[closest_i]).normalisedCopy();
@@ -268,8 +267,8 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) 
         next_i = closest_i;
     }
 
+    if (node_i != prev_i) { printf("NEW NODE: %d\n", prev_i); }
     // return the value by reference
-    if (node_i != prev_i) printf("NEW NODE: %d\n", prev_i);
     node_i = prev_i;
 
     // compute location and forward vectors

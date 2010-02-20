@@ -5,12 +5,12 @@
 --wSleep(100)
 --print("Awake")
 
-
-while (true) do
-
 print("Waiting")
 wWaitForSpineNode(10)
 print("Awake")
+
+while (true) do
+
 wSetLight("Light", {diffuse={0, 0, 1}})
 
 wQueueStartLoop("loop1", "loops/Effected Beat 01.wav", {bmp=113, n_beats=16})
