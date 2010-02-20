@@ -3,9 +3,8 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <Script.hpp>
+#include "Script.hpp"
 #include <stdexcept>
-#include "BeatLoop.hpp"
 
 using namespace Warp;
 using namespace Ogre;

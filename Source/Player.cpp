@@ -3,7 +3,9 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <Player.hpp>
+#include "Player.hpp"
+#include "Level.hpp"
+#include "DynamicTube.hpp"
 #include <Objects.hpp>
 
 using namespace Warp;
@@ -20,16 +22,20 @@ struct Player::Impl : public Game::Listener, public btMotionState {
     Impl(Game* game, const string& name) :
         game_(game),
         name_(name),
-        playerPosition_(Vector3::ZERO)
+        position_(Vector3::ZERO)
     {
+        // initialize spine node (kill later)
+        spineNode_.position = Vector3::ZERO;
+        spineNode_.forward = -Vector3::UNIT_Z;
+        spineNode_.index = 0;
 
 		// Set up OGRE scene nodes
 		node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
 		node_->attachObject(game_->getSceneManager()->createEntity(name_, "Ball.mesh"));
         
-        position_.setIdentity();
+        transform_.setIdentity();
         
-        position_.setOrigin(btVector3(0, -5, 5));
+        transform_.setOrigin(btVector3(0, -5, 5));
         shape_.reset(new btSphereShape(BALLRADIUS));
 
         btScalar mass(BALLMASS);
@@ -61,17 +67,20 @@ struct Player::Impl : public Game::Listener, public btMotionState {
 
     /** Called by bullet to get the transform state */
     void getWorldTransform(btTransform& transform) const {
-        transform = position_;
+        transform = transform_;
     }
 
     /** Called by Bullet to update the scene node */
     void setWorldTransform(const btTransform& transform) {
+        // get info from bullet
         const btQuaternion& rotation = transform.getRotation();
-        node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
         const btVector3& position = transform.getOrigin();
+        // apply to scene node
+        node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
         node_->setPosition(position.x(), position.y(), position.z());
-        position_ = transform;
-        game_->setPlayerPosition(Vector3(position.x(), position.y(), position.z()));
+        // set local info
+        transform_ = transform;
+        position_ = Vector3(position.x(), position.y(), position.z());
     }
 
 	/** Called when a new frame is detected */
@@ -82,17 +91,17 @@ struct Player::Impl : public Game::Listener, public btMotionState {
 		Vector3 position(btposition.x(), btposition.y(), btposition.z());
 		Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
 
-		const SpineNode& node = game_->getSpineNode();
+        SpineProjection projection = game_->getLevel()->getTube()->getSpineProjection(position);
         
         //float speed = body_->getLinearVelocity().length();
 		//Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;
 
-        assert(node.forward != Vector3::ZERO);
-        assert(node.position - position != Vector3::ZERO);
+        assert(projection.forward != Vector3::ZERO);
+        assert(projection.position - position != Vector3::ZERO);
 
         // Up points toward spine node
-        Vector3 forward = node.forward;
-		Vector3 up = (node.position - position).normalisedCopy();//Vector3::UNIT_Y;
+        Vector3 forward = projection.forward;
+		Vector3 up = (projection.position - position).normalisedCopy();//Vector3::UNIT_Y;
 		
 		// Need to make sure up is orthogonal to forward
         assert(up.crossProduct(forward) != Vector3::ZERO);
@@ -101,7 +110,7 @@ struct Player::Impl : public Game::Listener, public btMotionState {
         // Project the gravity vector into the plane with "forward" as the
         // normal vector.  This forces the ball to the outside of the ring, and
         // removes and component that would make the ball move forward/backward
-        up = up - (up.dotProduct(node.forward)) * node.forward;
+        up = up - (up.dotProduct(projection.forward)) * projection.forward;
 
         assert(up != Vector3::ZERO);
 
@@ -111,7 +120,7 @@ struct Player::Impl : public Game::Listener, public btMotionState {
 
         // Apply gravity and hover forces:
 		// We want the ship to hover at 2.0 meters above the ground
-		float distance = (node.position - position).length();
+		float distance = (projection.position - position).length();
 
 		Vector3 gravity = -20.0f * BALLMASS * up;
 		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
@@ -169,8 +178,12 @@ struct Player::Impl : public Game::Listener, public btMotionState {
     btVector3 front_;
     auto_ptr<btCollisionShape> shape_;
     auto_ptr<btRigidBody> body_;
-    btTransform position_;
-    Vector3 playerPosition_;
+    /* information about position and orientation from bullet */
+    btTransform transform_;
+    Vector3 position_;
+    SpineNode spineNode_;
+
+    int spineNode_i_;
 
 };
 
@@ -180,9 +193,14 @@ Player::Player(Game* game, const string& name) : impl_(new Impl(game, name)) {
 Player::~Player() {
 }
 
-void Player::setPosition(const Vector3& pos) {
-    impl_->playerPosition_ = pos;
-}
 const Vector3& Player::getPosition() const {
-    return impl_->playerPosition_;
+    return impl_->position_;
+}
+
+void Player::setSpineNode(const SpineNode& node) {
+    impl_->spineNode_ = node;
+}
+
+const SpineNode& Player::getSpineNode() const {
+    return impl_->spineNode_;
 }

@@ -55,3 +55,7 @@ Level::~Level() {
 Player* Level::getPlayer() {
     return impl_->player_.get();
 }
+
+const DynamicTube* Level::getTube() const {
+    return impl_->tube_.get();
+}

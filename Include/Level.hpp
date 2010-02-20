@@ -5,10 +5,12 @@
 #pragma once
 
 #include "Game.hpp"
-#include "Player.hpp"
 #include <memory>
 
 namespace Warp {
+
+class DynamicTube;
+class Player;
 
 class Level {
 public:
@@ -22,6 +24,7 @@ public:
 
     Player* getPlayer(); // no const so that other classes can mutate the data
 
+    const DynamicTube* getTube() const;
 private:
     Level(const Level&);
 

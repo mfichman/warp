@@ -21,8 +21,13 @@ public:
     /** Destructor */
     ~Player();
 
-    void setPosition(const Ogre::Vector3& pos);
     const Ogre::Vector3& getPosition() const;
+
+    /** Sets the current spine node */
+    void setSpineNode(const SpineNode& node);
+
+	/** Gets the current spine node */
+	const SpineNode& getSpineNode() const;
 
 private:
     std::auto_ptr<Impl> impl_;

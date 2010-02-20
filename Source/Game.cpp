@@ -27,8 +27,8 @@ extern "C" {
 
 #include "OscListener.hpp"
 #include "OscSender.hpp"
-#include "BeatLoop.hpp"
 #include "Level.hpp"
+#include "Player.hpp"
 
 using namespace Warp;
 using namespace Ogre;
@@ -63,7 +63,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         solver_(0),
         world_(0),
         level_(0),
-        playerPosition_(Vector3::ZERO),
         physicsAccumulator_(0.0f),
         root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")) {
     
@@ -196,9 +195,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
         world_->setGravity(btVector3(0, 0, 0));
         btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 
-        spineNode_.position = Vector3::ZERO;
-        spineNode_.forward = -Vector3::UNIT_Z;
-        spineNode_.index = 0;
 	}
 
     /** Loads the scripting engine */
@@ -376,7 +372,8 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	/** Lua callback.  Get the light state */
     static int luaGetSpineNodeId(lua_State* env) {
         Impl* impl = (Impl*)lua_touserdata(env, lua_upvalueindex(1));
-        lua_pushinteger(env, impl->spineNode_.index);
+        int index = 0; // static right now
+        lua_pushinteger(env, index);
         return 1;
 	}
     
@@ -460,10 +457,6 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
     // Current Level object:
     auto_ptr<Level> level_;
-
-    // Current spine node
-    SpineNode spineNode_;
-    Vector3 playerPosition_;
 };
 
 Game::Game() : impl_(new Impl()) {
@@ -535,19 +528,14 @@ void Game::removeListener(Listener* listener) {
 }
 
 void Game::setSpineNode(const SpineNode& node) {
-    if (node.index != impl_->spineNode_.index) {
+    if (node.index != getSpineNode().index) {
         cout << "Current spine node: " << node.index << endl;
     }
-    impl_->spineNode_ = node;
-
+    impl_->level_->getPlayer()->setSpineNode(node);
 }
 
 const SpineNode& Game::getSpineNode() const {
-	return impl_->spineNode_;
-}
-
-void Game::setPlayerPosition(const Vector3& pos) {
-    impl_->level_->getPlayer()->setPosition(pos);
+	return impl_->level_->getPlayer()->getSpineNode();
 }
 
 const Vector3& Game::getPlayerPosition() const {
@@ -556,4 +544,8 @@ const Vector3& Game::getPlayerPosition() const {
 
 void Game::loadLevel(std::string name) {
     impl_->level_.reset(new Level(this, name));
+}
+
+const Level* Game::getLevel() const {
+    return impl_->level_.get();
 }

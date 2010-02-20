@@ -4,7 +4,8 @@
  ******************************************************************************/
 #pragma once
 
-#include <Game.hpp>
+#include "Game.hpp"
+#include <Ogre.h>
 #include <memory>
 #include <string>
 
@@ -20,8 +21,11 @@ public:
     /** Destructor, destroys the tube */
     ~DynamicTube();
 
+    SpineProjection getSpineProjection(const Ogre::Vector3& v) const;
+
 private:
     DynamicTube(const DynamicTube&);
+
     DynamicTube& operator=(const DynamicTube&);
 
 	std::auto_ptr<Impl> impl_;

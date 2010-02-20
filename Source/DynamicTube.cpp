@@ -192,68 +192,9 @@ struct DynamicTube::Impl : public Game::Listener {
 	    }
     }
 
-    int mod(int num, int divisor) {
-        int remainder = num % divisor;
-        if (remainder < 0) remainder += divisor;
-        return remainder;
-    }
 
     /** Called when a new frame is detected */
 	void onTimeStep() {
-        const Vector3& position = game_->getPlayerPosition();
-
-
-		// BEGIN FIND NEAREST NODES
-        // Find best node
-        int prevIndex = 0;
-        int nextIndex = 1;
-
-        int searched = 0; // optimization
-        bool found = false; // optimization
-        
-        float minDistance = FLT_MAX;
-        int start = game_->getSpineNode().index;
-        int end = mod(start-1, nodes_.size());
-        for (int i = start; i != end; i = (i+1) % nodes_.size()) {
-            Vector3 v0 = position - nodes_[i];
-            Vector3 v1 = nodes_[mod(i+1, nodes_.size())] - nodes_[i];
-            
-            float distance = nodes_[i].distance(position);
-            if (distance < minDistance) {                    
-                if (v0.angleBetween(v1) <= Radian(Math::PI/2)) {
-                    minDistance = distance;
-                    prevIndex = i;
-                    nextIndex = mod(i+1, nodes_.size());
-                    found = true; // optimization
-                }
-            }
-            if (searched > 10 && found) break; // optimization
-            searched++; // optimization
-        }
-       
-        if (prevIndex > nextIndex && prevIndex != nodes_.size()-1 && nextIndex != 0) {
-            std::swap(nextIndex, prevIndex);
-        }
-
-        const Vector3& prev = nodes_[prevIndex];
-        const Vector3& next = nodes_[nextIndex];
-		const Vector3& nextnext = nodes_[mod(nextIndex+1, nodes_.size())];
-		Vector3 forward1 = (next - prev).normalisedCopy();
-		Vector3 forward2 = (nextnext - next).normalisedCopy();
-
-		// END FIND NEAREST NODES
-                                         
-        // projection of relative position in the direction of motion
-        // divided by distance to the next node
-        float alpha = forward1.dotProduct(position - prev)/next.distance(prev);
-
-        SpineNode node;
-        node.position = (1 - alpha)*prev + (alpha)*next;
-        node.forward = (1 - alpha)*forward1 + (alpha)*forward2;
-        node.forward.normalise();
-        node.index = prevIndex;
-
-        game_->setSpineNode(node);
 	}
 
     /** These parameters are exclusively for vertex generation */
@@ -283,4 +224,65 @@ DynamicTube::DynamicTube(Game* game, const std::string& name) : impl_(new Impl(g
 
 DynamicTube::~DynamicTube() {
 
+}
+
+SpineProjection DynamicTube::getSpineProjection(const Vector3& v) const {
+    SpineProjection result;
+        const Vector3& position = impl_->game_->getPlayerPosition();
+
+
+		// BEGIN FIND NEAREST NODES
+        // Find best node
+        int prevIndex = 0;
+        int nextIndex = 1;
+
+        int searched = 0; // optimization
+        bool found = false; // optimization
+        
+        float minDistance = FLT_MAX;
+        int start = impl_->game_->getSpineNode().index;
+        int end = mod(start-1, impl_->nodes_.size());
+        for (int i = start; i != end; i = (i+1) % impl_->nodes_.size()) {
+            Vector3 v0 = position - impl_->nodes_[i];
+            Vector3 v1 = impl_->nodes_[mod(i+1, impl_->nodes_.size())] - impl_->nodes_[i];
+            
+            float distance = impl_->nodes_[i].distance(position);
+            if (distance < minDistance) {                    
+                if (v0.angleBetween(v1) <= Radian(Math::PI/2)) {
+                    minDistance = distance;
+                    prevIndex = i;
+                    nextIndex = mod(i+1, impl_->nodes_.size());
+                    found = true; // optimization
+                }
+            }
+            if (searched > 10 && found) break; // optimization
+            searched++; // optimization
+        }
+       
+        if (prevIndex > nextIndex && prevIndex != impl_->nodes_.size()-1 && nextIndex != 0) {
+            std::swap(nextIndex, prevIndex);
+        }
+
+        const Vector3& prev = impl_->nodes_[prevIndex];
+        const Vector3& next = impl_->nodes_[nextIndex];
+		const Vector3& nextnext = impl_->nodes_[mod(nextIndex+1, impl_->nodes_.size())];
+		Vector3 forward1 = (next - prev).normalisedCopy();
+		Vector3 forward2 = (nextnext - next).normalisedCopy();
+
+		// END FIND NEAREST NODES
+                                         
+        // projection of relative position in the direction of motion
+        // divided by distance to the next node
+        float alpha = forward1.dotProduct(position - prev)/next.distance(prev);
+
+        SpineNode node;
+        node.position = (1 - alpha)*prev + (alpha)*next;
+        node.forward = (1 - alpha)*forward1 + (alpha)*forward2;
+        node.forward.normalise();
+        node.index = prevIndex;
+
+        impl_->game_->setSpineNode(node);
+        result.position = node.position;
+        result.forward = node.forward;
+    return result;
 }
