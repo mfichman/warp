@@ -22,7 +22,8 @@ struct Player::Impl : public Game::Listener, public btMotionState {
     Impl(Game* game, const string& name) :
         game_(game),
         name_(name),
-        position_(Vector3::ZERO)
+        position_(Vector3::ZERO),
+        spineNode_i_(0)
     {
         // initialize spine node (kill later)
         spineNode_.position = Vector3::ZERO;
@@ -91,7 +92,7 @@ struct Player::Impl : public Game::Listener, public btMotionState {
 		Vector3 position(btposition.x(), btposition.y(), btposition.z());
 		Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
 
-        SpineProjection projection = game_->getLevel()->getTube()->getSpineProjection(position);
+        SpineProjection projection = game_->getLevel()->getTube()->getSpineProjection(position, spineNode_i_);
         
         //float speed = body_->getLinearVelocity().length();
 		//Vector3 forward = speed > 0.01f ? Vector3(btforward.x(), btforward.y(), btforward.z()) : Vector3::UNIT_Z;

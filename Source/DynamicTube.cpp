@@ -226,94 +226,71 @@ DynamicTube::~DynamicTube() {
 
 }
 
-SpineProjection DynamicTube::getSpineProjection(const Vector3& v) const {
+SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int & node_i) const {
     SpineProjection result;
-   /*
-		// BEGIN FIND NEAREST NODES
-        // Find best node
-        int prevIndex = 0;
-        int nextIndex = 1;
 
-        int searched = 0; // optimization
-        bool found = false; // optimization
-        
-        float minDistance = FLT_MAX;
-        int start = impl_->game_->getSpineNode().index;
-        int end = mod(start-1, impl_->nodes_.size());
-        for (int i = start; i != end; i = (i+1) % impl_->nodes_.size()) {
-            Vector3 v0 = v - impl_->nodes_[i];
-            Vector3 v1 = impl_->nodes_[mod(i+1, impl_->nodes_.size())] - impl_->nodes_[i];
-            
-            float distance = impl_->nodes_[i].distance(v);
-            if (distance < minDistance) {                    
-                if (v0.angleBetween(v1) <= Radian(Math::PI/2)) {
-                    minDistance = distance;
-                    prevIndex = i;
-                    nextIndex = mod(i+1, impl_->nodes_.size());
-                    found = true; // optimization
-                }
-            }
-            if (searched > 10 && found) break; // optimization
-            searched++; // optimization
-        }
-       
-        if (prevIndex > nextIndex && prevIndex != impl_->nodes_.size()-1 && nextIndex != 0) {
-            std::swap(nextIndex, prevIndex);
+    int prev_i = 0;
+    int next_i = 0;
+
+    const std::vector<Vector3>& nodes = impl_->nodes_;
+    const int n_nodes = nodes.size();
+
+    // find the closest node to v near node_i
+    int closest_i = node_i;
+    float minDistance = nodes[node_i].distance(v);
+
+    // this loop will discover the local min in distance
+    while(true) {
+        // try the node in front and behind:
+        float nextDistance = nodes[mod(closest_i+1, n_nodes)].distance(v);
+        if (nextDistance < minDistance) {
+            minDistance = nextDistance;
+            closest_i = mod(closest_i + 1, n_nodes);
+            continue;
         }
 
-        const Vector3& prev = impl_->nodes_[prevIndex];
-        const Vector3& next = impl_->nodes_[nextIndex];
-		const Vector3& nextnext = impl_->nodes_[mod(nextIndex+1, impl_->nodes_.size())];
-		Vector3 forward1 = (next - prev).normalisedCopy();
-		Vector3 forward2 = (nextnext - next).normalisedCopy();
-
-		// END FIND NEAREST NODES
-    */                                     
-
-    int prevIndex = 0;
-    int nextIndex = 0;
-
-    int closestIndex = 0;
-
-    float minDistance = FLT_MAX;
-    std::vector<Vector3>& nodes = impl_->nodes_;
-
-    for (size_t i = 0; i < nodes.size(); i++) {
-        float curDist = nodes[i].distance(v);
-        if (curDist < minDistance) {
-            minDistance = curDist;
-            closestIndex = i;
+        float prevDistance = nodes[mod(closest_i-1, n_nodes)].distance(v);
+        if (prevDistance < minDistance) {
+            minDistance = prevDistance;
+            closest_i = mod(closest_i - 1, n_nodes);
+            continue;
         }
 
+        break;
     }
+    // return the value by reference
+    node_i = closest_i;
 
-    Vector3 forward = (nodes[mod(closestIndex + 1, nodes.size())] - nodes[closestIndex]).normalisedCopy();
-    float projected_v = forward.dotProduct(v - nodes[closestIndex]);
+    // get the previous and next node indexes
+    Vector3 forward = (nodes[mod(closest_i + 1, n_nodes)] - nodes[closest_i]).normalisedCopy();
+    float projected_v = forward.dotProduct(v - nodes[closest_i]);
     if (projected_v > 0) {
-        prevIndex = closestIndex;
-        nextIndex = mod(closestIndex + 1, nodes.size());
+        prev_i = closest_i;
+        next_i = mod(closest_i + 1, n_nodes);
     } else {
-        prevIndex = mod(closestIndex - 1, nodes.size());
-        nextIndex = closestIndex;
+        prev_i = mod(closest_i - 1, n_nodes);
+        next_i = closest_i;
     }
 
-    Vector3 prev = nodes[prevIndex];
-    Vector3 next = nodes[nextIndex];
+    // compute location and forward vectors
+    Vector3 prev = nodes[prev_i];
+    Vector3 next = nodes[next_i];
     Vector3 prevForward = (next - prev).normalisedCopy();
-    Vector3 nextForward = (nodes[mod(nextIndex + 1, nodes.size())] - next).normalisedCopy();
+    Vector3 nextForward = (nodes[mod(next_i + 1, n_nodes)] - next).normalisedCopy();
 
-        // projection of relative position in the direction of motion
-        // divided by distance to the next node
-        float alpha = prevForward.dotProduct(v - prev)/next.distance(prev);
+    // projection of relative position in the direction of motion
+    // divided by distance to the next node
+    float alpha = prevForward.dotProduct(v - prev)/next.distance(prev);
 
-        SpineNode node;
-        node.position = (1 - alpha)*prev + (alpha)*next;
-        node.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
-        node.forward.normalise();
-        node.index = prevIndex;
+    // interpolate
+    SpineNode node;
+    node.position = (1 - alpha)*prev + (alpha)*next;
+    node.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
+    node.forward.normalise();
+    node.index = prev_i;
 
-        impl_->game_->setSpineNode(node);
-        result.position = node.position;
-        result.forward = node.forward;
+    impl_->game_->setSpineNode(node);
+    result.position = node.position;
+    result.forward = node.forward;
     return result;
 }

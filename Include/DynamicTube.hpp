@@ -21,7 +21,7 @@ public:
     /** Destructor, destroys the tube */
     ~DynamicTube();
 
-    SpineProjection getSpineProjection(const Ogre::Vector3& v) const;
+    SpineProjection getSpineProjection(const Ogre::Vector3& v, int& node_i) const;
 
 private:
     DynamicTube(const DynamicTube&);
