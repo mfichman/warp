@@ -3,8 +3,7 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <FreeCamera.hpp>
-#include <Objects.hpp>
+#include "FreeCamera.hpp"
 
 using namespace Warp;
 using namespace Ogre;

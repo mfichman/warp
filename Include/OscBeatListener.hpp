@@ -50,8 +50,8 @@ public:
 
     OscBeatListener(int p)
         : port(p)
-		, thrd_(new boost::thread(&OscBeatListener::startListening, this))
     {
+		thrd_.reset(new boost::thread(&OscBeatListener::startListening, this));
         //thrd_->join();
     }
 

@@ -3,7 +3,7 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <Overlays.hpp>
+#include "Overlays.hpp"
 #include <CEGUI/CEGUI.h>
 
 using namespace Warp;

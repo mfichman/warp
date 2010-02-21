@@ -6,7 +6,6 @@
 #include "Level.hpp"
 #include "DynamicTube.hpp"
 #include "Player.hpp"
-#include "Objects.hpp"
 #include "Script.hpp"
 #include <list>
 #include <map>

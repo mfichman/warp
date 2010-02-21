@@ -65,14 +65,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\Source\Ball.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Tools\CurveTool.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Source\DynamicTube.cpp"
 				>
 			</File>
@@ -89,15 +81,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Source\LevelManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\Source\Main.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Source\Objects.cpp"
 				>
 			</File>
 			<File
@@ -105,15 +89,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Tools\RoadTool.cpp"
+				RelativePath="..\Source\Player.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\Source\Script.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Source\StaticTube.cpp"
 				>
 			</File>
 		</Filter>
@@ -123,11 +103,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\Include\Ball.hpp"
+				RelativePath="..\Include\DynamicTube.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Include\DynamicTube.hpp"
+				RelativePath="..\Include\Enemy.hpp"
 				>
 			</File>
 			<File
@@ -143,19 +123,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Include\LevelManager.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\Object.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\Objects.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\OscListener.hpp"
+				RelativePath="..\Include\OscBeatListener.hpp"
 				>
 			</File>
 			<File
@@ -167,11 +135,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Include\Player.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\Script.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Include\StaticTube.hpp"
+				RelativePath="..\Include\Warp.hpp"
 				>
 			</File>
 		</Filter>
@@ -181,10 +153,6 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
-		<File
-			RelativePath=".\readme.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

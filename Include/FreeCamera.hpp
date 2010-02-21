@@ -4,8 +4,8 @@
  ******************************************************************************/
 #pragma once
 
+#include "Game.hpp"
 #include <memory>
-#include <Game.hpp>
 
 namespace Warp {
 

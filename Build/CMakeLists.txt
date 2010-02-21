@@ -31,5 +31,4 @@ link_directories("D:\\Include\\OgreSDK\\lib")
 link_directories("D:\\Include\\OgreSDK\\lib\\opt")
 
 add_subdirectory(..\\Source ..\\Build\\Temp)
-add_subdirectory(..\\Tools ..\\Build\\Temp2)
 

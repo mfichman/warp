@@ -5,7 +5,6 @@
 
 #include "Warp.hpp"
 #include "Game.hpp"
-#include "Objects.hpp"
 #include "Script.hpp"
 #include "Level.hpp"
 #include "Player.hpp"
@@ -69,6 +68,10 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 
 	/** Destroys subsystems */
 	~Impl() {
+		// Destroy the level before tearing down the physics and graphics
+		// engines
+		level_.reset();
+
 		if (guiRenderer_) { delete guiRenderer_;	}
 		if (guiSystem_) { delete guiSystem_; }
 		if (root_) { delete root_; }
@@ -446,6 +449,7 @@ struct Game::Impl : public Ogre::WindowEventListener, Ogre::FrameListener {
 	OscSender* osc_sender_;
 	OscBeatListener* osc_listener_;
 
+	
     // Current Level object:
     auto_ptr<Level> level_;
 };

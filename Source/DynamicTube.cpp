@@ -3,10 +3,8 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include <DynamicTube.hpp>
-#include <Objects.hpp>
+#include "DynamicTube.hpp"
 #include <cfloat>
-
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
 using namespace Warp;

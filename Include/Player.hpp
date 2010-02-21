@@ -4,9 +4,8 @@
  ******************************************************************************/
 #pragma once
 
-
-#include <Ogre.h>
 #include "Game.hpp"
+#include <Ogre.h>
 #include <memory>
 
 namespace Warp {
