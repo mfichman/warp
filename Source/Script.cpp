@@ -344,7 +344,7 @@ lua_State* Warp::operator>>(lua_State* env, std::string& s) {
     return env;
 }
 
-/** reads beat loop info from an id and table of values */
+/** Reads beat loop info from an id and table of values */
 lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
     assert(lua_istable(env, -1));
 
@@ -372,4 +372,12 @@ lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
     env >> bl.name;
 
     return env;
+}
+
+void Warp::loadScript(lua_State* env, const std::string& name) {
+	if (luaL_dofile(env, name.c_str())) {
+        string message(lua_tostring(env, -1));
+        lua_pop(env, 2);
+        throw runtime_error("Script error: " + message);
+    }
 }

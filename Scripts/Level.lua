@@ -1,10 +1,10 @@
 -- Warp: CS248 Final Project
 -- Matt Fichman & Francesco Georg
 
-Game = Object:new()
+Level = Object:new()
 
 -- Waits for the given amount of timesteps before returning
-function Game:sleep(time)
+function Level:sleep(time)
     if (time <= 0) then return end
     coroutine.yield(function()
         time = time - 1
@@ -13,7 +13,7 @@ function Game:sleep(time)
 end
 
 -- Waits for the player to pass the given spine node before returning
-function Game:waitForSpineNode(id)
+function Level:waitForSpineNode(id)
     if (self:getSpineNodeId() >= id) then return end
     coroutine.yield(function()
         return self:getSpineNodeId() >= id
@@ -21,7 +21,7 @@ function Game:waitForSpineNode(id)
 end
 
 -- Waits for the player to return to the given spine node
-function Game:waitForSpineNodeReverse(id)
+function Level:waitForSpineNodeReverse(id)
     if (self:getSpineNodeId() < id) then return end
     coroutine.yield(function()
         return self:getSpineNodeId() < id
@@ -34,7 +34,7 @@ end
 -----------------
 
 -- Waits for the next beat before returning
-function Game:waitForBeat()
+function Level:waitForBeat()
     local beat = self:getBeat()
     coroutine.yield(function()
         return self:getBeat() ~= beat
@@ -42,7 +42,7 @@ function Game:waitForBeat()
 end
 
 -- Waits for the downbeat of the next measure before returning
-function Game:waitForDownbeat()
+function Level:waitForDownbeat()
     if (self:getBeat() % 4 == 0) then self:waitForBeat(1) end
     coroutine.yield(function()
         return self:getBeat()%4 == 0
@@ -50,7 +50,7 @@ function Game:waitForDownbeat()
 end
 
 -- Waits for the next set of 4 measures before returning
-function Game:waitForBeatSet()
+function Level:waitForBeatSet()
     if (self:getBeat() == 0) then self:waitForBeat(1) end
     coroutine.yield(function()
         return self:getBeat() == 0

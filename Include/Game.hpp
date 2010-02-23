@@ -44,6 +44,12 @@ public:
     /** Returns the physics world */
     btDynamicsWorld* getWorld() const;
 
+	/** Returns the OSC listener */
+	OscBeatListener* getOscBeatListener() const;
+
+	/** Returns the OSC sender */
+	OscSender* getOscSender() const;
+
     /** Returns the normalized mouse position in the range (-1, 1) */
     float getMouseNormalizedX() const;
 
@@ -74,17 +80,6 @@ private:
 	// Ogre callbacks
 	virtual void windowClosed(Ogre::RenderWindow* rw);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
-
-	// Lua callbacks
-	static int luaGetNode(lua_State* env);
-	static int luaSetNode(lua_State* env);
-	static int luaGetLight(lua_State* env);
-	static int luaSetLight(lua_State* env);
-	static int luaCreateObject(lua_State* env);
-	static int luaGetSpineNodeId(lua_State* env);
-	static int luaGetBeat(lua_State* env);
-	static int luaQueueStartLoop(lua_State* env);
-	static int luaStartBeatServer(lua_State* env);
 
 	// Graphics objects
     Ogre::Root* root_;

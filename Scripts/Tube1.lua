@@ -4,24 +4,24 @@
 --print("Sleeping")
 --wSleep(100)
 --print("Awake")
-Game:queueStartLoop("loop1", {path="loops/Effected Beat 01.wav", bpm=113, n_beats=16})
-Game:startBeatServer({bpm=110});
+Level:queueStartLoop("loop1", {path="loops/Effected Beat 01.wav", bpm=113, n_beats=16})
+Level:startBeatServer({bpm=110});
 
 print("Waiting")
-Game:waitForSpineNode(5)
+Level:waitForSpineNode(5)
 print("Awake")
 
-Game:queueStartLoop("loop2", {path="loops/Effected Beat 02.wav", bpm=110, n_beats=16})
-Game:waitForBeatSet()
-Game:setLight("Light", {diffuse={0, 0, 1}})
+Level:queueStartLoop("loop2", {path="loops/Effected Beat 02.wav", bpm=110, n_beats=16})
+Level:waitForBeatSet()
+Level:setLight("Light", {diffuse={0, 0, 1}})
 
 while (true) do
 
-Game:waitForBeat()
-Game:setLight("Light", {diffuse={1, 0, 0}})
+Level:waitForBeat()
+Level:setLight("Light", {diffuse={1, 0, 0}})
 
-Game:waitForBeat()
-Game:setLight("Light", {diffuse={0, 1, 0}})
+Level:waitForBeat()
+Level:setLight("Light", {diffuse={0, 1, 0}})
 
 end
 

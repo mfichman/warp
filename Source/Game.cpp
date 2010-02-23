@@ -7,9 +7,9 @@
 
 #include "Level.hpp"
 #include "Player.hpp"
-
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
+
 #include <Ogre.h>
 #include <OgreCEGUIRenderer.h>
 #include <CEGUI/CEGUI.h>
@@ -202,47 +202,6 @@ void Game::loadScript(const std::string& name) {
 void Game::loadScripting() {
     scriptState_ = lua_open();
     luaL_openlibs(scriptState_);
-
-	lua_State* env = scriptState_;
-
-	loadScript("Scripts/Object.lua");
-	loadScript("Scripts/Game.lua");
-	
-	lua_getglobal(env, "Game"); // Get the Game table
-
-	lua_pushlightuserdata(env, this); // Modifies an entity 
-    lua_pushcclosure(env, &Game::luaGetNode, 1);
-    lua_setfield(env, -2, "getNode");
-
-    lua_pushlightuserdata(env, this); // Modifies an entity 
-    lua_pushcclosure(env, &Game::luaSetNode, 1);
-    lua_setfield(env, -2, "setNode");
-
-    lua_pushlightuserdata(env, this); // Modifies a light
-    lua_pushcclosure(env, &Game::luaGetLight, 1);
-    lua_setfield(env, -2, "getLight");
-
-    lua_pushlightuserdata(env, this); // Modifies a light
-    lua_pushcclosure(env, &Game::luaSetLight, 1);
-    lua_setfield(env, -2, "setLight");
-
-	lua_pushlightuserdata(env, this); // Returns the current spine node
-    lua_pushcclosure(env, &Game::luaGetSpineNodeId, 1);
-    lua_setfield(env, -2, "getSpineNodeId");
-
-    lua_pushlightuserdata(env, this); // Gets the current beat
-    lua_pushcclosure(env, &Game::luaGetBeat, 1);
-    lua_setfield(env, -2, "getBeat");
-
-    lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
-    lua_pushcclosure(env, &Game::luaQueueStartLoop, 1);
-    lua_setfield(env, -2, "queueStartLoop");
-
-    lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
-    lua_pushcclosure(env, &Game::luaStartBeatServer, 1);
-    lua_setfield(env, -2, "startBeatServer");
-
-	lua_pop(env, 1); // Pop the Game table
 }
 
 /** load up osc interaction */
@@ -287,158 +246,6 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 	return true;
 }
 
-
-
-/** Lua callback.  Gets the given values for the node */
-int Game::luaGetNode(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-    if (!lua_isstring(env, 1)) {
-        lua_pushstring(env, "Expected string for node name");
-        lua_error(env);
-    }
-    string name(lua_tostring(env, 1)); // First argument: name of the entity
-    if (!game->sceneManager_->hasSceneNode(name)) {
-        lua_pushstring(env, "Invalid node name");
-        lua_error(env);
-    }
-    SceneNode* node = game->sceneManager_->getSceneNode(name);
-    env << *node;
-
-    return 1;
-}
-
-/** Lua callback.  Gets the given values for the node */
-int Game::luaSetNode(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-    if (!lua_isstring(env, 1)) {
-        lua_pushstring(env, "Expected string for node name");
-        lua_error(env);
-    }
-    string name(lua_tostring(env, 1)); // First argument: name of the entity
-    if (!game->sceneManager_->hasEntity(name)) {
-        lua_pushstring(env, "Invalid node name");
-        lua_error(env);
-    }
-    SceneNode* node = game->sceneManager_->getSceneNode(name);
-    env >> *node;
-
-    return 1;
-}
-
-/** Lua callback.  Get the light state */
-int Game::luaGetLight(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-    if (!lua_isstring(env, 1)) {
-        lua_pushstring(env, "Expected string for entity name");
-        lua_error(env);
-    }       
-    string name(lua_tostring(env, 1)); // First argument: name of the light
-    if (!game->sceneManager_->hasLight(name)) {
-        lua_pushstring(env, "Invalid entity name");
-        lua_error(env);
-    }
-    Light* light = game->sceneManager_->getLight(name);
-    env << *light;
-
-    return 1;
-}
-
-/** Lua callback.  Sets the given values for the light */
-int Game::luaSetLight(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-    if (!lua_isstring(env, 1)) {
-        lua_pushstring(env, "Expected string for entity name");
-        lua_error(env);
-    }       
-    string name(lua_tostring(env, 1)); // First argument: name of the light
-    if (!game->sceneManager_->hasLight(name)) {
-        lua_pushstring(env, "Invalid entity name");
-        lua_error(env);
-    }
-    Light* light = game->sceneManager_->getLight(name);
-    env >> *light;
-    
-    return 0;
-}
-
-/** Lua callback.  Returns the current spine node ID. */
-int Game::luaGetSpineNodeId(lua_State* env) {
-	Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-	if (game->level_.get()) {
-		lua_pushinteger(env, game->level_->getPlayer()->getSpineNodeIndex());
-	} else {
-		lua_pushnil(env);
-	}
-    return 1;
-}
-
-/** Lua callback.  Creates an object */
-int Game::luaCreateObject(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-
-    return 0;
-}
-
-/** Lua callback.  Gets the current beat as set by chuck */
-int Game::luaGetBeat(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-    lua_pushinteger(env, game->oscListener_->getCurBeat());
-    return 1;
-}
-
-/** Lua callback.  Sends chuck the message to start a loop
- *  It gives a string id for the loop and the pathname to find it
- */
-int Game::luaQueueStartLoop(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-    // get msg
-	BeatLoop beat_loop;
-    env >> beat_loop;
-
-    // send msg
-    OscSender* sender = game->oscSender_;
-    sender->beginMsg("/loop/start");
-    sender->addString(beat_loop.name);
-    sender->addString(beat_loop.path_name);
-    sender->addInt(beat_loop.bpm);
-    sender->addInt(beat_loop.n_beats);
-    sender->sendMsg();
-    return 1;
-}
-
-int Game::luaStartBeatServer(lua_State* env) {
-    Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
-    OscSender* sender = game->oscSender_;
-
-    int bpm = 120; // default value
-    lua_getfield(env, -1, "bpm");
-    if (!lua_isnil(env, -1)) {
-        bpm = lua_tointeger(env, -1);
-    }
-    lua_pop(env, 1); 
-    sender->beginMsg("/server/start");
-    sender->addInt(bpm);
-    sender->sendMsg();
-    return 1;
-}
-
 OIS::Keyboard* Game::getKeyboard() const { 
 	return keyboard_; 
 }
@@ -471,6 +278,14 @@ btDynamicsWorld* Game::getWorld() const {
     return world_;
 }
 
+OscBeatListener* Game::getOscBeatListener() const {
+	return oscListener_;
+}
+
+OscSender* Game::getOscSender() const {
+	return oscSender_;
+}
+
 float Game::getMouseNormalizedX() const {
 	unsigned int width, height, depth;
 	int top, left;
@@ -501,5 +316,7 @@ void Game::removeListener(GameListener* listener) {
 }
 
 void Game::setLevel(const string& name) {
+	// Make sure the old level is released first!
+	level_.reset();
 	level_.reset(new Level(this, name));
 }	
