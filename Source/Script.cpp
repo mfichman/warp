@@ -7,6 +7,7 @@
 #include "Game.hpp"
 
 #include <stdexcept>
+#include <boost/filesystem/operations.hpp>
 extern "C" {
 #include <lua/lua.h>
 #include <lua/lualib.h>
@@ -16,6 +17,7 @@ extern "C" {
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
+using namespace boost::filesystem;
 
 /** Initializes the script */
 Script::Script(Game* game, const std::string& path) :
@@ -380,4 +382,21 @@ void Warp::loadScript(lua_State* env, const std::string& name) {
         lua_pop(env, 2);
         throw runtime_error("Script error: " + message);
     }
+}
+
+void Warp::loadScriptFolder(lua_State* env, const std::string& dir) {
+	static const string ext(".lua");
+	path scripts(dir);
+	directory_iterator end;
+	for (directory_iterator i(scripts); i != end; ++i) {
+		if (!is_directory(*i)) {
+			size_t match = i->filename().rfind(ext);
+
+			// Make sure the file ends in .lua
+			if (match + ext.length() == i->filename().length()) {
+				loadScript(env, i->path().file_string());
+			}
+		}
+	}
+
 }

@@ -41,6 +41,9 @@ void Level::loadScriptCallbacks() {
 
 	loadScript(env, "Scripts/Object.lua");
 	loadScript(env, "Scripts/Level.lua");
+	loadScript(env, "Scripts/Enemy.lua");
+
+	loadScriptFolder(env, "Scripts/Enemies/");
 
 	lua_getglobal(env, "Level"); // Get the Level table
 

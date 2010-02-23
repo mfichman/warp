@@ -117,5 +117,6 @@ lua_State* operator>>(lua_State* env, std::string& s);
 lua_State* operator>>(lua_State* env, Warp::BeatLoop & bl);
 
 void loadScript(lua_State* env, const std::string& name);
+void loadScriptFolder(lua_State* env, const std::string& dir);
 
 }
