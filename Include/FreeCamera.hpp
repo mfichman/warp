@@ -4,15 +4,12 @@
  ******************************************************************************/
 #pragma once
 
-#include "Game.hpp"
-#include <memory>
+#include "Warp.hpp"
 
 namespace Warp {
 
-class FreeCamera  {
+class FreeCamera : public GameListener  {
 public:
-	struct Impl;
-
 	/** Creates a new ball */
     FreeCamera(Game* game);
 
@@ -20,7 +17,11 @@ public:
     ~FreeCamera();
 
 private:
-    std::auto_ptr<Impl> impl_;
+	FreeCamera(const FreeCamera&);
+    FreeCamera& operator=(const FreeCamera&);
+	virtual void onTimeStep();
+
+	Game* game_;
 };
 
 }

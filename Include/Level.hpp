@@ -4,33 +4,37 @@
  ******************************************************************************/
 #pragma once
 
-#include "Game.hpp"
-#include <memory>
+#include "Warp.hpp"
 
 namespace Warp {
 
-class DynamicTube;
-class Player;
-
-class Level {
+class Level : public GameListener {
 public:
-	struct Impl;
-
 	/** Creates a new script and begins executing it inside a coroutine */
     Level(Game* game, const std::string& name);
 
     /** Destructor */
     ~Level();
 
-    const Player* getPlayer() const;
+	/** Returns the player object */
+	inline Player* getPlayer() const {
+		return player_.get();
+	}
 
-    const DynamicTube* getTube() const;
+	/** Returns the tube for this level */
+	inline DynamicTube* getTube() const {
+		return tube_.get();
+	}
+
 private:
     Level(const Level&);
-
     Level& operator=(const Level&);
+	virtual void onTimeStep();
 
-	std::auto_ptr<Impl> impl_;
+	Game* game_;
+	std::auto_ptr<DynamicTube> tube_;
+	std::auto_ptr<Script> script_;
+	std::auto_ptr<Player> player_;
 };
 
 

@@ -69,6 +69,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\Enemy.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\FreeCamera.cpp"
 				>
 			</File>

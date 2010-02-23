@@ -4,16 +4,12 @@
  ******************************************************************************/
 #pragma once
 
-#include "Game.hpp"
-#include <memory>
+#include "Warp.hpp"
 
 namespace Warp {
 
-class Game;
-
-class Overlays {
+class Overlays : public GameListener  {
 public:
-	struct Impl;
 
 	/** Creates a new set of overlays */
     Overlays(Game* game);
@@ -22,7 +18,12 @@ public:
     ~Overlays();
 
 private:
-	std::auto_ptr<Impl> impl_;
+	Overlays(const Overlays&);
+    Overlays& operator=(const Overlays&);
+	void onTimeStep();
+
+	Game* game_;
+	Ogre::Overlay* debug_;
 };
 
 }

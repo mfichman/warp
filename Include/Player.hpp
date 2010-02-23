@@ -4,29 +4,53 @@
  ******************************************************************************/
 #pragma once
 
-#include "Game.hpp"
-#include <Ogre.h>
-#include <memory>
+#include "Warp.hpp"
+
+#include <Bullet/btBulletDynamicsCommon.h>
 
 namespace Warp {
 
-class Player  {
+class Player : public GameListener, public btMotionState {
 public:
-	struct Impl;
-
 	/** Creates a new ball */
-    Player(Game* game, const std::string& name);
+    Player(Game* game, Level* level, const std::string& name);
 
     /** Destructor */
     ~Player();
 
+	/** Returns the player's current position */
     const Ogre::Vector3& getPosition() const;
 
 	/** Gets the current spine node index */
-	int getSpineNode() const;
-
+	int getSpineNodeIndex() const;
+		
 private:
-    std::auto_ptr<Impl> impl_;
+	Player(const Player&);
+    Player& operator=(const Player&);
+
+	// Bullet callbacks
+	virtual void getWorldTransform(btTransform& transform) const;
+	virtual void setWorldTransform(const btTransform& transform);
+
+	virtual void onTimeStep();
+
+	Game* game_;
+	Level* level_;
+
+	// Ogre scene data
+	std::string name_;
+	Ogre::SceneNode* node_;
+
+	// Collision data
+	std::auto_ptr<btCollisionShape> shape_;
+	std::auto_ptr<btRigidBody> body_;
+
+    // Information about position and orientation from Bullet
+    btTransform transform_;
+	Ogre::Vector3 position_;
+
+    int lastSpineNodeIndex_;
+
 };
 
 }

@@ -7,21 +7,12 @@
 #include "Warp.hpp"
 
 #include <memory>
-#include <Ogre.h>
-#include <OIS/OIS.h>
-#include <Bullet/btBulletDynamicsCommon.h>
-#include <Bullet/btBulletCollisionCommon.h>
-extern "C" { 
-#include <lua/lua.h> 
-}
+#include <list>
 
 namespace Warp {
 
-class Game {
+class Game : public Ogre::WindowEventListener, public Ogre::FrameListener {
 public: 
-	struct Impl; 
-	class Listener;
-    class Collidable;
 
 	/** Creates a new game */
 	Game();
@@ -50,12 +41,6 @@ public:
     /** Returns the main script engine handle */
     lua_State* getScriptState() const;
 
-    /** Returns the object factory */
-    Objects* getObjects() const;
-
-    /** Returns the overlays object */
-    Overlays* getOverlays() const;
-
     /** Returns the physics world */
     btDynamicsWorld* getWorld() const;
 
@@ -66,32 +51,75 @@ public:
     float getMouseNormalizedY() const;
 
 	/** Adds a new event listener, which is called at a fixed interval (0.01 s) */
-	void addListener(Listener* listener);
+	void addListener(GameListener* listener);
 
 	/** Removes an event listener */
-	void removeListener(Listener* listener);
+	void removeListener(GameListener* listener);
 
-    /** Attach a new level object (call to change levels) */
-    void loadLevel(std::string name);
-
-    const Level* getLevel() const;
+	/** Sets the current level by name */
+	void setLevel(const std::string& name);
     
 private:
-	std::auto_ptr<Impl> impl_;
-};
+	Game(const Game&);
+    Game& operator=(const Game&);
 
-class Game::Listener {
-public:
+	void loadScripting();
+    void loadResources();
+    void loadGraphics();
+    void loadInput();
+    void loadPhysics();
+    void loadOsc();
 
-	/** Called for every physics timestep (fixed at every 0.01 s) */
-	virtual void onTimeStep() {}
-};
+	// Ogre callbacks
+	virtual void windowClosed(Ogre::RenderWindow* rw);
+	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
-class Game::Collidable {
-public:
+	// Lua callbacks
+	static int luaGetNode(lua_State* env);
+	static int luaSetNode(lua_State* env);
+	static int luaGetLight(lua_State* env);
+	static int luaSetLight(lua_State* env);
+	static int luaCreateObject(lua_State* env);
+	static int luaGetSpineNodeId(lua_State* env);
+	static int luaGetBeat(lua_State* env);
+	static int luaQueueStartLoop(lua_State* env);
+	static int luaStartBeatServer(lua_State* env);
+
+	// Graphics objects
+    Ogre::Root* root_;
+    Ogre::Camera* camera_;
+    Ogre::SceneManager*	sceneManager_;
+    Ogre::Viewport*	viewport_;
+    Ogre::RenderWindow*	window_;
     
-    /** Called when an object collides with another object */
-    virtual void onCollision() {}
+	// GUI objects
+    CEGUI::OgreCEGUIRenderer* guiRenderer_;
+    CEGUI::System* guiSystem_;
+    
+	// Input objects
+    OIS::InputManager* inputManager_;
+    OIS::Keyboard* keyboard_;
+    OIS::Mouse*	mouse_;
+    
+	// Physics objects
+    btBroadphaseInterface* broadphase_;
+    btCollisionDispatcher* dispatcher_;
+    btConstraintSolver* solver_;
+    btDefaultCollisionConfiguration* collisionConfiguration_;
+    btDiscreteDynamicsWorld* world_;
+    float physicsAccumulator_;
+    
+	// Game objects
+	std::list<GameListener*> listeners_;
 
+    // Scripting objects
+    lua_State* scriptState_;
+
+	// Osc object
+	OscSender* oscSender_;
+	OscBeatListener* oscListener_;
+
+	// Current level
+	std::auto_ptr<Level> level_;
 };
 }

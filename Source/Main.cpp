@@ -29,7 +29,6 @@ int main(int argc, char** argv) {
         
         //Warp::Script script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
-        game->loadLevel("Tube1");
         //Warp::StaticTube tube(game.get(), "Test");
         //Warp::DynamicTube tube(game.get(), "Tube1");
         Warp::FreeCamera camera(game.get());
@@ -38,6 +37,7 @@ int main(int argc, char** argv) {
         //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
        //O/gre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
 
+		game->setLevel("Tube1");
 		game->getRoot()->startRendering();
         
     } catch (Exception& ex) {

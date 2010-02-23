@@ -4,15 +4,12 @@
  ******************************************************************************/
 #pragma once
 
-#include "Game.hpp"
-#include <memory>
+#include "Warp.hpp"
 
 namespace Warp {
 
-class Script {
+class Script : public GameListener {
 public:
-	struct Impl;
-
 	/** Creates a new script and begins executing it inside a coroutine */
     Script(Game* game, const std::string& name);
 
@@ -22,25 +19,16 @@ public:
 private:
     Script(const Script&);
     Script& operator=(const Script&);
+	void onTimeStep();
+	bool hasTriggerFired();
 
-	std::auto_ptr<Impl> impl_;
+	enum Event { WAIT_BEAT, WAIT_SPINE_NODE, SLEEP };
+
+	Game* game_;
+    std::string path_;
+    int trigger_;
+    int coroutine_;
+    Event waitEvent_;
 };
-
-
-/** Methods for sending Ogre and ODE values to a script */
-lua_State* operator<<(lua_State* env, const Ogre::Vector3& v);
-lua_State* operator<<(lua_State* env, const Ogre::Quaternion& q);
-lua_State* operator<<(lua_State* env, const Ogre::SceneNode& n);
-lua_State* operator<<(lua_State* env, const Ogre::Light& l);
-lua_State* operator<<(lua_State* env, const Ogre::ColourValue& c);
-
-/** Methods for reading Ogre and ODE values from a script */
-lua_State* operator>>(lua_State* env, Ogre::Vector3& v);
-lua_State* operator>>(lua_State* env, Ogre::Quaternion& q);
-lua_State* operator>>(lua_State* env, Ogre::SceneNode& n);
-lua_State* operator>>(lua_State* env, Ogre::Light& l);
-lua_State* operator>>(lua_State* env, Ogre::ColourValue& c);
-lua_State* operator>>(lua_State* env, std::string& s);
-lua_State* operator>>(lua_State* env, Warp::BeatLoop & bl);
 
 }
