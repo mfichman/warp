@@ -1,17 +1,10 @@
 -- Warp: CS248 Final Project
 -- Matt Fichman & Francesco Georg
 
-wEntity = {}
-
-function wEntity:new()
-
-
-end
-
-
+Game = Object:new()
 
 -- Waits for the given amount of timesteps before returning
-function wSleep(time)
+function Game:sleep(time)
     if (time <= 0) then return end
     coroutine.yield(function()
         time = time - 1
@@ -20,18 +13,18 @@ function wSleep(time)
 end
 
 -- Waits for the player to pass the given spine node before returning
-function wWaitForSpineNode(id)
-    if (wGetSpineNodeId() >= id) then return end
+function Game:waitForSpineNode(id)
+    if (self:getSpineNodeId() >= id) then return end
     coroutine.yield(function()
-        return wGetSpineNodeId() >= id
+        return self:getSpineNodeId() >= id
     end)
 end
 
 -- Waits for the player to return to the given spine node
-function wWaitForSpineNodeReverse(id)
-    if (wGetSpineNodeId() < id) then return end
+function Game:waitForSpineNodeReverse(id)
+    if (self:getSpineNodeId() < id) then return end
     coroutine.yield(function()
-        return wGetSpineNodeId() < id
+        return self:getSpineNodeId() < id
     end)
 end
 
@@ -41,25 +34,25 @@ end
 -----------------
 
 -- Waits for the next beat before returning
-function wWaitForBeat()
-    local beat = wGetBeat()
+function Game:waitForBeat()
+    local beat = self:getBeat()
     coroutine.yield(function()
-        return wGetBeat() ~= beat
+        return self:getBeat() ~= beat
     end)
 end
 
 -- Waits for the downbeat of the next measure before returning
-function wWaitForDownbeat()
-    if (wGetBeat()%4 == 0) then wWaitForBeat(1) end
+function Game:waitForDownbeat()
+    if (self:getBeat() % 4 == 0) then self:waitForBeat(1) end
     coroutine.yield(function()
-        return wGetBeat()%4 == 0
+        return self:getBeat()%4 == 0
     end)
 end
 
 -- Waits for the next set of 4 measures before returning
-function wWaitForBeatSet()
-    if (wGetBeat() == 0) then wWaitForBeat(1) end
+function Game:waitForBeatSet()
+    if (self:getBeat() == 0) then self:waitForBeat(1) end
     coroutine.yield(function()
-        return wGetBeat() == 0
+        return self:getBeat() == 0
     end)
 end

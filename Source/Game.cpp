@@ -188,48 +188,61 @@ void Game::loadPhysics() {
 
 }
 
+/** Loads a script */
+void Game::loadScript(const std::string& name) {
+	lua_State* env = scriptState_;
+	if (luaL_dofile(env, name.c_str())) {
+        string message(lua_tostring(env, -1));
+        lua_pop(env, 2);
+        throw runtime_error("Script error: " + message);
+    }
+}
+
 /** Loads the scripting engine */
 void Game::loadScripting() {
     scriptState_ = lua_open();
     luaL_openlibs(scriptState_);
 
-    lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
-    lua_pushcclosure(scriptState_, &Game::luaGetNode, 1);
-    lua_setglobal(scriptState_, "wGetNode");
+	lua_State* env = scriptState_;
 
-    lua_pushlightuserdata(scriptState_, this); // Modifies an entity 
-    lua_pushcclosure(scriptState_, &Game::luaSetNode, 1);
-    lua_setglobal(scriptState_, "wSetNode");
+	loadScript("Scripts/Object.lua");
+	loadScript("Scripts/Game.lua");
+	
+	lua_getglobal(env, "Game"); // Get the Game table
 
-    lua_pushlightuserdata(scriptState_, this); // Modifies a light
-    lua_pushcclosure(scriptState_, &Game::luaGetLight, 1);
-    lua_setglobal(scriptState_, "wGetLight");
+	lua_pushlightuserdata(env, this); // Modifies an entity 
+    lua_pushcclosure(env, &Game::luaGetNode, 1);
+    lua_setfield(env, -2, "getNode");
 
-    lua_pushlightuserdata(scriptState_, this); // Modifies a light
-    lua_pushcclosure(scriptState_, &Game::luaSetLight, 1);
-    lua_setglobal(scriptState_, "wSetLight");
+    lua_pushlightuserdata(env, this); // Modifies an entity 
+    lua_pushcclosure(env, &Game::luaSetNode, 1);
+    lua_setfield(env, -2, "setNode");
 
-	lua_pushlightuserdata(scriptState_, this); // Returns the current spine node
-    lua_pushcclosure(scriptState_, &Game::luaGetSpineNodeId, 1);
-    lua_setglobal(scriptState_, "wGetSpineNodeId");
+    lua_pushlightuserdata(env, this); // Modifies a light
+    lua_pushcclosure(env, &Game::luaGetLight, 1);
+    lua_setfield(env, -2, "getLight");
 
-    lua_pushlightuserdata(scriptState_, this); // Gets the current beat
-    lua_pushcclosure(scriptState_, &Game::luaGetBeat, 1);
-    lua_setglobal(scriptState_, "wGetBeat");
+    lua_pushlightuserdata(env, this); // Modifies a light
+    lua_pushcclosure(env, &Game::luaSetLight, 1);
+    lua_setfield(env, -2, "setLight");
 
-    lua_pushlightuserdata(scriptState_, this); // tell chuck to enqueue loop
-    lua_pushcclosure(scriptState_, &Game::luaQueueStartLoop, 1);
-    lua_setglobal(scriptState_, "wQueueStartLoop");
+	lua_pushlightuserdata(env, this); // Returns the current spine node
+    lua_pushcclosure(env, &Game::luaGetSpineNodeId, 1);
+    lua_setfield(env, -2, "getSpineNodeId");
 
-    lua_pushlightuserdata(scriptState_, this); // tell chuck to enqueue loop
-    lua_pushcclosure(scriptState_, &Game::luaStartBeatServer, 1);
-    lua_setglobal(scriptState_, "wStartBeatServer");
+    lua_pushlightuserdata(env, this); // Gets the current beat
+    lua_pushcclosure(env, &Game::luaGetBeat, 1);
+    lua_setfield(env, -2, "getBeat");
 
-    if (luaL_dofile(scriptState_, "Scripts/Warp.lua")) {
-        string message(lua_tostring(scriptState_, -1));
-        lua_pop(scriptState_, 2);
-        throw runtime_error("Script error: " + message);
-    }
+    lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
+    lua_pushcclosure(env, &Game::luaQueueStartLoop, 1);
+    lua_setfield(env, -2, "queueStartLoop");
+
+    lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
+    lua_pushcclosure(env, &Game::luaStartBeatServer, 1);
+    lua_setfield(env, -2, "startBeatServer");
+
+	lua_pop(env, 1); // Pop the Game table
 }
 
 /** load up osc interaction */
@@ -279,6 +292,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 /** Lua callback.  Gets the given values for the node */
 int Game::luaGetNode(lua_State* env) {
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
 
     if (!lua_isstring(env, 1)) {
         lua_pushstring(env, "Expected string for node name");
@@ -298,6 +312,7 @@ int Game::luaGetNode(lua_State* env) {
 /** Lua callback.  Gets the given values for the node */
 int Game::luaSetNode(lua_State* env) {
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
 
     if (!lua_isstring(env, 1)) {
         lua_pushstring(env, "Expected string for node name");
@@ -317,6 +332,8 @@ int Game::luaSetNode(lua_State* env) {
 /** Lua callback.  Get the light state */
 int Game::luaGetLight(lua_State* env) {
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
+
     if (!lua_isstring(env, 1)) {
         lua_pushstring(env, "Expected string for entity name");
         lua_error(env);
@@ -335,6 +352,8 @@ int Game::luaGetLight(lua_State* env) {
 /** Lua callback.  Sets the given values for the light */
 int Game::luaSetLight(lua_State* env) {
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
+
     if (!lua_isstring(env, 1)) {
         lua_pushstring(env, "Expected string for entity name");
         lua_error(env);
@@ -353,6 +372,8 @@ int Game::luaSetLight(lua_State* env) {
 /** Lua callback.  Returns the current spine node ID. */
 int Game::luaGetSpineNodeId(lua_State* env) {
 	Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
+
 	if (game->level_.get()) {
 		lua_pushinteger(env, game->level_->getPlayer()->getSpineNodeIndex());
 	} else {
@@ -364,6 +385,7 @@ int Game::luaGetSpineNodeId(lua_State* env) {
 /** Lua callback.  Creates an object */
 int Game::luaCreateObject(lua_State* env) {
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
 
 
     return 0;
@@ -372,6 +394,7 @@ int Game::luaCreateObject(lua_State* env) {
 /** Lua callback.  Gets the current beat as set by chuck */
 int Game::luaGetBeat(lua_State* env) {
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
     lua_pushinteger(env, game->oscListener_->getCurBeat());
     return 1;
 }
@@ -380,11 +403,12 @@ int Game::luaGetBeat(lua_State* env) {
  *  It gives a string id for the loop and the pathname to find it
  */
 int Game::luaQueueStartLoop(lua_State* env) {
-    // get msg
-    BeatLoop beat_loop;
-
-    env >> beat_loop;
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
+
+    // get msg
+	BeatLoop beat_loop;
+    env >> beat_loop;
 
     // send msg
     OscSender* sender = game->oscSender_;
@@ -399,6 +423,8 @@ int Game::luaQueueStartLoop(lua_State* env) {
 
 int Game::luaStartBeatServer(lua_State* env) {
     Game* game = (Game*)lua_touserdata(env, lua_upvalueindex(1));
+	lua_remove(env, 1);
+
     OscSender* sender = game->oscSender_;
 
     int bpm = 120; // default value

@@ -69,6 +69,7 @@ private:
     void loadInput();
     void loadPhysics();
     void loadOsc();
+	void loadScript(const std::string& name);
 
 	// Ogre callbacks
 	virtual void windowClosed(Ogre::RenderWindow* rw);
