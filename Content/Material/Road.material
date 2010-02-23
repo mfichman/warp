@@ -15,52 +15,6 @@ material Road
                 scale 0.1 1.0
 			    texture Road.png
 			}
-
-
-		}
-	}
-}
-
-material Asphalt
-{
-
-	technique
-	{
-
-
-	
-		pass
-		{
-			ambient 0.000000 0.000000 0.000000 1.000000
-			diffuse 0.80000 0.000000 0.00000 1.000000
-			
-			//texture_unit
-			//{
-			//    filtering anisotropic
-            //    max_anisotropy 8
-			//    texture Asphalt.jpg
-			//}
-		}
-	}
-}
-
-
-material RoadSide
-{
-
-	technique
-	{
-
-	
-		pass
-		{
-			ambient 0.300000 0.300000 0.300000 1.00000
-			diffuse 0.5000 0.50000 0.5000 1.00000
-			
-			texture_unit
-			{
-				texture GreenGrass.jpg
-			}
 		}
 	}
 }

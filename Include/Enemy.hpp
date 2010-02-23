@@ -30,6 +30,8 @@ private:
 	// Lua callbacks
 	static int luaAddEntity(lua_State* env);
 	static int luaSetEntity(lua_State* env);
+	static int luaAddParticleSystem(lua_State* env);
+	static int luaSetParticleSystem(lua_State* env);
 	static int luaSet(lua_State* env);
 
 	Game* game_;

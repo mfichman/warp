@@ -20,13 +20,18 @@ function Sentinel:init()
     self:setEntity{name="Tentacle3", animation="Attack", orientation={0,0,1,angle=270}, position={0,-0.25,0}}
 
     self:set{orientation={0,1,0,angle=180}}-- Flip around to face camera
-
-    self.time = 0.0]]
+    
+]]
+    self.time = 0.0
+    self:addEntity{name="Ship", mesh="Ship.mesh"}
+    self:addParticleSystem{name="Exhaust", template="Fountain"}
+    self:setParticleSystem{name="Exhaust", position={0, 0, 0.8}}
+    
 end
 
 -- This function gets called once per timestep by the
 -- C++ peer class connected to this Lua class
 function Sentinel:onTimeStep()
-    --[[self.time = self.time + 0.01
-    self:setEntity{name="Body", orientation={0,0,1,angle=100*self.time}}]]
+    self.time = self.time + 0.01
+    self:set{orientation={0,0.4,1,angle=100*self.time}}
 end

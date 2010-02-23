@@ -45,9 +45,9 @@ Enemy::~Enemy() {
 	SceneNode::ChildNodeIterator i = node_->getChildIterator();
 	while (i.hasMoreElements()) {
 		SceneNode* node = static_cast<SceneNode*>(i.getNext());
-		Entity* entity = static_cast<Entity*>(node->getAttachedObject(0U));
+		MovableObject* obj = node->getAttachedObject(0U);
 		node->detachAllObjects();
-		node->getCreator()->destroyEntity(entity);
+		node->getCreator()->destroyMovableObject(obj->getName(), obj->getMovableType());
 	}
 	node_->removeAndDestroyAllChildren();
 	node_->getParentSceneNode()->removeAndDestroyChild(node_->getName());
@@ -71,6 +71,14 @@ void Enemy::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Enemy::luaSetEntity, 1);
 	lua_setfield(env, -2, "setEntity");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Enemy::luaAddParticleSystem, 1);
+	lua_setfield(env, -2, "addParticleSystem");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Enemy::luaSetParticleSystem, 1);
+	lua_setfield(env, -2, "setParticleSystem");
 
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Enemy::luaSet, 1);
@@ -122,6 +130,34 @@ int Enemy::luaAddEntity(lua_State* env) {
 	return 0;
 }
 
+/** Adds an entity to the enemy in its own scene node */
+int Enemy::luaAddParticleSystem(lua_State* env) {
+	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
+
+	try {
+		string name, templ;
+		lua_getfield(env, -1, "name");
+		env >> name;
+		lua_getfield(env, -1, "template");
+		env >> templ;
+
+		name = self->name_ + "." + name;
+
+		SceneNode* node = self->node_->createChildSceneNode(name);
+		ParticleSystem* system = self->game_->getSceneManager()->createParticleSystem(name, templ);
+		node->attachObject(system);
+
+	} catch (Exception& ex) {
+		lua_pushstring(env, ex.getFullDescription().c_str());
+		lua_error(env);
+	} catch (exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
+
+	return 0;
+}
+
 /** Sets an entity */
 int Enemy::luaSetEntity(lua_State* env) {
 	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
@@ -151,6 +187,34 @@ int Enemy::luaSetEntity(lua_State* env) {
 
 		env >> *node;
 		env >> *entity;
+
+	} catch (Exception& ex) {
+		lua_pushstring(env, ex.getFullDescription().c_str());
+		lua_error(env);
+	} catch (exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
+
+	return 0;
+}
+
+
+/** Sets an entity */
+int Enemy::luaSetParticleSystem(lua_State* env) {
+	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
+
+	try {
+		string name;
+		lua_getfield(env, -1, "name");
+		env >> name;
+
+		lua_pushvalue(env, -1);
+		name = self->name_ + "." + name;
+
+		SceneNode* node = self->game_->getSceneManager()->getSceneNode(name);
+
+		env >> *node;
 
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
