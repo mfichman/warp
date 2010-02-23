@@ -6,6 +6,7 @@
 #include "Level.hpp"
 
 #include "DynamicTube.hpp"
+#include "Enemy.hpp"
 #include "Player.hpp"
 #include "Script.hpp"
 #include "Game.hpp"
@@ -27,7 +28,8 @@ using namespace std;
 Level::Level(Game* game, const std::string& name) :
     game_(game),
     tube_(new DynamicTube(game, "Levels/" + name + ".tube")),
-    script_(new Script(game, "Scripts/" + name + ".lua"))
+    script_(new Script(game, "Scripts/" + name + ".lua")),
+	entitiesCreated_(0)
 {
 	player_.reset(new Player(game, this, "Ball"));
     game_->addListener(this);
@@ -71,6 +73,10 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaStartBeatServer, 1);
     lua_setfield(env, -2, "startBeatServer");
 
+    lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
+    lua_pushcclosure(env, &Level::luaCreateEnemy, 1);
+    lua_setfield(env, -2, "createEnemy");
+
 	lua_pop(env, 1); // Pop the Level table
 }
 	
@@ -79,17 +85,30 @@ Level::~Level() {
 	game_->removeListener(this);
 }
 
+/** Creates an enemy */
+int Level::luaCreateEnemy(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	std::string type;
+	env >> type;
+
+	// Create a new enemy and add it to the list
+	boost::shared_ptr<Enemy> enemy(new Enemy(level->game_, type, level->entitiesCreated_++));
+	level->enemies_.push_back(enemy);
+
+	env >> *enemy;
+
+	return 1;
+}
+
 /** Lua callback.  Get the light state */
 int Level::luaGetLight(lua_State* env) {
     Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	Game* game = level->game_;
-	lua_remove(env, 1);
 
-    if (!lua_isstring(env, 1)) {
-        lua_pushstring(env, "Expected string for entity name");
-        lua_error(env);
-    }       
-    string name(lua_tostring(env, 1)); // First argument: name of the light
+	string name;
+	lua_getfield(env, -1, "name");
+	env >> name;
+
     if (!game->getSceneManager()->hasLight(name)) {
         lua_pushstring(env, "Invalid entity name");
         lua_error(env);
@@ -104,13 +123,11 @@ int Level::luaGetLight(lua_State* env) {
 int Level::luaSetLight(lua_State* env) {
     Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	Game* game = level->game_;
-	lua_remove(env, 1);
 
-    if (!lua_isstring(env, 1)) {
-        lua_pushstring(env, "Expected string for entity name");
-        lua_error(env);
-    }       
-    string name(lua_tostring(env, 1)); // First argument: name of the light
+    string name;
+	lua_getfield(env, -1, "name");
+	env >> name;
+
     if (!game->getSceneManager()->hasLight(name)) {
         lua_pushstring(env, "Invalid entity name");
         lua_error(env);
@@ -124,10 +141,7 @@ int Level::luaSetLight(lua_State* env) {
 /** Lua callback.  Returns the current spine node ID. */
 int Level::luaGetSpineNodeId(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_remove(env, 1);
-
 	lua_pushinteger(env, level->player_->getSpineNodeIndex());
-
     return 1;
 }
 
@@ -135,7 +149,6 @@ int Level::luaGetSpineNodeId(lua_State* env) {
 int Level::luaGetBeat(lua_State* env) {
     Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	Game* game = level->game_;
-	lua_remove(env, 1);
     lua_pushinteger(env, game->getOscBeatListener()->getCurBeat());
     return 1;
 }
@@ -146,7 +159,6 @@ int Level::luaGetBeat(lua_State* env) {
 int Level::luaQueueStartLoop(lua_State* env) {
     Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	Game* game = level->game_;
-	lua_remove(env, 1);
 
     // get msg
 	BeatLoop beat_loop;
@@ -189,5 +201,9 @@ void Level::onTimeStep() {
 	// Hack hack hack
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_R)) {
 		game_->setLevel("Tube1");
+	}
+
+	for (list<boost::shared_ptr<Enemy>>::iterator i = enemies_.begin(); i != enemies_.end(); i++) {
+		(*i)->onTimeStep();
 	}
 }

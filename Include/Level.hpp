@@ -6,6 +6,9 @@
 
 #include "Warp.hpp"
 
+#include <memory>
+#include <boost/shared_ptr.hpp>
+
 namespace Warp {
 
 class Level : public GameListener {
@@ -42,11 +45,14 @@ private:
 	static int luaGetBeat(lua_State* env);
 	static int luaQueueStartLoop(lua_State* env);
 	static int luaStartBeatServer(lua_State* env);
+	static int luaCreateEnemy(lua_State* env);
 
 	Game* game_;
+	std::list<boost::shared_ptr<Enemy>> enemies_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Script> script_;
 	std::auto_ptr<Player> player_;
+	size_t entitiesCreated_;
 };
 
 

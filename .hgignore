@@ -16,3 +16,6 @@ Warp.exe*
 *.orig
 *.swp
 *~
+*.skeleton.xml
+*.mesh.xml
+*.blend1

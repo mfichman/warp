@@ -47,6 +47,7 @@ class btTriangleIndexVertexArray;
 class btGImpactMeshShape;
 class btCollisionObject;
 class btDynamicsWorld;
+class btRigidBody;
 
 
 class OscSender;
@@ -107,6 +108,7 @@ lua_State* operator<<(lua_State* env, const Ogre::SceneNode& n);
 lua_State* operator<<(lua_State* env, const Ogre::Light& l);
 lua_State* operator<<(lua_State* env, const Ogre::ColourValue& c);
 
+
 /** Methods for reading Ogre and ODE values from a script */
 lua_State* operator>>(lua_State* env, Ogre::Vector3& v);
 lua_State* operator>>(lua_State* env, Ogre::Quaternion& q);
@@ -114,7 +116,9 @@ lua_State* operator>>(lua_State* env, Ogre::SceneNode& n);
 lua_State* operator>>(lua_State* env, Ogre::Light& l);
 lua_State* operator>>(lua_State* env, Ogre::ColourValue& c);
 lua_State* operator>>(lua_State* env, std::string& s);
-lua_State* operator>>(lua_State* env, Warp::BeatLoop & bl);
+lua_State* operator>>(lua_State* env, Warp::BeatLoop& bl);
+lua_State* operator>>(lua_State* env, Warp::Enemy& e);
+lua_State* operator>>(lua_State* env, Ogre::Entity& e);
 
 void loadScript(lua_State* env, const std::string& name);
 void loadScriptFolder(lua_State* env, const std::string& dir);

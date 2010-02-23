@@ -138,10 +138,10 @@ void Player::onTimeStep() {
     right.normalise();
     up.normalise();
     forward.normalise();        
-    game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
+    //game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
 	
 	position = POSITION_SMOOTHNESS * game_->getCamera()->getPosition() + (1-POSITION_SMOOTHNESS) * position;
-	game_->getCamera()->setPosition(position - forward*0.5 + up*0.25);
+	//game_->getCamera()->setPosition(position - forward*0.5 + up*0.25);
 
 }
 

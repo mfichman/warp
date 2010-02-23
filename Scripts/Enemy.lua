@@ -7,7 +7,7 @@ Enemy = Object:new() -- Inherit from Object
 -- don't need an Enemy class in Lua since it uses 
 -- duck typing, but it makes the code clearer and prevents
 -- crashes if you forget to define onTimeStep.
-function onTimeStep()
+function Enemy:onTimeStep()
 
 end
 

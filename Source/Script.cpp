@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <boost/filesystem/operations.hpp>
+#include <Bullet/btBulletDynamicsCommon.h>
 extern "C" {
 #include <lua/lua.h>
 #include <lua/lualib.h>
@@ -142,6 +143,7 @@ lua_State* Warp::operator<<(lua_State* env, const Ogre::Vector3& v) {
 
 lua_State* Warp::operator<<(lua_State* env, const Ogre::Quaternion& q) {
      lua_newtable(env);
+
      lua_pushnumber(env, q.x);
      lua_rawseti(env, -2, 1);
      lua_pushnumber(env, q.y);
@@ -221,19 +223,31 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
     assert(lua_istable(env, -1));
-    lua_rawgeti(env, -1, 1);
-    q.x = lua_tonumber(env, -1);
-    lua_pop(env, 1);
-    lua_rawgeti(env, -1, 2);
-    q.y = lua_tonumber(env, -1);
-    lua_pop(env, 1);
-    lua_rawgeti(env, -1, 3);
-    q.z = lua_tonumber(env, -1);
-    lua_pop(env, 1);
-    lua_rawgeti(env, -1, 4);
-    q.w = lua_tonumber(env, -1);
-    lua_pop(env, 1);
-    lua_pop(env, 1);
+
+	lua_getfield(env, -1, "angle");
+	if (lua_isnil(env, -1)) {
+		lua_pop(env, 1);
+		lua_rawgeti(env, -1, 1);
+		q.x = lua_tonumber(env, -1);
+		//lua_pop(env, 1);
+		lua_rawgeti(env, -1, 2);
+		q.y = lua_tonumber(env, -1);
+		lua_pop(env, 1);
+		lua_rawgeti(env, -1, 3);
+		q.z = lua_tonumber(env, -1);
+		lua_pop(env, 1);
+		lua_rawgeti(env, -1, 4);
+		q.w = lua_tonumber(env, -1);
+		lua_pop(env, 1);
+		lua_pop(env, 1);
+	} else {
+		Vector3 axis;
+		float angle = lua_tonumber(env, -1);
+		lua_pop(env, 1);
+		env >> axis; 	
+		q = Quaternion(Degree(angle), axis);
+	}
+    
 
     return env;
 
@@ -241,11 +255,10 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
     assert(lua_istable(env, -1));
-    Vector3 position;
-    Quaternion orientation;
-
+    
     lua_getfield(env, -1, "position");
     if (!lua_isnil(env, -1)) {
+		Vector3 position;
         env >> position;
         n.setPosition(position);
     } else {
@@ -253,11 +266,28 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
     }
     lua_getfield(env, -1, "orientation");
     if (!lua_isnil(env, -1)) {
+		Quaternion orientation;
         env >> orientation;
         n.setOrientation(orientation);
     } else {
         lua_pop(env, 1);
     }
+    lua_pop(env, 1);
+
+	if (!n.getUserAny().isEmpty()) {
+		btRigidBody* body = any_cast<btRigidBody*>(n.getUserAny());
+		Vector3 vel;
+		env >> vel;
+		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
+	}
+
+    return env;
+
+}
+
+lua_State* Warp::operator>>(lua_State* env, Ogre::Entity& e) {
+    assert(lua_istable(env, -1));
+
     lua_pop(env, 1);
 
     return env;
@@ -350,6 +380,9 @@ lua_State* Warp::operator>>(lua_State* env, std::string& s) {
 lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
     assert(lua_istable(env, -1));
 
+	lua_getfield(env, -1, "name");
+	env >> bl.name; // name must not be nil, so this will throw an exception if it is
+
     lua_getfield(env, -1, "path");
     if (!lua_isnil(env, -1)) {
         env >> bl.path_name;
@@ -370,8 +403,6 @@ lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
     lua_pop(env, 1); 
     // pop off the table
     lua_pop(env, 1); 
-
-    env >> bl.name;
 
     return env;
 }
