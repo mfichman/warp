@@ -149,6 +149,10 @@ void Game::loadInput() {
 	window_->getCustomAttribute("WINDOW", &windowHandle);
 	windowName << windowHandle;
 	params.insert(make_pair(string("WINDOW"), windowName.str()));
+	params.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
+	params.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
+	params.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
+	params.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
 	inputManager_ = OIS::InputManager::createInputSystem(params);
     
 	// Setup the keyboard

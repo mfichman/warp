@@ -37,6 +37,12 @@ Level::Level(Game* game, const std::string& name) :
 	loadScriptCallbacks();
 }
 
+/** Destroys the level */
+Level::~Level() {
+	game_->removeListener(this);
+
+}
+
 /** Loads Lua script functions for this level */
 void Level::loadScriptCallbacks() {
 	lua_State* env = game_->getScriptState();
@@ -78,11 +84,6 @@ void Level::loadScriptCallbacks() {
     lua_setfield(env, -2, "createEnemy");
 
 	lua_pop(env, 1); // Pop the Level table
-}
-	
-/** Destroys the level */
-Level::~Level() {
-	game_->removeListener(this);
 }
 
 /** Creates an enemy */

@@ -26,9 +26,9 @@ FreeCamera::~FreeCamera() {
 /** Called when a new frame is started */
 void FreeCamera::onTimeStep() {
     // Moves the camera around
-    const OIS::MouseState& state = game_->getMouse()->getMouseState();
-    game_->getCamera()->pitch(Radian(-state.Y.rel/100.0));
-    game_->getCamera()->yaw(Radian(-state.X.rel/100.0));
+    //const OIS::MouseState& state = game_->getMouse()->getMouseState();
+    //game_->getCamera()->pitch(Radian(-state.Y.rel/100.0));
+    //game_->getCamera()->yaw(Radian(-state.X.rel/100.0));
 
     if (game_->getKeyboard()->isKeyDown(OIS::KC_RSHIFT)) {
 	    if (game_->getKeyboard()->isKeyDown(OIS::KC_PGUP)) {
