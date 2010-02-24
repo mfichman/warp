@@ -104,7 +104,7 @@ void SubObject::separateFromParent() {
 	float theta = Math::RangeRandom(-Math::PI, Math::PI);
 	float phi = Math::RangeRandom(-Math::PI, Math::PI);
 	btVector3 linvel(cosf(theta)*sinf(phi), sinf(theta)*cosf(phi), cosf(phi));
-	linvel *= 5;
+	linvel *= 10;
 	body_->setLinearVelocity(linvel + parent_->getRigidBody()->getLinearVelocity());
 
 	btVector3 axis(Math::RangeRandom(-1.0, 1.0), Math::RangeRandom(0, 5.0), Math::RangeRandom(-1.0, 1.0));
