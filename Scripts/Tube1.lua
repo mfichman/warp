@@ -4,7 +4,12 @@
 --print("Sleeping")
 --wSleep(100)
 --print("Awake")
-local obj = Level:createObject("Ship")
+local obj1 = Level:createObject("Ship")
+local obj2 = Level:createObject("Ship")
+local obj3 = Level:createObject("Ship")
+
+obj2:set{position={-3, 0, 0}}
+obj3:set{position={3, 0, 0}}
 
 --Level:sleep(50)
 --Level:createObject("Explosion")

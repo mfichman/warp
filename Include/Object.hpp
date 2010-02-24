@@ -60,6 +60,7 @@ private:
 	static int luaExplode(lua_State* env);
 	static int luaDestroy(lua_State* env);
 	static int luaWarningDestroyed(lua_State* env);
+	static int luaGetPosition(lua_State* env);
 
 	void callMethod(const std::string& method);
 

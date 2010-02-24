@@ -42,13 +42,15 @@ end
 -- This function is called when the object is selected by
 -- the player
 function Ship:onSelect()
-    if (selected) then return end -- Make sure we don't launch > 1 task
-    selected = true
+    if (self.selected) then return end -- Make sure we don't launch > 1 task
+    self.selected = true
     Level:createTask(function()
         print("Sleeping...")
         --Level:waitForBeatSet()   
         --Level:sleep(100)
-        print("Task awake")    
+        print("Task awake")  
+        local explosion = Level:createObject("Explosion")  
+        explosion:set{position=self:getPosition()}
         self:explode()
     end)
 end

@@ -96,6 +96,8 @@ Object::~Object() {
 	lua_setfield(env, -2, "explode");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "destroy");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "getPosition");
 	lua_pop(env, 1);
 	lua_unref(env, table_);
 }
@@ -138,6 +140,10 @@ void Object::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaDestroy, 1);
 	lua_setfield(env, -2, "destroy");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaGetPosition, 1);
+	lua_setfield(env, -2, "getPosition");
 
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
@@ -316,6 +322,13 @@ int Object::luaWarningDestroyed(lua_State* env) {
 	lua_pushstring(env, "This object is no longer valid");
 	lua_error(env);
 	return 0;
+}
+
+/** Return position */
+int Object::luaGetPosition(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	env << self->node_->getPosition();
+	return 1;
 }
 
 /** Calls a method on the peer Lua object */
