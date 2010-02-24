@@ -4,7 +4,7 @@
 --print("Sleeping")
 --wSleep(100)
 --print("Awake")
-local obj = Level:createObject("Sentinel")
+local obj = Level:createObject("Ship")
 
 --Level:sleep(50)
 --Level:createObject("Explosion")
