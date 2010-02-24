@@ -64,7 +64,7 @@ class Player;
 class DynamicTube;
 class Level;
 class Game;
-class Enemy;
+class Object;
 class GameListener;
 
 inline int mod(int num, int divisor) {
@@ -117,7 +117,7 @@ lua_State* operator>>(lua_State* env, Ogre::Light& l);
 lua_State* operator>>(lua_State* env, Ogre::ColourValue& c);
 lua_State* operator>>(lua_State* env, std::string& s);
 lua_State* operator>>(lua_State* env, Warp::BeatLoop& bl);
-lua_State* operator>>(lua_State* env, Warp::Enemy& e);
+lua_State* operator>>(lua_State* env, Warp::Object& e);
 lua_State* operator>>(lua_State* env, Ogre::Entity& e);
 
 void loadScript(lua_State* env, const std::string& name);

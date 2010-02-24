@@ -4,7 +4,8 @@
 --print("Sleeping")
 --wSleep(100)
 --print("Awake")
-Level:createEnemy("Sentinel")
+Level:createObject("Sentinel")
+Level:createObject("Explosion")
 
 
 

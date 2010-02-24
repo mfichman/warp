@@ -1,7 +1,7 @@
 -- Warp: CS248 Final Project
 -- Matt Fichman & Francesco Georg
 
-Sentinel = Enemy:new()
+Sentinel = Object:new()
 
 -- Test enemy for the game.  The init() function gets
 -- called when a new sentinel is created

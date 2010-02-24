@@ -1,0 +1,73 @@
+material Flare
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend add
+			depth_write off
+
+			texture_unit
+			{
+				texture Halo.png
+			}
+		}
+	}
+}
+
+material RedFire
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend add
+			depth_write off
+
+			texture_unit
+			{
+				texture RedFire.png
+			}
+		}
+	}
+}
+
+
+material GoldFire
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend add
+			depth_write off
+
+			texture_unit
+			{
+				texture GoldFire.png
+			}
+		}
+	}
+}
+
+material Smoke
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			//scene_blend src_colour one_minus_src_colour
+            scene_blend add
+			depth_write off
+
+			texture_unit
+			{
+				texture Smoke.png
+			}
+		}
+	}
+}

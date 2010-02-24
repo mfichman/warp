@@ -3,7 +3,7 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include "Enemy.hpp"
+#include "Object.hpp"
 
 #include "Game.hpp"
 
@@ -18,11 +18,11 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-#define ENEMY_MASS 1.0f
-#define ENEMY_RADIUS 0.5f
+#define Object_MASS 1.0f
+#define Object_RADIUS 0.5f
 
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
-Enemy::Enemy(Game* game, const string& type, int id) :
+Object::Object(Game* game, const string& type, int id) :
     game_(game),
 	type_(type)
 {
@@ -36,7 +36,7 @@ Enemy::Enemy(Game* game, const string& type, int id) :
 	loadScriptCallbacks();
 }
 
-Enemy::~Enemy() {
+Object::~Object() {
 
 	lua_State* env = game_->getScriptState();
 	lua_unref(env, table_);
@@ -53,7 +53,7 @@ Enemy::~Enemy() {
 	node_->getParentSceneNode()->removeAndDestroyChild(node_->getName());
 }
 
-void Enemy::loadScriptCallbacks() {
+void Object::loadScriptCallbacks() {
 	lua_State* env = game_->getScriptState();
 
 	// Create the peer Lua object
@@ -65,46 +65,46 @@ void Enemy::loadScriptCallbacks() {
 	lua_newtable(env);
 
 	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Enemy::luaAddEntity, 1);
+	lua_pushcclosure(env, &Object::luaAddEntity, 1);
 	lua_setfield(env, -2, "addEntity");
 
 	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Enemy::luaSetEntity, 1);
+	lua_pushcclosure(env, &Object::luaSetEntity, 1);
 	lua_setfield(env, -2, "setEntity");
 
 	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Enemy::luaAddParticleSystem, 1);
+	lua_pushcclosure(env, &Object::luaAddParticleSystem, 1);
 	lua_setfield(env, -2, "addParticleSystem");
 
 	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Enemy::luaSetParticleSystem, 1);
+	lua_pushcclosure(env, &Object::luaSetParticleSystem, 1);
 	lua_setfield(env, -2, "setParticleSystem");
 
 	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Enemy::luaSet, 1);
+	lua_pushcclosure(env, &Object::luaSet, 1);
 	lua_setfield(env, -2, "set");
 
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
 		string message(lua_tostring(env, -1));
 		lua_pop(env, 1);
-		throw runtime_error("Error creating enemy: " + message);
+		throw runtime_error("Error creating Object: " + message);
 	}
 
 	table_ = lua_ref(env, -1);
 }
 
 /** Sets the scene node position and orientation */
-int Enemy::luaSet(lua_State* env) {
-	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
+int Object::luaSet(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 	env >> *self->node_;
 
 	return 0;
 }
 
-/** Adds an entity to the enemy in its own scene node */
-int Enemy::luaAddEntity(lua_State* env) {
-	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
+/** Adds an entity to the Object in its own scene node */
+int Object::luaAddEntity(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 
 	try {
 		string name, mesh;
@@ -130,9 +130,9 @@ int Enemy::luaAddEntity(lua_State* env) {
 	return 0;
 }
 
-/** Adds an entity to the enemy in its own scene node */
-int Enemy::luaAddParticleSystem(lua_State* env) {
-	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
+/** Adds an entity to the Object in its own scene node */
+int Object::luaAddParticleSystem(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 
 	try {
 		string name, templ;
@@ -159,8 +159,8 @@ int Enemy::luaAddParticleSystem(lua_State* env) {
 }
 
 /** Sets an entity */
-int Enemy::luaSetEntity(lua_State* env) {
-	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
+int Object::luaSetEntity(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 
 	try {
 		string name;
@@ -201,8 +201,8 @@ int Enemy::luaSetEntity(lua_State* env) {
 
 
 /** Sets an entity */
-int Enemy::luaSetParticleSystem(lua_State* env) {
-	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
+int Object::luaSetParticleSystem(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 
 	try {
 		string name;
@@ -228,7 +228,7 @@ int Enemy::luaSetParticleSystem(lua_State* env) {
 }
 
 /** Called when the game updates */
-void Enemy::onTimeStep() {
+void Object::onTimeStep() {
 	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
 		(*i)->addTime(0.01);
 	}
@@ -243,11 +243,11 @@ void Enemy::onTimeStep() {
 	if (lua_pcall(env, 1, 0, 0)) {
 		string message(lua_tostring(env, -1));
 		lua_pop(env, 1);
-		throw runtime_error("Error updating enemy: " + message);
+		throw runtime_error("Error updating Object: " + message);
 	}
 }
 
-lua_State* Warp::operator>>(lua_State* env, Warp::Enemy& e) {
+lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {
 	lua_getref(env, e.table_);
 	return env;
 }

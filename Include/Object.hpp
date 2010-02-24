@@ -11,20 +11,20 @@
 
 namespace Warp {
 
-class Enemy {
+class Object {
 public:
 
 	/** Creates a new script and begins executing it inside a coroutine */
-    Enemy(Game* game, const std::string& name, int id);
+    Object(Game* game, const std::string& name, int id);
 
     /** Destructor */
-    ~Enemy();
+    ~Object();
 
 	/** Called every timestep by Level */
 	void onTimeStep();
 private:
-    Enemy(const Enemy&);
-    Enemy& operator=(const Enemy&);
+    Object(const Object&);
+    Object& operator=(const Object&);
 	void loadScriptCallbacks();
 
 	// Lua callbacks
@@ -42,7 +42,7 @@ private:
 	std::list<Ogre::AnimationState*> activeAnimations_;
 	std::list<boost::shared_ptr<btRigidBody>> rigidBodies_;
 
-	friend lua_State* Warp::operator>>(lua_State* env, Enemy& e);
+	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
 };
 
 

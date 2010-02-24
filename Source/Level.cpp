@@ -6,7 +6,7 @@
 #include "Level.hpp"
 
 #include "DynamicTube.hpp"
-#include "Enemy.hpp"
+#include "Object.hpp"
 #include "Player.hpp"
 #include "Script.hpp"
 #include "Game.hpp"
@@ -49,9 +49,8 @@ void Level::loadScriptCallbacks() {
 
 	loadScript(env, "Scripts/Object.lua");
 	loadScript(env, "Scripts/Level.lua");
-	loadScript(env, "Scripts/Enemy.lua");
 
-	loadScriptFolder(env, "Scripts/Enemies/");
+	loadScriptFolder(env, "Scripts/Objects/");
 
 	lua_getglobal(env, "Level"); // Get the Level table
 
@@ -80,23 +79,23 @@ void Level::loadScriptCallbacks() {
     lua_setfield(env, -2, "startBeatServer");
 
     lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
-    lua_pushcclosure(env, &Level::luaCreateEnemy, 1);
-    lua_setfield(env, -2, "createEnemy");
+    lua_pushcclosure(env, &Level::luaCreateObject, 1);
+    lua_setfield(env, -2, "createObject");
 
 	lua_pop(env, 1); // Pop the Level table
 }
 
-/** Creates an enemy */
-int Level::luaCreateEnemy(lua_State* env) {
+/** Creates an Object */
+int Level::luaCreateObject(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	std::string type;
 	env >> type;
 
-	// Create a new enemy and add it to the list
-	boost::shared_ptr<Enemy> enemy(new Enemy(level->game_, type, level->entitiesCreated_++));
-	level->enemies_.push_back(enemy);
+	// Create a new Object and add it to the list
+	boost::shared_ptr<Object> Object(new Object(level->game_, type, level->entitiesCreated_++));
+	level->objects_.push_back(Object);
 
-	env >> *enemy;
+	env >> *Object;
 
 	return 1;
 }
@@ -204,7 +203,7 @@ void Level::onTimeStep() {
 		game_->setLevel("Tube1");
 	}
 
-	for (list<boost::shared_ptr<Enemy>>::iterator i = enemies_.begin(); i != enemies_.end(); i++) {
+	for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
 		(*i)->onTimeStep();
 	}
 }
