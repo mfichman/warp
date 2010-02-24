@@ -97,7 +97,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Source\Script.cpp"
+				RelativePath="..\Source\ScriptTask.cpp"
 				>
 			</File>
 			<File
@@ -147,7 +147,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Include\Script.hpp"
+				RelativePath="..\Include\ScriptTask.hpp"
 				>
 			</File>
 			<File

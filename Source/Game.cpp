@@ -198,7 +198,7 @@ void Game::loadScript(const std::string& name) {
 	if (luaL_dofile(env, name.c_str())) {
         string message(lua_tostring(env, -1));
         lua_pop(env, 2);
-        throw runtime_error("Script error: " + message);
+        throw runtime_error("ScriptTask error: " + message);
     }
 }
 

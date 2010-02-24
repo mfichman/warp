@@ -25,7 +25,8 @@ using namespace boost;
 Object::Object(Game* game, const string& type, int id) :
     game_(game),
 	type_(type),
-	exploded_(false)
+	exploded_(false),
+	alive_(true)
 {
 	ostringstream os;
 	os << type << id;
@@ -62,9 +63,7 @@ Object::~Object() {
 		game_->getWorld()->removeCollisionObject(body_.get());
 	}
 
-	// Clean up scripting
-	lua_State* env = game_->getScriptState();
-	lua_unref(env, table_);
+
 
 	// Destroy all subobjects
 	subObjects_.clear();
@@ -79,6 +78,26 @@ Object::~Object() {
 	}
 	node_->removeAndDestroyAllChildren();
 	node_->getParentSceneNode()->removeAndDestroyChild(node_->getName());
+
+	// Clean up scripting
+	lua_State* env = game_->getScriptState();
+	lua_getref(env, table_);
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "addEntity");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "setEntity");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "addParticleSystem");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "setParticleSystem");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "set");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "explode");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "destroy");
+	lua_pop(env, 1);
+	lua_unref(env, table_);
 }
 
 void Object::loadScriptCallbacks() {
@@ -115,6 +134,10 @@ void Object::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaExplode, 1);
 	lua_setfield(env, -2, "explode");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaDestroy, 1);
+	lua_setfield(env, -2, "destroy");
 
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
@@ -281,24 +304,51 @@ int Object::luaExplode(lua_State* env) {
 	return 0;
 }
 
-/** Called when the game updates */
-void Object::onTimeStep() {
-	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
-		(*i)->addTime(0.01);
-	}
+/** Destroys the object */
+int Object::luaDestroy(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	self->alive_ = false;
+	return 0;
+}
 
+/** Warning */
+int Object::luaWarningDestroyed(lua_State* env) {
+	lua_pushstring(env, "This object is no longer valid");
+	lua_error(env);
+	return 0;
+}
+
+/** Calls a method on the peer Lua object */
+void Object::callMethod(const std::string& method) {
 	lua_State* env = game_->getScriptState();
 
 	lua_getref(env, table_);
-	lua_getfield(env, -1, "onTimeStep");
+	lua_getfield(env, -1, method.c_str());
+	if (!lua_isfunction(env, -1)) {
+		lua_pop(env, -1);
+		assert(lua_gettop(env) == 0);
+		return;
+	}
+
 	lua_pushvalue(env, -2);
 	lua_remove(env, -3);
 
 	if (lua_pcall(env, 1, 0, 0)) {
 		string message(lua_tostring(env, -1));
 		lua_pop(env, 1);
-		throw runtime_error("Error updating Object: " + message);
+		throw runtime_error(message);
 	}
+
+	assert(lua_gettop(env) == 0);
+}
+
+/** Called when the game updates */
+void Object::onTimeStep() {
+	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
+		(*i)->addTime(0.01);
+	}
+
+	callMethod("onTimeStep");
 }
 
 lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {
@@ -320,6 +370,11 @@ void Object::setWorldTransform(const btTransform& transform) {
     node_->setPosition(position.x(), position.y(), position.z());
     // Set local info
     transform_ = transform;
+}
+
+/** Called when the object is selected */
+void Object::select() {
+	callMethod("onSelect");
 }
 
 /** Causes the object to explode, and the pieces to become independent */

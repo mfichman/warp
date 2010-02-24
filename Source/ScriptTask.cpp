@@ -3,7 +3,7 @@
  * Francesco Georg, Matt Fichman                                              *
  ******************************************************************************/
 
-#include "Script.hpp"
+#include "ScriptTask.hpp"
 #include "Game.hpp"
 
 #include <stdexcept>
@@ -20,24 +20,43 @@ using namespace Ogre;
 using namespace std;
 using namespace boost::filesystem;
 
-/** Initializes the script */
-Script::Script(Game* game, const std::string& path) :
-    path_(path),
+/** Initializes the script task from a file */
+ScriptTask::ScriptTask(Game* game, const std::string& path) :
     game_(game), 
-    trigger_(0) {    
+    trigger_(0),
+	alive_(true) {    
 
     lua_State* env = game_->getScriptState();
+
+    // Load the script chunk as a function
+    if (luaL_loadfile(env, path.c_str())) {
+        string message(lua_tostring(env, -1));
+        lua_pop(env, 1); // "coroutine.create"
+        throw runtime_error("Could not load script: " + message);
+	}
+
+	int functionRef = lua_ref(env, LUA_REGISTRYINDEX);
+	init(functionRef);
+}
+
+/** Initializes the script task from a reference to the "thread" function */
+ScriptTask::ScriptTask(Game* game, int functionRef) :
+    game_(game), 
+    trigger_(0),
+	alive_(true) {
+
+	init(functionRef);
+}
+
+void ScriptTask::init(int functionRef) {
+	lua_State* env = game_->getScriptState();
 
     lua_getglobal(env, "coroutine");
     lua_getfield(env, -1, "create"); // Function to be called
     lua_remove(env, -2); // Remove "coroutine" table
 
-    // Load the script chunk
-    if (luaL_loadfile(env, path_.c_str())) {
-        string message(lua_tostring(env, -1));
-        lua_pop(env, 1); // "coroutine.create"
-        throw runtime_error("Could not load script: " + message);
-    }
+	// Get the task function
+	lua_getref(env, functionRef);
 
     // Call "coroutine.create(script chunk)" as the argument
     // Return value is the coroutine object
@@ -45,21 +64,14 @@ Script::Script(Game* game, const std::string& path) :
 
      // Save a reference to the coroutine object (and pop it off the stack)
     coroutine_ = lua_ref(env, LUA_REGISTRYINDEX);
-
-    // Check the stack
-    assert(lua_gettop(env) == 0);
-
-    // Add this object as a game listener
-    game_->addListener(this);
 }
 
-Script::~Script() {
+ScriptTask::~ScriptTask() {
     lua_unref(game_->getScriptState(), coroutine_);
 	if (trigger_) lua_unref(game_->getScriptState(), trigger_);
-    game_->removeListener(this);
 }
 
-bool Script::hasTriggerFired() {
+bool ScriptTask::hasTriggerFired() {
     if (!trigger_) return true;
     lua_State* env = game_->getScriptState();
 
@@ -88,7 +100,9 @@ bool Script::hasTriggerFired() {
 }
 
 /** Determines if the script should be restarted in this frame */
-void Script::onTimeStep() {
+void ScriptTask::onTimeStep() {
+	if (!alive_) return;
+
     lua_State* env = game_->getScriptState();
 
     // Check trigger
@@ -120,8 +134,8 @@ void Script::onTimeStep() {
         throw runtime_error("Error calling script function: " + message);
 
     } else {
-        // Script is complete, never run it again
-        game_->removeListener(this);
+        // ScriptTask is complete, never run it again
+        alive_ = false;
         lua_pop(env, 2);
     }
 
@@ -434,7 +448,7 @@ void Warp::loadScript(lua_State* env, const std::string& name) {
 	if (luaL_dofile(env, name.c_str())) {
         string message(lua_tostring(env, -1));
         lua_pop(env, 2);
-        throw runtime_error("Script error: " + message);
+        throw runtime_error("ScriptTask error: " + message);
     }
 }
 

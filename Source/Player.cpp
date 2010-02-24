@@ -159,8 +159,6 @@ void Player::updateRay() {
 		float scry = (float)state.Y.abs/game_->getWindow()->getHeight();
 		Ray ray = game_->getCamera()->getCameraToViewportRay(scrx, scry);
 
-		cout << ray.getOrigin() << endl;
-
 		btVector3 from(ray.getOrigin().x, ray.getOrigin().y, ray.getOrigin().z);
 		btVector3 to(ray.getPoint(100).x, ray.getPoint(100).y, ray.getPoint(100).z);
 
@@ -171,7 +169,7 @@ void Player::updateRay() {
 			if (body) {
 				Object* obj = static_cast<Object*>(body->getUserPointer());
 				if (obj) {
-					obj->explode();
+					obj->select();
 				}
 			}
 		}

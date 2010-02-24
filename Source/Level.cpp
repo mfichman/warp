@@ -8,12 +8,13 @@
 #include "DynamicTube.hpp"
 #include "Object.hpp"
 #include "Player.hpp"
-#include "Script.hpp"
+#include "ScriptTask.hpp"
 #include "Game.hpp"
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
 
 #include <string>
+#include <algorithm>
  extern "C" {
 #include <lua/lua.h> 
 #include <lua/lualib.h>
@@ -23,18 +24,20 @@
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
+using namespace boost;
 
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
 Level::Level(Game* game, const std::string& name) :
     game_(game),
     tube_(new DynamicTube(game, "Levels/" + name + ".tube")),
-    script_(new Script(game, "Scripts/" + name + ".lua")),
 	entitiesCreated_(0)
 {
 	player_.reset(new Player(game, this, "Ball"));
     game_->addListener(this);
 
 	loadScriptCallbacks();
+
+	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".lua")));
 }
 
 /** Destroys the level */
@@ -82,6 +85,10 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaCreateObject, 1);
     lua_setfield(env, -2, "createObject");
 
+	lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
+    lua_pushcclosure(env, &Level::luaCreateTask, 1);
+    lua_setfield(env, -2, "createTask");
+
 	lua_pop(env, 1); // Pop the Level table
 }
 
@@ -92,12 +99,25 @@ int Level::luaCreateObject(lua_State* env) {
 	env >> type;
 
 	// Create a new Object and add it to the list
-	boost::shared_ptr<Object> Object(new Object(level->game_, type, level->entitiesCreated_++));
+	shared_ptr<Object> Object(new Object(level->game_, type, level->entitiesCreated_++));
 	level->objects_.push_back(Object);
 
 	env >> *Object;
 
 	return 1;
+}
+
+/** Creates a task */
+int Level::luaCreateTask(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	if (!lua_isfunction(env, -1)) {
+		lua_pushstring(env, "Not a function");
+		lua_error(env);
+	}
+	int functionRef = lua_ref(env, -1);
+	level->tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(level->game_, functionRef))); 
+
+	return 0;
 }
 
 /** Lua callback.  Get the light state */
@@ -194,13 +214,27 @@ int Level::luaStartBeatServer(lua_State* env) {
     return 1;
 }
 
+template <typename T>
+class Updater {
+public:
+	bool operator()(shared_ptr<T> t) {
+		t->onTimeStep();
+		return !t->isAlive();
+	}
+};
+
 #include <OIS/OIS.h>
 /** Called once for each game loop */
 void Level::onTimeStep() {
 
-	for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
-		(*i)->onTimeStep();
-	}
+	static Updater<Object> objectUpdater;
+	static Updater<ScriptTask> taskUpdater;
+	remove_if(objects_.begin(), objects_.end(), objectUpdater);
+	remove_if(tasks_.begin(), tasks_.end(), taskUpdater);
+
+	//for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
+	//	(*i)->onTimeStep();
+	//}
 	
 	// Hack hack hack
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_R)) {

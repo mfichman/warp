@@ -59,7 +59,7 @@ namespace Warp {
 
 class Overlays;
 class Objects;
-class Script;
+class ScriptTask;
 class Player;
 class DynamicTube;
 class Level;

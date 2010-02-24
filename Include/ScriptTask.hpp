@@ -8,27 +8,37 @@
 
 namespace Warp {
 
-class Script : public GameListener {
+class ScriptTask {
 public:
 	/** Creates a new script and begins executing it inside a coroutine */
-    Script(Game* game, const std::string& name);
+    ScriptTask(Game* game, const std::string& name);
+
+	/** Creates a new task and begins executing it inside a coroutine */
+	ScriptTask(Game* game, int functionRef);
 
     /** Descructor */
-    ~Script();
+    ~ScriptTask();
+
+	
+	/** Returns true if the script is alive */
+	bool isAlive() const { return alive_; }
+
+	/** Called every timestep by Level */
+	void onTimeStep();
 
 private:
-    Script(const Script&);
-    Script& operator=(const Script&);
-	void onTimeStep();
+    ScriptTask(const ScriptTask&);
+    ScriptTask& operator=(const ScriptTask&);
+	void init(int functionRef);
 	bool hasTriggerFired();
 
 	enum Event { WAIT_BEAT, WAIT_SPINE_NODE, SLEEP };
 
 	Game* game_;
-    std::string path_;
     int trigger_;
     int coroutine_;
     Event waitEvent_;
+	bool alive_;
 };
 
 }

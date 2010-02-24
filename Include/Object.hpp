@@ -24,17 +24,23 @@ public:
 	/** Returns the scene node */
 	Ogre::SceneNode* getSceneNode() { return node_; }
 
-	/** Called every timestep by Level */
-	void onTimeStep();
-
 	/** Returns the transform */
 	const btTransform& getTransform() const { return transform_; }
 
 	/** Returns the rigid body */
 	btRigidBody* getRigidBody() { return body_.get(); }
 
-	
+	/** Called when the object is selected */
+	void select();
+
+	/** Makes the object explode! */
 	void explode();
+
+	/** Returns true if the object is alive */
+	bool isAlive() const { return alive_; }
+
+	/** Called every timestep by Level */
+	void onTimeStep();
 
 private:
     Object(const Object&);
@@ -52,6 +58,10 @@ private:
 	static int luaSetParticleSystem(lua_State* env);
 	static int luaSet(lua_State* env);
 	static int luaExplode(lua_State* env);
+	static int luaDestroy(lua_State* env);
+	static int luaWarningDestroyed(lua_State* env);
+
+	void callMethod(const std::string& method);
 
 	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
 
@@ -73,6 +83,7 @@ private:
 	btTransform transform_;
 
 	bool exploded_;
+	bool alive_;
 };
 
 

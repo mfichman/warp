@@ -29,6 +29,7 @@ function Sentinel:init()
     self:addEntity{name="ShipLeftWing", mesh="ShipLeftWing.mesh"}
     self:setEntity{name="ShipRightWing", position={0.6, -0.2, 0}}
     self:setEntity{name="ShipLeftWing", position={-0.6, -0.2, 0}}
+    self.selected = false
     
 end
 
@@ -39,8 +40,15 @@ function Sentinel:onTimeStep()
     --self:set{orientation={0,0.4,1,angle=100*self.time}}
 end
 
--- This function gets called when the object is destroyed
--- (but not wwhen it is deallocated)
-function Sentinel:onDestroy()
-
+-- This function is called when the object is selected by
+-- the player
+function Sentinel:onSelect()
+    if (selected) then return end
+    selected = true
+    Level:createTask(function()
+        print("Sleeping...")
+        Level:waitForBeatSet()   
+        print("Task awake")    
+        self:explode()
+    end)
 end

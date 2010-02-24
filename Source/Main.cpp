@@ -4,7 +4,7 @@
 #include <DynamicTube.hpp>
 #include <FreeCamera.hpp>
 #include <Overlays.hpp>
-#include <Script.hpp>
+#include <ScriptTask.hpp>
 #include <sstream>
 
 using namespace Ogre;
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
         
         
-        //Warp::Script script(game.get(), "Scripts/Test.lua");
+        //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
         //Warp::StaticTube tube(game.get(), "Test");
         //Warp::DynamicTube tube(game.get(), "Tube1");

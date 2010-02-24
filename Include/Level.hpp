@@ -33,7 +33,7 @@ private:
     Level(const Level&);
     Level& operator=(const Level&);
 	void loadScriptCallbacks();
-	virtual void onTimeStep();
+	void onTimeStep();
 	
 
 	// Lua callbacks
@@ -46,11 +46,12 @@ private:
 	static int luaQueueStartLoop(lua_State* env);
 	static int luaStartBeatServer(lua_State* env);
 	static int luaCreateObject(lua_State* env);
+	static int luaCreateTask(lua_State* env);
 
 	Game* game_;
 	std::list<boost::shared_ptr<Object>> objects_;
+	std::list<boost::shared_ptr<ScriptTask>> tasks_;
 	std::auto_ptr<DynamicTube> tube_;
-	std::auto_ptr<Script> script_;
 	std::auto_ptr<Player> player_;
 	size_t entitiesCreated_;
 };
