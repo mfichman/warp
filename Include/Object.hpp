@@ -33,6 +33,9 @@ public:
 	/** Returns the rigid body */
 	btRigidBody* getRigidBody() { return body_.get(); }
 
+	
+	void explode();
+
 private:
     Object(const Object&);
     Object& operator=(const Object&);
@@ -51,8 +54,6 @@ private:
 	static int luaExplode(lua_State* env);
 
 	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
-
-	void explode();
 
 	Game* game_;
 	std::string type_;

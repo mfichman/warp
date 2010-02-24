@@ -6,6 +6,7 @@
 #include "Player.hpp"
 #include "Game.hpp"
 #include "Level.hpp"
+#include "Object.hpp"
 #include "DynamicTube.hpp"
 
 #include <OIS/OIS.h>
@@ -149,7 +150,32 @@ void Player::computeForces() {
 }
 
 void Player::updateRay() {
-	
+
+	const OIS::MouseState& state = game_->getMouse()->getMouseState();
+	if (state.buttonDown(OIS::MB_Right)) {
+
+		// Create picking ray and test for the closest btRigidBody
+		float scrx = (float)state.X.abs/game_->getWindow()->getWidth();
+		float scry = (float)state.Y.abs/game_->getWindow()->getHeight();
+		Ray ray = game_->getCamera()->getCameraToViewportRay(scrx, scry);
+
+		cout << ray.getOrigin() << endl;
+
+		btVector3 from(ray.getOrigin().x, ray.getOrigin().y, ray.getOrigin().z);
+		btVector3 to(ray.getPoint(100).x, ray.getPoint(100).y, ray.getPoint(100).z);
+
+		btCollisionWorld::ClosestRayResultCallback callback(from, to);
+		game_->getWorld()->rayTest(from, to, callback);
+		if (callback.hasHit()) {
+			btRigidBody* body = btRigidBody::upcast(callback.m_collisionObject);
+			if (body) {
+				Object* obj = static_cast<Object*>(body->getUserPointer());
+				if (obj) {
+					obj->explode();
+				}
+			}
+		}
+	}
 }
 
 const Vector3& Player::getPosition() const {

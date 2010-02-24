@@ -6,9 +6,9 @@
 --print("Awake")
 local obj = Level:createObject("Sentinel")
 
-Level:sleep(50)
-Level:createObject("Explosion")
-obj:explode()
+--Level:sleep(50)
+--Level:createObject("Explosion")
+--obj:explode()
 
 
 -- NOTE: my_function{val="blah"} is a shortcut for my_function({val="blah"})
