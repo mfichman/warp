@@ -66,6 +66,7 @@ class Level;
 class Game;
 class Object;
 class GameListener;
+class SubObject;
 
 inline int mod(int num, int divisor) {
     int remainder = num % divisor;
@@ -119,6 +120,7 @@ lua_State* operator>>(lua_State* env, std::string& s);
 lua_State* operator>>(lua_State* env, Warp::BeatLoop& bl);
 lua_State* operator>>(lua_State* env, Warp::Object& e);
 lua_State* operator>>(lua_State* env, Ogre::Entity& e);
+lua_State* operator>>(lua_State* env, btRigidBody& n);
 
 void loadScript(lua_State* env, const std::string& name);
 void loadScriptFolder(lua_State* env, const std::string& dir);

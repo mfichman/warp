@@ -100,6 +100,10 @@
 				RelativePath="..\Source\Script.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\Source\SubObject.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -144,6 +148,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\Script.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\SubObject.hpp"
 				>
 			</File>
 			<File

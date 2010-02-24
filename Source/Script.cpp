@@ -274,15 +274,38 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
     }
     lua_pop(env, 1);
 
-	if (!n.getUserAny().isEmpty()) {
-		btRigidBody* body = any_cast<btRigidBody*>(n.getUserAny());
-		Vector3 vel;
-		env >> vel;
-		body->setLinearVelocity(btVector3(vel.x, vel.y, vel.z));
-	}
-
     return env;
 
+}
+
+lua_State* Warp::operator>>(lua_State* env, btRigidBody& n) {
+    assert(lua_istable(env, -1));
+    
+    lua_getfield(env, -1, "position");
+    if (!lua_isnil(env, -1)) {
+		Vector3 position;
+        env >> position;
+
+		btQuaternion q = n.getOrientation();
+		btVector3 v(position.x, position.y, position.z);
+        n.setCenterOfMassTransform(btTransform(q, v));
+    } else {
+        lua_pop(env, 1);
+    }
+    lua_getfield(env, -1, "orientation");
+    if (!lua_isnil(env, -1)) {
+		Quaternion o;
+        env >> o;
+
+        btQuaternion q(o.x, o.y, o.z, o.w);
+		btVector3 v = n.getCenterOfMassPosition();
+        n.setCenterOfMassTransform(btTransform(q, v));
+    } else {
+        lua_pop(env, 1);
+    }
+    lua_pop(env, 1);
+
+    return env;
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Entity& e) {

@@ -6,8 +6,10 @@
 #include "Object.hpp"
 
 #include "Game.hpp"
+#include "SubObject.hpp"
 
 #include <sstream>
+#include <stdexcept>
  extern "C" {
 #include <lua/lua.h> 
 #include <lua/lualib.h>
@@ -17,14 +19,13 @@
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
-
-#define Object_MASS 1.0f
-#define Object_RADIUS 0.5f
+using namespace boost;
 
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
 Object::Object(Game* game, const string& type, int id) :
     game_(game),
-	type_(type)
+	type_(type),
+	exploded_(false)
 {
 	ostringstream os;
 	os << type << id;
@@ -32,14 +33,41 @@ Object::Object(Game* game, const string& type, int id) :
 
 	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
 
-	
+	// Initialize the physics shape
+	shape_.reset(new btCompoundShape());
+
+	// Initialize the mass and inertia
+	btScalar mass(1.0f);
+	btVector3 inertia(0.0f, 0.0f, 0.0f);
+	shape_->calculateLocalInertia(mass, inertia);
+
+	// Initialize the rigid body
+	transform_.setIdentity();
+	btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
+	body_.reset(new btRigidBody(rbinfo));
+	body_->setFriction(0.0f);
+	body_->setRestitution(1.0f);
+	body_->setUserPointer(this);
+	game_->getWorld()->addRigidBody(body_.get());
+
+	body_->setLinearVelocity(btVector3(0, -1, 0));
+
 	loadScriptCallbacks();
 }
 
 Object::~Object() {
 
+	// Clean up physics
+	if (body_.get()) { 
+		game_->getWorld()->removeCollisionObject(body_.get());
+	}
+
+	// Clean up scripting
 	lua_State* env = game_->getScriptState();
 	lua_unref(env, table_);
+
+	// Destroy all subobjects
+	subObjects_.clear();
 
 	// Destroy all attached entities and scene nodes
 	SceneNode::ChildNodeIterator i = node_->getChildIterator();
@@ -84,6 +112,10 @@ void Object::loadScriptCallbacks() {
 	lua_pushcclosure(env, &Object::luaSet, 1);
 	lua_setfield(env, -2, "set");
 
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaExplode, 1);
+	lua_setfield(env, -2, "explode");
+
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
 		string message(lua_tostring(env, -1));
@@ -97,7 +129,7 @@ void Object::loadScriptCallbacks() {
 /** Sets the scene node position and orientation */
 int Object::luaSet(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	env >> *self->node_;
+	env >> *self->body_;
 
 	return 0;
 }
@@ -112,17 +144,22 @@ int Object::luaAddEntity(lua_State* env) {
 		env >> name;
 		lua_getfield(env, -1, "mesh");
 		env >> mesh;
+		lua_getfield(env, -1, "mass");
+		float mass = lua_tonumber(env, -1);
 
+		// Create the subobject and add it to this object
 		name = self->name_ + "." + name;
+		shared_ptr<SubObject> subobj(new SubObject(self->game_, self, name, mesh));
+		self->subObjects_.push_back(subobj);
+		self->shape_->addChildShape(btTransform::getIdentity(), subobj->getShape());
+		self->body_->updateInertiaTensor();
 
-		SceneNode* node = self->node_->createChildSceneNode(name);
-		Entity* entity = self->game_->getSceneManager()->createEntity(name, mesh);
-		node->attachObject(entity);
+		assert(self->node_ == subobj->getSceneNode()->getParent());
 
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
 		lua_error(env);
-	} catch (exception& ex) {
+	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
 	}
@@ -150,7 +187,7 @@ int Object::luaAddParticleSystem(lua_State* env) {
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
 		lua_error(env);
-	} catch (exception& ex) {
+	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
 	}
@@ -172,6 +209,7 @@ int Object::luaSetEntity(lua_State* env) {
 
 		SceneNode* node = self->game_->getSceneManager()->getSceneNode(name);
 		Entity* entity = static_cast<Entity*>(node->getAttachedObject(0U));
+		SubObject* subobj = any_cast<SubObject*>(node->getUserAny());
 
 		lua_getfield(env, -1, "animation");
 		if (!lua_isnil(env, -1)) {
@@ -185,13 +223,22 @@ int Object::luaSetEntity(lua_State* env) {
 			lua_pop(env, 1);
 		}
 
-		env >> *node;
 		env >> *entity;
+		env >> *node;
+
+		// Recalculate the physics for collision detection
+		const Quaternion& q = node->getOrientation();
+		const Vector3& v = node->getPosition();
+		btTransform transform(btQuaternion(q.x, q.y, q.z, q.w), btVector3(v.x, v.y, v.z));
+
+		self->shape_->removeChildShape(subobj->getShape());
+		self->shape_->addChildShape(transform, subobj->getShape());
+		self->body_->updateInertiaTensor();
 
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
 		lua_error(env);
-	} catch (exception& ex) {
+	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
 	}
@@ -219,11 +266,18 @@ int Object::luaSetParticleSystem(lua_State* env) {
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
 		lua_error(env);
-	} catch (exception& ex) {
+	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
 	}
 
+	return 0;
+}
+
+/** Explodes the object */
+int Object::luaExplode(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	self->explode();
 	return 0;
 }
 
@@ -250,4 +304,35 @@ void Object::onTimeStep() {
 lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {
 	lua_getref(env, e.table_);
 	return env;
+}
+
+void Object::getWorldTransform(btTransform& transform) const {
+	transform = transform_;
+}
+
+void Object::setWorldTransform(const btTransform& transform) {
+
+	// Get info from bullet
+    const btQuaternion& rotation = transform.getRotation();
+    const btVector3& position = transform.getOrigin();
+    // Apply to scene node
+    node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
+    node_->setPosition(position.x(), position.y(), position.z());
+    // Set local info
+    transform_ = transform;
+}
+
+/** Causes the object to explode, and the pieces to become independent */
+void Object::explode() {
+	if (exploded_) {
+		return;
+	}
+	exploded_ = true;
+
+	for (list<shared_ptr<SubObject>>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
+		(*i)->separateFromParent();
+	}
+
+	game_->getWorld()->removeCollisionObject(body_.get());
+	body_.reset();
 }

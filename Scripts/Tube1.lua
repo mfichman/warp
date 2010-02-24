@@ -4,9 +4,11 @@
 --print("Sleeping")
 --wSleep(100)
 --print("Awake")
-Level:createObject("Sentinel")
-Level:createObject("Explosion")
+local obj = Level:createObject("Sentinel")
 
+Level:sleep(50)
+Level:createObject("Explosion")
+obj:explode()
 
 
 -- NOTE: my_function{val="blah"} is a shortcut for my_function({val="blah"})

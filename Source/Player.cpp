@@ -78,7 +78,11 @@ void Player::setWorldTransform(const btTransform& transform) {
 
 /** Called when a new frame is detected */
 void Player::onTimeStep() {
+	computeForces();
+	updateRay();
+}
 
+void Player::computeForces() {
 	btVector3 btposition = body_->getCenterOfMassPosition();
 	btVector3 btvelocity = body_->getLinearVelocity();
 	Vector3 position(btposition.x(), btposition.y(), btposition.z());
@@ -142,7 +146,10 @@ void Player::onTimeStep() {
 	
 	position = POSITION_SMOOTHNESS * game_->getCamera()->getPosition() + (1-POSITION_SMOOTHNESS) * position;
 	//game_->getCamera()->setPosition(position - forward*0.5 + up*0.25);
+}
 
+void Player::updateRay() {
+	
 }
 
 const Vector3& Player::getPosition() const {

@@ -53,6 +53,25 @@ material GoldFire
 	}
 }
 
+
+material RedFire
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend add
+			depth_write off
+
+			texture_unit
+			{
+				texture RedFire.png
+			}
+		}
+	}
+}
+
 material Smoke
 {
 	technique

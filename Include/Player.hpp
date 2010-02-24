@@ -33,6 +33,8 @@ private:
 	virtual void setWorldTransform(const btTransform& transform);
 
 	virtual void onTimeStep();
+	void computeForces();
+	void updateRay();
 
 	Game* game_;
 	Level* level_;

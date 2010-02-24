@@ -179,15 +179,15 @@ void Game::loadPhysics() {
     broadphase_ = new btDbvtBroadphase();
     solver_ = new btSequentialImpulseConstraintSolver();
     world_ = new btDiscreteDynamicsWorld(dispatcher_, broadphase_, solver_, collisionConfiguration_);
-    world_->getSolverInfo().m_splitImpulse = true;
-    world_->getSolverInfo().m_splitImpulsePenetrationThreshold = 00.0f;
+    //world_->getSolverInfo().m_splitImpulse = true;
+    //world_->getSolverInfo().m_splitImpulsePenetrationThreshold = 00.0f;
     //world_->getSolverInfo().m_maxErrorReduction = 0.0f;
     //world_->getSolverInfo().m_numIterations = 20;
-    world_->getSolverInfo().m_restitution = 0.0f;
-    world_->getSolverInfo().m_globalCfm = 1000.0f;
-    world_->getSolverInfo().m_erp = 1.00f;
-    world_->getSolverInfo().m_erp2 = 1.00f;
-    world_->setGravity(btVector3(0, 0, 0));
+    //world_->getSolverInfo().m_restitution = 0.0f;
+    //world_->getSolverInfo().m_globalCfm = 1000.0f;
+    //world_->getSolverInfo().m_erp = 1.00f;
+    //world_->getSolverInfo().m_erp2 = 1.00f;
+    world_->setGravity(btVector3(0, -5, 0));
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 
 }

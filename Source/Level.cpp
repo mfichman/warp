@@ -197,13 +197,15 @@ int Level::luaStartBeatServer(lua_State* env) {
 #include <OIS/OIS.h>
 /** Called once for each game loop */
 void Level::onTimeStep() {
+
+	for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
+		(*i)->onTimeStep();
+	}
 	
 	// Hack hack hack
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_R)) {
 		game_->setLevel("Tube1");
 	}
 
-	for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
-		(*i)->onTimeStep();
-	}
+
 }

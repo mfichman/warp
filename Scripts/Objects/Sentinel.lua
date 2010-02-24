@@ -23,15 +23,24 @@ function Sentinel:init()
     
 ]]
     self.time = 0.0
-    self:addEntity{name="Ship", mesh="Ship.mesh"}
-    self:addParticleSystem{name="Exhaust", template="Fountain"}
-    self:setParticleSystem{name="Exhaust", position={0, 0, 0.8}}
+    --self:addEntity{name="Ship", mesh="Ship.mesh"}
+    self:addEntity{name="ShipHull", mesh="ShipHull.mesh"}
+    self:addEntity{name="ShipRightWing", mesh="ShipRightWing.mesh"}
+    self:addEntity{name="ShipLeftWing", mesh="ShipLeftWing.mesh"}
+    self:setEntity{name="ShipRightWing", position={0.6, -0.2, 0}}
+    self:setEntity{name="ShipLeftWing", position={-0.6, -0.2, 0}}
     
 end
 
 -- This function gets called once per timestep by the
 -- C++ peer class connected to this Lua class
 function Sentinel:onTimeStep()
-    self.time = self.time + 0.01
-    self:set{orientation={0,0.4,1,angle=100*self.time}}
+    --self.time = self.time + 0.01
+    --self:set{orientation={0,0.4,1,angle=100*self.time}}
+end
+
+-- This function gets called when the object is destroyed
+-- (but not wwhen it is deallocated)
+function Sentinel:onDestroy()
+
 end
