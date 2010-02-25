@@ -6,12 +6,17 @@
 #include <Overlays.hpp>
 #include <ScriptTask.hpp>
 #include <sstream>
+#include <boost/thread.hpp>
 
 using namespace Ogre;
 using namespace std;
 
 int main(int argc, char** argv) {
     try {
+#ifdef WIN32
+		system("start /Daudio \"Warp: Chuck Server\" chuck.exe play.ck");
+#endif
+
 		auto_ptr<Warp::Game> game(new Warp::Game()); 
 		
         game->getCamera()->setPosition(0, 0, -20);
@@ -26,7 +31,6 @@ int main(int argc, char** argv) {
 		light->setDirection(Vector3(0, -1, 1)); 
 
         
-        
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
         //Warp::StaticTube tube(game.get(), "Test");
@@ -39,6 +43,10 @@ int main(int argc, char** argv) {
 
 		game->setLevel("Tube1");
 		game->getRoot()->startRendering();
+
+#ifdef WIN32
+		system("taskkill /IM chuck.exe");
+#endif
         
     } catch (Exception& ex) {
         cerr << "Exception: " << ex.getFullDescription() << endl;

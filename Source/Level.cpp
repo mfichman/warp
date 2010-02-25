@@ -43,7 +43,6 @@ Level::Level(Game* game, const std::string& name) :
 /** Destroys the level */
 Level::~Level() {
 	game_->removeListener(this);
-
 }
 
 /** Loads Lua script functions for this level */

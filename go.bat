@@ -1,4 +1,3 @@
-start /Daudio "Warp: ChucK Server" chuck.exe play.ck
-FOR /F "tokens=2" %%I in ('TASKLIST /NH /FI "WINDOWTITLE eq Warp: ChucK Server"' ) DO SET PID=%%I 
+rem Chuck is now started from inside warp.exe, so we don't need it in the batchfile anymore
 start /W warp
-TASKKILL /PID %PID% 
+
