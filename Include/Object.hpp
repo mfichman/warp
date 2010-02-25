@@ -33,9 +33,6 @@ public:
 	/** Called when the object is selected */
 	void select();
 
-	/** Makes the object explode! */
-	void explode();
-
 	/** Returns true if the object is alive */
 	bool isAlive() const { return alive_; }
 
@@ -59,6 +56,7 @@ private:
 	static int luaSet(lua_State* env);
 	static int luaExplode(lua_State* env);
 	static int luaDestroy(lua_State* env);
+	static int luaTarget(lua_State* env);
 	static int luaWarningDestroyed(lua_State* env);
 	static int luaGetPosition(lua_State* env);
 
@@ -75,8 +73,10 @@ private:
 
 	// Ogre scene data
 	Ogre::SceneNode* node_;
+	Ogre::BillboardSet* billboards_;
 	std::list<Ogre::AnimationState*> activeAnimations_;
 	std::list<boost::shared_ptr<SubObject>> subObjects_;
+
 
 	// Physics data
 	std::auto_ptr<btCompoundShape> shape_;

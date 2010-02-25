@@ -152,7 +152,7 @@ void Player::computeForces() {
 void Player::updateRay() {
 
 	const OIS::MouseState& state = game_->getMouse()->getMouseState();
-	if (state.buttonDown(OIS::MB_Right)) {
+	if (state.buttonDown(OIS::MB_Right) || state.buttonDown(OIS::MB_Left)) {
 
 		// Create picking ray and test for the closest btRigidBody
 		float scrx = (float)state.X.abs/game_->getWindow()->getWidth();

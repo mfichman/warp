@@ -33,6 +33,15 @@ end
 -- MUSIC STUFF --
 -----------------
 
+-- Waits for a beat mod the given number == 0
+function Level:waitForBeatMod(num, mod)
+    local beat = self:getBeat()
+    coroutine.yield(function()
+        local newbeat = self:getBeat();
+        return (newbeat % mod == num) and (newbeat ~= beat)
+    end)
+end
+
 -- Waits for the next beat before returning
 function Level:waitForBeat()
     local beat = self:getBeat()

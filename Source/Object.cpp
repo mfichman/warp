@@ -26,7 +26,8 @@ Object::Object(Game* game, const string& type, int id) :
     game_(game),
 	type_(type),
 	exploded_(false),
-	alive_(true)
+	alive_(true),
+	billboards_(0)
 {
 	ostringstream os;
 	os << type << id;
@@ -63,10 +64,15 @@ Object::~Object() {
 		game_->getWorld()->removeCollisionObject(body_.get());
 	}
 
-
-
 	// Destroy all subobjects
 	subObjects_.clear();
+
+	// Remove targeting billboard
+	if (billboards_) {
+		node_->detachObject(billboards_);
+		game_->getSceneManager()->destroyBillboardSet(billboards_);
+		billboards_ = 0;
+	}
 
 	// Destroy all attached entities and scene nodes
 	SceneNode::ChildNodeIterator i = node_->getChildIterator();
@@ -140,6 +146,10 @@ void Object::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaDestroy, 1);
 	lua_setfield(env, -2, "destroy");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaTarget, 1);
+	lua_setfield(env, -2, "target");
 
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaGetPosition, 1);
@@ -306,7 +316,27 @@ int Object::luaSetParticleSystem(lua_State* env) {
 /** Explodes the object */
 int Object::luaExplode(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	self->explode();
+	if (self->exploded_) {
+		return 0;
+	}
+	self->exploded_ = true;
+
+	// Separate the subobjects
+	for (list<shared_ptr<SubObject>>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
+		(*i)->separateFromParent();
+	}
+
+	// Disable the original rigid body for the object
+	self->game_->getWorld()->removeCollisionObject(self->body_.get());
+	self->body_.reset();
+
+	// Turn off the targeting billboard, if it is on
+	if (self->billboards_) {
+		self->node_->detachObject(self->billboards_);
+		self->game_->getSceneManager()->destroyBillboardSet(self->billboards_);
+		self->billboards_ = 0;
+	}
+
 	return 0;
 }
 
@@ -314,8 +344,27 @@ int Object::luaExplode(lua_State* env) {
 int Object::luaDestroy(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 	self->alive_ = false;
+
 	return 0;
 }
+
+
+/** Destroys the object */
+int Object::luaTarget(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	
+	if (!self->billboards_) {
+		self->billboards_ = self->game_->getSceneManager()->createBillboardSet(self->name_ + ".Target", 1);
+		self->billboards_->setMaterialName("Circle");
+		self->billboards_->setDefaultWidth(2.0f);
+		self->billboards_->setDefaultHeight(2.0f);
+		self->billboards_->createBillboard(0.0f, 0.0f, 0.0f);
+		self->node_->attachObject(self->billboards_);
+	}
+
+	return 0;
+}
+
 
 /** Warning */
 int Object::luaWarningDestroyed(lua_State* env) {
@@ -388,19 +437,4 @@ void Object::setWorldTransform(const btTransform& transform) {
 /** Called when the object is selected */
 void Object::select() {
 	callMethod("onSelect");
-}
-
-/** Causes the object to explode, and the pieces to become independent */
-void Object::explode() {
-	if (exploded_) {
-		return;
-	}
-	exploded_ = true;
-
-	for (list<shared_ptr<SubObject>>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
-		(*i)->separateFromParent();
-	}
-
-	game_->getWorld()->removeCollisionObject(body_.get());
-	body_.reset();
 }

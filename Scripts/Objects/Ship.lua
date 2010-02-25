@@ -46,11 +46,12 @@ function Ship:onSelect()
     self.selected = true
     Level:createTask(function()
         print("Sleeping...")
-        --Level:waitForBeatSet()   
-        --Level:sleep(100)
+        self:target()
+        Level:waitForBeatMod(0, 2)   
         print("Task awake")  
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}
         self:explode()
+        
     end)
 end

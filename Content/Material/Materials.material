@@ -1,0 +1,17 @@
+material Circle
+{
+	technique
+	{
+		pass
+		{
+            transparent
+            lighting off
+            scene_blend alpha_blend
+            depth_write off
+			texture_unit
+			{
+				texture Circle.png
+			}
+		}
+	}
+}
