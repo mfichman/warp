@@ -75,11 +75,18 @@ inline int mod(int num, int divisor) {
 }
 
 struct SpineNode {
+	SpineNode() :
+		distance(0) {}
+
 	Ogre::Vector3 position; // Position of the node
 	float distance; // Distance along the path from first node
 };
 
 struct SpineProjection {
+	SpineProjection() :
+		index(0),
+		distance(0) {}
+
     Ogre::Vector3 position;
     Ogre::Vector3 forward;
 	int index;

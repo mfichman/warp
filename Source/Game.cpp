@@ -187,7 +187,7 @@ void Game::loadPhysics() {
     //world_->getSolverInfo().m_globalCfm = 1000.0f;
     //world_->getSolverInfo().m_erp = 1.00f;
     //world_->getSolverInfo().m_erp2 = 1.00f;
-    world_->setGravity(btVector3(0, -5, 0));
+    world_->setGravity(btVector3(0, -2, 0));
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 
 }

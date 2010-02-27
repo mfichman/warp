@@ -21,6 +21,9 @@ public:
 	/** Returns the spine projection given the current node number */
     SpineProjection getSpineProjection(const Ogre::Vector3& v, int node_i) const;
 
+	/** Returns the spine projection given the current node number & the distance value */
+	SpineProjection getSpineProjection(float distance, int node_i) const;
+
 private:
     DynamicTube(const DynamicTube&);
     DynamicTube& operator=(const DynamicTube&);

@@ -188,6 +188,56 @@ void DynamicTube::generateIndices() {
     }
 }
 
+/** Returns the spine projection given the current node number & the distance value */
+SpineProjection DynamicTube::getSpineProjection(float distance, int node_i) const {
+	int prev_i = node_i;
+	int next_i = mod(prev_i + 1, nodes_.size());
+
+	float total = nodes_[nodes_.size()-1].distance; // Total distance along tube
+	distance = fmod(distance, total);
+	if (distance < 0) distance += total;
+
+	while (true) {
+		const SpineNode& next = nodes_[next_i];
+		const SpineNode& prev = nodes_[prev_i];
+
+		if (distance < nodes_[prev_i].distance) {
+			// Move forward along the tube to the next node
+			next_i = mod(next_i - 1, nodes_.size());
+			prev_i = mod(prev_i - 1, nodes_.size());
+				
+		} else if (distance > nodes_[next_i].distance) {
+			// Move backward along the tube to the previous node
+			next_i = mod(next_i + 1, nodes_.size());
+			prev_i = mod(prev_i + 1, nodes_.size());
+
+		} else {
+			break;
+		}
+	}
+	
+	// At this point, "distance" should be between prev.distance and next.distance
+    // compute location and forward vectors
+	const SpineNode& prev = nodes_[prev_i];
+    const SpineNode& next = nodes_[next_i];
+    Vector3 prevForward = (next.position - prev.position).normalisedCopy();
+    Vector3 nextForward = (nodes_[mod(next_i + 1, nodes_.size())].position - next.position).normalisedCopy();
+
+    // projection of relative position in the direction of motion
+    // divided by distance to the next node
+    float alpha = (distance - prev.distance)/(next.distance - prev.distance);
+
+    // interpolate
+    SpineProjection result;
+    result.position = (1 - alpha)*prev.position + (alpha)*next.position;
+    result.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
+    result.forward.normalise();
+	result.index = prev_i;
+	result.distance = (1 - alpha)*prev.distance + (alpha)*next.distance;
+
+	return result;
+}
+
 /** Returns the spine projection given the current node number */
 SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) const {
 
@@ -230,10 +280,10 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) co
     }
 
     // compute location and forward vectors
-    const SpineNode& prev = nodes_[prev_i];
+	const SpineNode& prev = nodes_[prev_i];
     const SpineNode& next = nodes_[next_i];
     Vector3 prevForward = (next.position - prev.position).normalisedCopy();
-    Vector3 nextForward = (nodes_[mod(next_i + 1, n_nodes)].position - next.position).normalisedCopy();
+    Vector3 nextForward = (nodes_[mod(next_i + 1, nodes_.size())].position - next.position).normalisedCopy();
 
     // projection of relative position in the direction of motion
     // divided by distance to the next node
@@ -247,5 +297,5 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) co
 	result.index = prev_i;
 	result.distance = (1 - alpha)*prev.distance + (alpha)*next.distance;
 
-    return result;
+	return result;
 }

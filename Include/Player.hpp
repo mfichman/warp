@@ -21,8 +21,11 @@ public:
 	/** Returns the player's current position */
     const Ogre::Vector3& getPosition() const;
 
-	/** Gets the current spine node distance */
-	float getSpineNodeDistance() const;
+	/** Gets the current player spine node projection */
+	const SpineProjection& getPlayerProjection() const;
+
+	/** Returns the spine projection where enemies should spawn */
+	const SpineProjection& getSpawnProjection() const;
 		
 private:
 	Player(const Player&);
@@ -42,6 +45,7 @@ private:
 	// Ogre scene data
 	std::string name_;
 	Ogre::SceneNode* node_;
+	Ogre::SceneNode* shipNode_;
 
 	// Collision data
 	std::auto_ptr<btCollisionShape> shape_;
@@ -51,8 +55,8 @@ private:
     btTransform transform_;
 	Ogre::Vector3 position_;
 
-    float spineNodeDistance_;
-	int spineNodeIndex_;
+	SpineProjection spawnProjection_;
+	SpineProjection playerProjection_;
 
 };
 

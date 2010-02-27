@@ -27,8 +27,8 @@ function Ship:init()
     self:addEntity{name="ShipHull", mesh="ShipHull.mesh"}
     self:addEntity{name="ShipRightWing", mesh="ShipRightWing.mesh"}
     self:addEntity{name="ShipLeftWing", mesh="ShipLeftWing.mesh"}
-    self:setEntity{name="ShipRightWing", position={0.6, -0.2, 0}}
-    self:setEntity{name="ShipLeftWing", position={-0.6, -0.2, 0}}
+    self:setEntity{name="ShipRightWing", position={1.2, -0.4, 0}}
+    self:setEntity{name="ShipLeftWing", position={-1.2, -0.4, 0}}
     self.selected = false
 end
 
@@ -47,7 +47,7 @@ function Ship:onSelect()
     Level:createTask(function()
         print("Sleeping...")
         self:target()
-        Level:waitForBeatMod(0, 2)   
+        Level:waitForBeat()
         print("Task awake")  
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}

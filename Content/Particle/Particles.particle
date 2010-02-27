@@ -2,8 +2,8 @@
 particle_system Fountain
 {
     material Flare
-    particle_width 1.0
-    particle_height 1.0
+    particle_width 3.0
+    particle_height 3.0
     cull_each false
     quota 10000
     billboard_type point
@@ -12,8 +12,8 @@ particle_system Fountain
     emitter Box
     {
         angle 25
-        width 0.1
-        height 0.1
+        width 0.5
+        height 0.5
         depth 0
         emission_rate 50
         time_to_live 3
@@ -44,24 +44,24 @@ particle_system Fountain
 particle_system Flames
 {
     material Flare
-    particle_width 1.2
-    particle_height 1.2
+    particle_width 2.2
+    particle_height 2.2
     cull_each false
-    quota 1000
+    quota 40
     billboard_type point
 
     // Area emitter
     emitter Box
     {
         angle 15
-        width 0.3
+        width 0.9
         height 0
-        depth 0.3
+        depth 0.9
         emission_rate 50
-        time_to_live 3
+        time_to_live 0.5
         direction 0 1 0
-        velocity_min 2.0
-        velocity_max 3.0
+        velocity_min 4.0
+        velocity_max 6.0
         colour_range_start 1 0 0
         colour_range_end 0.5 0.6 0
     }
@@ -78,10 +78,10 @@ particle_system Flames
 particle_system Explosion
 {
     material GoldFire
-    particle_width 3
-    particle_height 3
+    particle_width 5
+    particle_height 5
     cull_each false
-    quota 14
+    quota 35
     billboard_type point
     billboard_rotation_type vertex
 
@@ -92,9 +92,9 @@ particle_system Explosion
         velocity_min 0
         velocity_max 0
 
-        width 2
-        height 2
-        depth 2
+        width 6
+        height 6
+        depth 6
         
 
         time_to_live 0.5
@@ -105,7 +105,7 @@ particle_system Explosion
         direction 0 0 1
         duration 0.5
         emission_rate 1000
-        repeat_delay 2.0
+        //repeat_delay 2.0
     }
 
     affector Rotator
@@ -133,7 +133,7 @@ particle_system Smoke
     particle_width 2
     particle_height 2
     cull_each false
-    quota 4
+    quota 12
     billboard_type point
     billboar_rotation_type vertex
 
@@ -144,9 +144,9 @@ particle_system Smoke
         velocity_min 0.1
         velocity_max 0.15
 
-        width 2
-        height 2
-        depth 2
+        width 5
+        height 5
+        depth 5
 
         time_to_live 2
         
@@ -156,7 +156,7 @@ particle_system Smoke
         direction 0 0 1
         duration 0.5
         emission_rate 1000
-        repeat_delay 2.0
+        //repeat_delay 2.0
     }
 
     affector Rotator

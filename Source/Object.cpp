@@ -7,6 +7,8 @@
 
 #include "Game.hpp"
 #include "SubObject.hpp"
+#include "Level.hpp"
+#include "Player.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -22,12 +24,14 @@ using namespace std;
 using namespace boost;
 
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
-Object::Object(Game* game, const string& type, int id) :
+Object::Object(Game* game, Level* level, const string& type, int id) :
     game_(game),
 	type_(type),
 	exploded_(false),
 	alive_(true),
-	billboards_(0)
+	billboards_(0),
+	spineNodeIndex_(0),
+	level_(level)
 {
 	ostringstream os;
 	os << type << id;
@@ -43,8 +47,13 @@ Object::Object(Game* game, const string& type, int id) :
 	btVector3 inertia(0.0f, 0.0f, 0.0f);
 	shape_->calculateLocalInertia(mass, inertia);
 
+	// Find the spawn position
+	const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection();
+
+	// TODO: Align the object so it's facing down the tube
+
 	// Initialize the rigid body
-	transform_.setIdentity();
+	transform_ = btTransform(btQuaternion::getIdentity(), btVector3(spawn.position.x, spawn.position.y, spawn.position.z));
 	btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
 	body_.reset(new btRigidBody(rbinfo));
 	body_->setFriction(0.0f);
@@ -52,12 +61,12 @@ Object::Object(Game* game, const string& type, int id) :
 	body_->setUserPointer(this);
 	game_->getWorld()->addRigidBody(body_.get());
 
-	body_->setLinearVelocity(btVector3(0, -1, 0));
-
 	loadScriptCallbacks();
 }
 
 Object::~Object() {
+
+	cout << name_ << " deallocated" << endl;
 
 	// Clean up physics
 	if (body_.get()) { 
@@ -356,8 +365,8 @@ int Object::luaTarget(lua_State* env) {
 	if (!self->billboards_) {
 		self->billboards_ = self->game_->getSceneManager()->createBillboardSet(self->name_ + ".Target", 1);
 		self->billboards_->setMaterialName("Circle");
-		self->billboards_->setDefaultWidth(2.0f);
-		self->billboards_->setDefaultHeight(2.0f);
+		self->billboards_->setDefaultWidth(5.0f);
+		self->billboards_->setDefaultHeight(5.0f);
 		self->billboards_->createBillboard(0.0f, 0.0f, 0.0f);
 		self->node_->attachObject(self->billboards_);
 	}
@@ -368,8 +377,7 @@ int Object::luaTarget(lua_State* env) {
 
 /** Warning */
 int Object::luaWarningDestroyed(lua_State* env) {
-	lua_pushstring(env, "This object is no longer valid");
-	lua_error(env);
+	cout << "This object is no longer valid" << endl;
 	return 0;
 }
 
@@ -411,6 +419,20 @@ void Object::onTimeStep() {
 	}
 
 	callMethod("onTimeStep");
+
+	const SpineProjection proj = level_->getPlayer()->getPlayerProjection();
+	Vector3 to = proj.position - node_->getPosition();
+
+	// If the players forward vector is facing away from us, then the object is
+	// out of the field of view so this object should be deleted.  N.B.:
+	// there is probably a better way to do this using the distance along the
+	// spine node path.
+	if (to.dotProduct(proj.forward) > 0 && to.squaredLength() > 12) {
+		alive_ = false;
+	}
+
+	// Fly down the tube in the opposite direction of the player
+
 }
 
 lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {

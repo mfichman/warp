@@ -1,28 +1,11 @@
 -- Warp: CS248 Final Project
 -- Matt Fichman & Francesco Georg
 
---print("Sleeping")
---wSleep(100)
---print("Awake")
-local obj1 = Level:createObject("Ship")
-local obj2 = Level:createObject("Ship")
-local obj3 = Level:createObject("Ship")
-
-obj2:set{position={-3, 0, 0}}
-obj3:set{position={3, 0, 0}}
-
---Level:sleep(50)
---Level:createObject("Explosion")
---obj:explode()
-
-
 -- NOTE: my_function{val="blah"} is a shortcut for my_function({val="blah"})
 Level:queueStartLoop{name="loop1", path="loops/Effected Beat 01.wav", bpm=113, n_beats=16}
 Level:startBeatServer{bpm=110}
 
-print("Waiting")
-Level:waitForDistance(50)
-print("Awake")
+Level:waitForDistance(350)
 
 Level:queueStartLoop{name="loop2", path="loops/Effected Beat 02.wav", bpm=110, n_beats=16}
 Level:waitForBeatSet()
@@ -37,4 +20,3 @@ Level:waitForBeat()
 Level:setLight{name="Light", diffuse={0, 1, 0}}
 
 end
-

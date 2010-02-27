@@ -16,7 +16,7 @@ class Object : public btMotionState {
 public:
 
 	/** Creates a new script and begins executing it inside a coroutine */
-    Object(Game* game, const std::string& name, int id);
+    Object(Game* game, Level* level, const std::string& name, int id);
 
     /** Destructor */
     ~Object();
@@ -65,6 +65,7 @@ private:
 	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
 
 	Game* game_;
+	Level* level_;
 	std::string type_;
 	std::string name_;
 
@@ -85,6 +86,8 @@ private:
 
 	bool exploded_;
 	bool alive_;
+
+	int spineNodeIndex_;
 };
 
 

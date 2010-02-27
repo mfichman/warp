@@ -21,18 +21,19 @@ using namespace std;
 #define POSITION_SMOOTHNESS 0.60f
 #define ROTATION_SMOOTHNESS 0.05f
 
+#define SPAWN_DISTANCE 150.0f
+
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
 Player::Player(Game* game, Level* level, const string& name) :
     game_(game),
 	level_(level),
     name_(name),
-    position_(Vector3::ZERO),
-    spineNodeIndex_(0),
-	spineNodeDistance_(0)
+    position_(Vector3::ZERO)
 {
 	// Set up OGRE scene nodes
 	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
-	node_->attachObject(game_->getSceneManager()->createEntity(name_, "Ball.mesh"));
+	shipNode_ = node_->createChildSceneNode(name_ + ".ShipNode");
+	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_, "Dagger.mesh"));
     
     transform_.setIdentity();
     
@@ -54,6 +55,7 @@ Player::Player(Game* game, Level* level, const string& name) :
 }
 
 Player::~Player() {
+	node_->removeAndDestroyChild(shipNode_->getName());
     game_->getSceneManager()->getRootSceneNode()->removeAndDestroyChild(name_);
     game_->getSceneManager()->destroyEntity(name_);
     game_->getWorld()->removeCollisionObject(body_.get());
@@ -90,12 +92,18 @@ void Player::computeForces() {
 	Vector3 position(btposition.x(), btposition.y(), btposition.z());
 	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
 
-    SpineProjection projection = level_->getTube()->getSpineProjection(position, spineNodeIndex_);
-	spineNodeIndex_ = projection.index;
-	spineNodeDistance_ = projection.distance;
+	// Get the player location
+    playerProjection_ = level_->getTube()->getSpineProjection(position, playerProjection_.index);
+
+	// Get the spawn location
+	spawnProjection_ = level_->getTube()->getSpineProjection(playerProjection_.distance + SPAWN_DISTANCE, spawnProjection_.index);
     
+
+	const SpineProjection& projection = playerProjection_;
     assert(projection.forward != Vector3::ZERO);
     assert(projection.position - position != Vector3::ZERO);
+
+
 
     // Up points toward spine node
     Vector3 forward = projection.forward;
@@ -144,11 +152,12 @@ void Player::computeForces() {
 
     right.normalise();
     up.normalise();
-    forward.normalise();        
-    //game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
+    forward.normalise();   
+	shipNode_->setOrientation(Quaternion(-right, up, -forward));
+    game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
 	
 	position = POSITION_SMOOTHNESS * game_->getCamera()->getPosition() + (1-POSITION_SMOOTHNESS) * position;
-	//game_->getCamera()->setPosition(position - forward*0.5 + up*0.25);
+	game_->getCamera()->setPosition(position - forward*2.0 + up*0.5);
 }
 
 void Player::updateRay() {
@@ -162,7 +171,7 @@ void Player::updateRay() {
 		Ray ray = game_->getCamera()->getCameraToViewportRay(scrx, scry);
 
 		btVector3 from(ray.getOrigin().x, ray.getOrigin().y, ray.getOrigin().z);
-		btVector3 to(ray.getPoint(100).x, ray.getPoint(100).y, ray.getPoint(100).z);
+		btVector3 to(ray.getPoint(1000).x, ray.getPoint(1000).y, ray.getPoint(1000).z);
 
 		btCollisionWorld::ClosestRayResultCallback callback(from, to);
 		game_->getWorld()->rayTest(from, to, callback);
@@ -182,6 +191,12 @@ const Vector3& Player::getPosition() const {
     return position_;
 }
 
-float Player::getSpineNodeDistance() const {
-    return spineNodeDistance_;
+const SpineProjection& Player::getPlayerProjection() const {
+    return playerProjection_;
 }
+
+const SpineProjection& Player::getSpawnProjection() const {
+	return spawnProjection_;
+}
+
+

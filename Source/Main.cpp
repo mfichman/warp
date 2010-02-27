@@ -12,17 +12,17 @@ using namespace Ogre;
 using namespace std;
 
 int main(int argc, char** argv) {
-    try {
 #ifdef WIN32
-		system("start /Daudio \"Warp: Chuck Server\" chuck.exe play.ck");
+	system("start /Daudio \"Warp: Chuck Server\" chuck.exe play.ck");
 #endif
 
+	try {
 		auto_ptr<Warp::Game> game(new Warp::Game()); 
 		
         game->getCamera()->setPosition(0, 0, -20);
         game->getCamera()->lookAt(0, -10, 100);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.0, 0.0, 0.0));
-		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.0, 0.0, 0.0), 0.0, 0, 300);
+		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.0, 0.0, 0.0), 0.0, 0, 150);
 
 		Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
@@ -44,15 +44,15 @@ int main(int argc, char** argv) {
 		game->setLevel("Tube1");
 		game->getRoot()->startRendering();
 
-#ifdef WIN32
-		system("taskkill /IM chuck.exe");
-#endif
-        
+
     } catch (Exception& ex) {
         cerr << "Exception: " << ex.getFullDescription() << endl;
     } catch (std::exception& ex) {
         cerr << "Exception: " << ex.what() << endl;
     }   
+#ifdef WIN32   
+	system("taskkill /IM chuck.exe");
+#endif
 
     return 0;
 }

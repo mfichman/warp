@@ -37,7 +37,8 @@ Level::Level(Game* game, const std::string& name) :
 
 	loadScriptCallbacks();
 
-	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".lua")));
+	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Beat.lua")));
+	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Level.lua")));
 }
 
 /** Destroys the level */
@@ -101,7 +102,7 @@ int Level::luaCreateObject(lua_State* env) {
 #pragma warning (default:4800)
 
 	// Create a new Object and add it to the list
-	shared_ptr<Object> Object(new Object(level->game_, type, level->entitiesCreated_++));
+	shared_ptr<Object> Object(new Object(level->game_, level, type, level->entitiesCreated_++));
 	level->objects_.push_back(Object);
 
 	env >> *Object;
@@ -163,7 +164,7 @@ int Level::luaSetLight(lua_State* env) {
 /** Lua callback.  Returns the current spine node ID. */
 int Level::luaGetSpineNodeDistance(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_pushinteger(env, level->player_->getSpineNodeDistance());
+	lua_pushinteger(env, level->player_->getPlayerProjection().distance);
     return 1;
 }
 
@@ -231,8 +232,8 @@ void Level::onTimeStep() {
 
 	static Updater<Object> objectUpdater;
 	static Updater<ScriptTask> taskUpdater;
-	remove_if(objects_.begin(), objects_.end(), objectUpdater);
-	remove_if(tasks_.begin(), tasks_.end(), taskUpdater);
+	objects_.erase(remove_if(objects_.begin(), objects_.end(), objectUpdater), objects_.end());
+	tasks_.erase(remove_if(tasks_.begin(), tasks_.end(), taskUpdater), tasks_.end());
 
 	//for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
 	//	(*i)->onTimeStep();
