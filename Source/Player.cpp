@@ -27,7 +27,8 @@ Player::Player(Game* game, Level* level, const string& name) :
 	level_(level),
     name_(name),
     position_(Vector3::ZERO),
-    lastSpineNodeIndex_(0)
+    spineNodeIndex_(0),
+	spineNodeDistance_(0)
 {
 	// Set up OGRE scene nodes
 	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
@@ -89,8 +90,9 @@ void Player::computeForces() {
 	Vector3 position(btposition.x(), btposition.y(), btposition.z());
 	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
 
-    SpineProjection projection = level_->getTube()->getSpineProjection(position, lastSpineNodeIndex_);
-	lastSpineNodeIndex_ = projection.index;
+    SpineProjection projection = level_->getTube()->getSpineProjection(position, spineNodeIndex_);
+	spineNodeIndex_ = projection.index;
+	spineNodeDistance_ = projection.distance;
     
     assert(projection.forward != Vector3::ZERO);
     assert(projection.position - position != Vector3::ZERO);
@@ -180,6 +182,6 @@ const Vector3& Player::getPosition() const {
     return position_;
 }
 
-int Player::getSpineNodeIndex() const {
-    return lastSpineNodeIndex_;
+float Player::getSpineNodeDistance() const {
+    return spineNodeDistance_;
 }

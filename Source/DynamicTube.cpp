@@ -104,13 +104,15 @@ void DynamicTube::readInputFile() {
 void DynamicTube::generateRing() {
 
     // Generate the spine node
-    Vector3 spinePosition = transform_ * Vector3::ZERO;
-
+	SpineNode node;
+	node.position = transform_ * Vector3::ZERO;
+	
     if (nodes_.size() != 0) {
-        v_ += lastSpinePosition_.distance(spinePosition);
+        v_ += lastSpinePosition_.distance(node.position);
     }
-    lastSpinePosition_ = spinePosition;
-    nodes_.push_back(spinePosition);
+	node.distance = v_;
+    lastSpinePosition_ = node.position;
+    nodes_.push_back(node);
     
     // Generate the ring around the node
     for (int i = 0; i < ringDivisions_; i++) {
@@ -193,17 +195,17 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) co
 
     int closest_i = node_i;
     { /* find the closest node to v near node_i */
-        float minDistance = nodes_[node_i].squaredDistance(v);
+        float minDistance = nodes_[node_i].position.squaredDistance(v);
         // this loop will discover the local min in distance around node_i
         while(true) {
             // try the node in front and behind:
-            float nextDistance = nodes_[mod(closest_i+1, n_nodes)].squaredDistance(v);
+            float nextDistance = nodes_[mod(closest_i+1, n_nodes)].position.squaredDistance(v);
             if (nextDistance < minDistance) {
                 minDistance = nextDistance;
                 closest_i = mod(closest_i + 1, n_nodes);
                 continue;
             }
-            float prevDistance = nodes_[mod(closest_i-1, n_nodes)].squaredDistance(v);
+            float prevDistance = nodes_[mod(closest_i-1, n_nodes)].position.squaredDistance(v);
             if (prevDistance < minDistance) {
                 minDistance = prevDistance;
                 closest_i = mod(closest_i - 1, n_nodes);
@@ -217,8 +219,8 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) co
     int next_i;
 
     // get the previous and next node indexes
-    Vector3 forward = (nodes_[mod(closest_i + 1, n_nodes)] - nodes_[closest_i]).normalisedCopy();
-    float projected_v = forward.dotProduct(v - nodes_[closest_i]);
+    Vector3 forward = (nodes_[mod(closest_i + 1, n_nodes)].position - nodes_[closest_i].position).normalisedCopy();
+    float projected_v = forward.dotProduct(v - nodes_[closest_i].position);
     if (projected_v > 0) {
         prev_i = closest_i;
         next_i = mod(closest_i + 1, n_nodes);
@@ -227,23 +229,23 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) co
         next_i = closest_i;
     }
 
-    if (node_i != prev_i) { printf("NEW NODE: %d\n", prev_i); }
-
     // compute location and forward vectors
-    Vector3 prev = nodes_[prev_i];
-    Vector3 next = nodes_[next_i];
-    Vector3 prevForward = (next - prev).normalisedCopy();
-    Vector3 nextForward = (nodes_[mod(next_i + 1, n_nodes)] - next).normalisedCopy();
+    const SpineNode& prev = nodes_[prev_i];
+    const SpineNode& next = nodes_[next_i];
+    Vector3 prevForward = (next.position - prev.position).normalisedCopy();
+    Vector3 nextForward = (nodes_[mod(next_i + 1, n_nodes)].position - next.position).normalisedCopy();
 
     // projection of relative position in the direction of motion
     // divided by distance to the next node
-    float alpha = prevForward.dotProduct(v - prev)/next.distance(prev);
+    float alpha = prevForward.dotProduct(v - prev.position)/next.position.distance(prev.position);
 
     // interpolate
     SpineProjection result;
-    result.position = (1 - alpha)*prev + (alpha)*next;
+    result.position = (1 - alpha)*prev.position + (alpha)*next.position;
     result.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
     result.forward.normalise();
 	result.index = prev_i;
+	result.distance = (1 - alpha)*prev.distance + (alpha)*next.distance;
+
     return result;
 }

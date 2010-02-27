@@ -21,8 +21,8 @@ public:
 	/** Returns the player's current position */
     const Ogre::Vector3& getPosition() const;
 
-	/** Gets the current spine node index */
-	int getSpineNodeIndex() const;
+	/** Gets the current spine node distance */
+	float getSpineNodeDistance() const;
 		
 private:
 	Player(const Player&);
@@ -51,7 +51,8 @@ private:
     btTransform transform_;
 	Ogre::Vector3 position_;
 
-    int lastSpineNodeIndex_;
+    float spineNodeDistance_;
+	int spineNodeIndex_;
 
 };
 

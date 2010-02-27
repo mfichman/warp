@@ -74,10 +74,16 @@ inline int mod(int num, int divisor) {
     return remainder;
 }
 
+struct SpineNode {
+	Ogre::Vector3 position; // Position of the node
+	float distance; // Distance along the path from first node
+};
+
 struct SpineProjection {
     Ogre::Vector3 position;
     Ogre::Vector3 forward;
 	int index;
+	float distance;
 };
 
 struct BeatLoop {

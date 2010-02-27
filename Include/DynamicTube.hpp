@@ -54,7 +54,7 @@ private:
     btTransform position_;
 
 	// Spine node tracking
-	std::vector<Ogre::Vector3> nodes_;
+	std::vector<SpineNode> nodes_;
 };
 
 }

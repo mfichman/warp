@@ -65,8 +65,8 @@ void Level::loadScriptCallbacks() {
     lua_setfield(env, -2, "setLight");
 
 	lua_pushlightuserdata(env, this); // Returns the current spine node
-    lua_pushcclosure(env, &Level::luaGetSpineNodeId, 1);
-    lua_setfield(env, -2, "getSpineNodeId");
+    lua_pushcclosure(env, &Level::luaGetSpineNodeDistance, 1);
+    lua_setfield(env, -2, "getSpineNodeDistance");
 
     lua_pushlightuserdata(env, this); // Gets the current beat
     lua_pushcclosure(env, &Level::luaGetBeat, 1);
@@ -96,6 +96,9 @@ int Level::luaCreateObject(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	std::string type;
 	env >> type;
+#pragma warning (disable:4800)
+	bool snap = lua_toboolean(env, -1);
+#pragma warning (default:4800)
 
 	// Create a new Object and add it to the list
 	shared_ptr<Object> Object(new Object(level->game_, type, level->entitiesCreated_++));
@@ -158,9 +161,9 @@ int Level::luaSetLight(lua_State* env) {
 }
 
 /** Lua callback.  Returns the current spine node ID. */
-int Level::luaGetSpineNodeId(lua_State* env) {
+int Level::luaGetSpineNodeDistance(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_pushinteger(env, level->player_->getSpineNodeIndex());
+	lua_pushinteger(env, level->player_->getSpineNodeDistance());
     return 1;
 }
 

@@ -21,7 +21,7 @@ Level:queueStartLoop{name="loop1", path="loops/Effected Beat 01.wav", bpm=113, n
 Level:startBeatServer{bpm=110}
 
 print("Waiting")
-Level:waitForSpineNode(5)
+Level:waitForDistance(50)
 print("Awake")
 
 Level:queueStartLoop{name="loop2", path="loops/Effected Beat 02.wav", bpm=110, n_beats=16}

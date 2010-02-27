@@ -12,19 +12,12 @@ function Level:sleep(time)
     end)
 end
 
--- Waits for the player to pass the given spine node before returning
-function Level:waitForSpineNode(id)
-    if (self:getSpineNodeId() >= id) then return end
+-- Waits for the player to pass the given position along the
+-- tube before returning
+function Level:waitForDistance(distance)
+    if (self:getSpineNodeDistance() >= distance) then return end
     coroutine.yield(function()
-        return self:getSpineNodeId() >= id
-    end)
-end
-
--- Waits for the player to return to the given spine node
-function Level:waitForSpineNodeReverse(id)
-    if (self:getSpineNodeId() < id) then return end
-    coroutine.yield(function()
-        return self:getSpineNodeId() < id
+        return self:getSpineNodeDistance() >= distance
     end)
 end
 

@@ -28,7 +28,7 @@ private:
     std::auto_ptr<boost::thread> thrd_;
 
     void beatEvent(int beat) { // we could callback to a method in the main program here...
-        std::cout << "BEAT:" << beat << std::endl;
+        //std::cout << "BEAT:" << beat << std::endl;
         cur_beat = beat;
     }
 
