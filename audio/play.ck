@@ -174,5 +174,5 @@ spork ~ start_server_listener();
 spork ~ stop_server_listener();
 spork ~ loop_start_listener();
 me.yield();
-<<< "listeners loaded", "" >>>;
+<<< "server started", "" >>>;
 1::day => now;
