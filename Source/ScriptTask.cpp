@@ -68,7 +68,7 @@ void ScriptTask::init(int functionRef) {
 
 ScriptTask::~ScriptTask() {
     lua_unref(game_->getScriptState(), coroutine_);
-	if (trigger_) lua_unref(game_->getScriptState(), trigger_);
+    if (trigger_) lua_unref(game_->getScriptState(), trigger_);
 }
 
 bool ScriptTask::hasTriggerFired() {

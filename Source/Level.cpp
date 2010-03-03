@@ -176,7 +176,8 @@ int Level::luaGetBeat(lua_State* env) {
     return 1;
 }
 
-/** Lua callback.  Sends chuck the message to start a loop
+/**
+ *  Lua callback.  Sends chuck the message to start a loop
  *  It gives a string id for the loop and the pathname to find it
  */
 int Level::luaQueueStartLoop(lua_State* env) {

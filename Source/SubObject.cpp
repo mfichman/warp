@@ -32,7 +32,7 @@ SubObject::SubObject(Game* game, Object* parent, const std::string& name, const 
 	shape_.reset(new btBoxShape(half));
 }
 
-/** Destrutor */
+/** Destructor */
 SubObject::~SubObject() {
 
 	// Destroy all attached entities and scene nodes
