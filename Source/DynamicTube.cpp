@@ -68,11 +68,10 @@ DynamicTube::~DynamicTube() {
  * step <curve angle step>
  */
 void DynamicTube::readInputFile() {
-    // Create the first ring
-    generateStraight(0);
 
     // Read the input file
     std::ifstream in((name_).c_str());
+	bool first = true;
 
     if (!in.is_open()) throw runtime_error("Unable to open tube file " + name_);
     while (!in.eof()) {
@@ -80,10 +79,12 @@ void DynamicTube::readInputFile() {
         in >> type;
         
         if (type == "straight") {
+			if (first) generateStraight(0);
             float length;
             in >> length;
             generateStraight(length);
         } else if (type == "curve") {
+			if (first) generateStraight(0);
             float nx, ny, nz, angle, radius;
             in >> nx >> ny >> nz >> angle >> radius;
             angle = abs(angle);
