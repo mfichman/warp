@@ -13,6 +13,7 @@ Gain master_gain => dac;
 16 => int g_n_beats; // 4 measures
 0 => int g_server_started;
 0 => int cur_beat;
+0 => int cur_frac;
 
 Event downbeat_e;
 Event beat_e;
@@ -61,7 +62,7 @@ class BeatLoop {
 // INSTANCES
 //////////////
 
-BeatLoop g_loops[0]; // this is a map
+BeatLoop g_loops[50];
 
 ////////////////
 // BEAT SENDER
@@ -84,7 +85,7 @@ OscRecv recv;
 // start listening (launch thread)
 recv.listen();
 
-recv.event( "/loop/start, s s i i" ) @=> OscEvent @ loop_start_e;
+recv.event( "/loop/load, i s i i" ) @=> OscEvent @ loop_load_e;
 recv.event( "/server/start, i" ) @=> OscEvent @ start_server_e;
 recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 
@@ -97,11 +98,13 @@ fun void metronome() {
     while (g_server_started) {
         downbeat_e.broadcast();
         for (0 => cur_beat; cur_beat < g_n_beats; cur_beat++) {
-            beat_e.broadcast();
-            xmit.startMsg("/", "i");
-            cur_beat => xmit.addInt;
-            <<<"beat: ", cur_beat,"">>>;
-            1::minute / g_bpm => now;
+            for (0 => cur_frac; cur_frac < 4; cur_frac++) {
+                beat_e.broadcast();
+                xmit.startMsg("/", "i i");
+                cur_beat => xmit.addInt;
+                cur_frac => xmit.addInt;
+                1::minute / g_bpm / 4 => now;
+            }
         }
     }
 }
@@ -129,7 +132,7 @@ fun void stop_server_listener() {
     }
 }
 
-fun void loop_start_listener() {
+fun void loop_load_listener() {
     while( true )
     {
         // wait for event to arrive
@@ -138,7 +141,7 @@ fun void loop_start_listener() {
         // grab the next message from the queue. 
         while( loop_start_e.nextMsg() )
         { 
-            string name;
+            int id;
             string path_name;
             int bpm;
             int n_beats;
@@ -149,19 +152,17 @@ fun void loop_start_listener() {
             loop_start_e.getInt() => n_beats;
 
             // print
-            <<< "got (via OSC): " >>>;
-            <<< "name: ", name >>>;
-            <<< "path: ",  path_name >>>;
-            <<< "bpm: ",  bpm >>>;
-            <<< "n_beats: ", n_beats >>>;
+            // <<< "got (via OSC): " >>>;
+            // <<< "name: ", name >>>;
+            // <<< "path: ",  path_name >>>;
+            // <<< "bpm: ",  bpm >>>;
+            // <<< "n_beats: ", n_beats >>>;
 
             BeatLoop bl;
             bl.load(path_name);
             bpm => bl.bpm;
             n_beats => bl.n_beats;
             bl @=> g_loops[name];
-
-            spork ~ bl.start();
         }
     }
 }
