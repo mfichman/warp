@@ -79,12 +79,12 @@ void DynamicTube::readInputFile() {
         in >> type;
         
         if (type == "straight") {
-			if (first) generateStraight(0);
+			if (first) generateStraight(1);
             float length;
             in >> length;
             generateStraight(length);
         } else if (type == "curve") {
-			if (first) generateStraight(0);
+			if (first) generateStraight(1);
             float nx, ny, nz, angle, radius;
             in >> nx >> ny >> nz >> angle >> radius;
             angle = abs(angle);
