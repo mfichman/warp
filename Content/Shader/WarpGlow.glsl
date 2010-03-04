@@ -1,4 +1,4 @@
-extern void phong(out vec4, out vec4, out vec4);
+void phong(out vec4, out vec4, out vec4);
 
 uniform sampler2D glow_sampler; // Glow texture
 uniform sampler2D tex_sampler;

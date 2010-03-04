@@ -46,8 +46,8 @@ int main(int argc, char** argv) {
         Warp::FreeCamera camera(game.get());
         Warp::Overlays overlays(game.get());
 
-        Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Bloom");
-        Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Bloom", true);
+        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Bloom");
+        //Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Bloom", true);
 
 		game->setLevel("Tube1");
 		game->getRoot()->startRendering();
