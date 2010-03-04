@@ -1,4 +1,4 @@
-material Banshee/TEXFACE/BansheePylon.png
+material BansheePylon/TEXFACE/BansheePylon.png
 {
 	receive_shadows on
 	technique
@@ -18,12 +18,12 @@ material Banshee/TEXFACE/BansheePylon.png
 		{
 			ambient 0.0 0.0 0.0
 			diffuse 0.0 0.0 0.0
-			specular 1.000000 1.000000 1.000000 1.000000 18.000000
+			specular 0.383736 0.383736 0.383736 1.000000 18.000000
 			scene_blend add
 		}
 	}
 }
-material Banshee/TEXFACE/BansheeBody.png
+material BansheeBody/TEXFACE/BansheeBody.png
 {
 	receive_shadows on
 	technique
@@ -43,12 +43,12 @@ material Banshee/TEXFACE/BansheeBody.png
 		{
 			ambient 0.0 0.0 0.0
 			diffuse 0.0 0.0 0.0
-			specular 1.000000 1.000000 1.000000 1.000000 18.000000
+			specular 0.383736 0.383736 0.383736 1.000000 18.000000
 			scene_blend add
 		}
 	}
 }
-material Banshee/TEXFACE/BansheeWings.png
+material BansheeWings/TEXFACE/BansheeWings.png
 {
 	receive_shadows on
 	technique
@@ -68,7 +68,7 @@ material Banshee/TEXFACE/BansheeWings.png
 		{
 			ambient 0.0 0.0 0.0
 			diffuse 0.0 0.0 0.0
-			specular 1.000000 1.000000 1.000000 1.000000 18.000000
+			specular 0.383736 0.383736 0.383736 1.000000 18.000000
 			scene_blend add
 		}
 	}

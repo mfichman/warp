@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 #ifdef WIN32
-	system("start /Daudio \"Warp: Chuck Server\" chuck.exe play.ck");
+	//system("start /Daudio \"Warp: Chuck Server\" chuck.exe play.ck");
 #endif
 
 	try {
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         cerr << "Exception: " << ex.what() << endl;
     }   
 #ifdef WIN32   
-	system("taskkill /IM chuck.exe");
+	//system("taskkill /IM chuck.exe");
 #endif
 
     return 0;

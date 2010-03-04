@@ -5,8 +5,8 @@ local distance = 0
 while (true) do
     Level:waitForDistance(distance)
     Level:createObject("Banshee")
-    Level:createObject("Retro")
-    Level:createObject("Nighthawk")
+    Level:createObject("Banshee")
+    Level:createObject("Banshee")
     distance = distance + 150
 end
 
