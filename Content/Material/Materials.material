@@ -4,6 +4,7 @@ material Circle
 	{
 		pass
 		{
+		    fog_override true
             transparent
             lighting off
             scene_blend alpha_blend
@@ -25,25 +26,25 @@ material Road
 			ambient 0.200000 0.200000 0.200000 1.000000
 			diffuse 0.80000 0.800000 0.80000 1.000000
 
-		    vertex_program_ref WarpBasic
-			{
-			}
+		    vertex_program_ref WarpBasic {}
 			
 			fragment_program_ref WarpGlow
 			{
+				param_named texscale float2 5.0 1.0
 			}
 				
 
 			texture_unit
 			{
+				tex_address_mode wrap
 			    filtering anisotropic
                 max_anisotropy 8
-                scale 0.1 1.0
 			    texture GrayClouds.png
 			}
 			
 			texture_unit
 			{
+				tex_address_mode wrap
 				filtering anisotropic
 				max_anisotropy 8
 				texture RoadGlow.png

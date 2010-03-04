@@ -10,6 +10,7 @@ fragment_program WarpPhong glsl
     default_params
     {
         param_named_auto ambient_light ambient_light_colour
+        param_named_auto light_count light_count
     }
 }
 
@@ -23,6 +24,7 @@ fragment_program WarpGlow glsl
         param_named tex_sampler int 0
         param_named glow_sampler int 1
         param_named_auto time time 2.0
+        param_named texscale float2 1.0 1.0
     }
 }
 

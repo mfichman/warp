@@ -1,6 +1,6 @@
 material BansheePylon/TEXFACE/BansheePylon.png
 {
-	receive_shadows on
+	receive_shadows off
 	technique
 	{
 		pass
@@ -8,24 +8,27 @@ material BansheePylon/TEXFACE/BansheePylon.png
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000
 			emissive 0.000000 0.000000 0.000000 1.000000
+		    specular 0.383736 0.383736 0.383736 1.000000 18.000000
 			texture_unit
 			{
 				texture BansheePylon.png
 				colour_op modulate
 			}
-		}
-		pass
-		{
-			ambient 0.0 0.0 0.0
-			diffuse 0.0 0.0 0.0
-			specular 0.383736 0.383736 0.383736 1.000000 18.000000
-			scene_blend add
+		    texture_unit
+			{
+				texture BansheePylonGlow.png
+			}
+		    vertex_program_ref WarpBasic {}
+			fragment_program_ref WarpGlow
+			{
+				param_named_auto time time 0
+			}
 		}
 	}
 }
 material BansheeBody/TEXFACE/BansheeBody.png
 {
-	receive_shadows on
+	receive_shadows off
 	technique
 	{
 		pass
@@ -33,24 +36,27 @@ material BansheeBody/TEXFACE/BansheeBody.png
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000
 			emissive 0.000000 0.000000 0.000000 1.000000
+			specular 0.383736 0.383736 0.383736 1.000000 18.000000
 			texture_unit
 			{
 				texture BansheeBody.png
 				colour_op modulate
 			}
-		}
-		pass
-		{
-			ambient 0.0 0.0 0.0
-			diffuse 0.0 0.0 0.0
-			specular 0.383736 0.383736 0.383736 1.000000 18.000000
-			scene_blend add
+		    texture_unit
+			{
+				texture BansheeBodyGlow.png
+			}
+			vertex_program_ref WarpBasic {}
+			fragment_program_ref WarpGlow
+			{
+				param_named_auto time time 0
+			}
 		}
 	}
 }
 material BansheeWings/TEXFACE/BansheeWings.png
 {
-	receive_shadows on
+	receive_shadows off
 	technique
 	{
 		pass
@@ -58,18 +64,21 @@ material BansheeWings/TEXFACE/BansheeWings.png
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000
 			emissive 0.000000 0.000000 0.000000 1.000000
+			specular 0.383736 0.383736 0.383736 1.000000 18.000000
 			texture_unit
 			{
 				texture BansheeWings.png
 				colour_op modulate
 			}
-		}
-		pass
-		{
-			ambient 0.0 0.0 0.0
-			diffuse 0.0 0.0 0.0
-			specular 0.383736 0.383736 0.383736 1.000000 18.000000
-			scene_blend add
+			texture_unit
+			{
+				texture BansheeWingsGlow.png
+			}
+			vertex_program_ref WarpBasic {}
+			fragment_program_ref WarpGlow
+			{
+				param_named_auto time time 0
+			}
 		}
 	}
 }

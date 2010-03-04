@@ -28,7 +28,7 @@ function Banshee:onSelect()
     self.selected = true
     Level:createTask(function()
         self:target()
-        --Level:waitForBeat()
+        Level:waitForBeat()
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}
         self:explode()
