@@ -135,7 +135,7 @@ particle_system Smoke
     cull_each false
     quota 12
     billboard_type point
-    billboar_rotation_type vertex
+    billboard_rotation_type vertex
 
     emitter Ellipsoid
     {

@@ -1,0 +1,28 @@
+vertex_program WarpBasic glsl
+{
+    source WarpBasic.glsl
+}
+
+fragment_program WarpPhong glsl
+{
+    source WarpPhong.glsl
+    
+    default_params
+    {
+        param_named_auto ambient_light ambient_light_colour
+    }
+}
+
+fragment_program WarpGlow glsl
+{
+    source WarpGlow.glsl
+    attach WarpPhong
+    
+    default_params
+    {
+        param_named tex_sampler int 0
+        param_named glow_sampler int 1
+        param_named_auto time time 2.0
+    }
+}
+

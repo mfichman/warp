@@ -19,6 +19,8 @@ int main(int argc, char** argv) {
 	try {
 		auto_ptr<Warp::Game> game(new Warp::Game()); 
 		
+		Ogre::LogManager::getSingleton().setLogDetail(LL_LOW);
+
         game->getCamera()->setPosition(0, 0, -20);
         game->getCamera()->lookAt(0, -10, 100);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.0, 0.0, 0.0));
@@ -29,6 +31,9 @@ int main(int argc, char** argv) {
 		light->setDiffuseColour(ColourValue(0.8, 0.8, 0.8));
 		light->setSpecularColour(ColourValue(2.0, 2.0, 2.0));
 		light->setDirection(Vector3(0, -1, 1)); 
+
+
+	
 
         
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");

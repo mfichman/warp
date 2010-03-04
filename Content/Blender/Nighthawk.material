@@ -10,8 +10,8 @@ material NighthawkHull/TEXFACE/NighthawkHull.png
 			emissive 0.000000 0.000000 0.000000 1.000000
 			texture_unit
 			{
-                filtering anistropic
-                max_anistropy 8
+                filtering anisotropic
+                max_anisotropy 8
 				texture NighthawkHull.png
 				colour_op modulate
 			}
@@ -37,8 +37,8 @@ material NighthawkRightWing/TEXFACE/NighthawkWing.png
 			emissive 0.000000 0.000000 0.000000 1.000000
 			texture_unit
 			{
-                filtering anistropic
-                max_anistropy 8
+                filtering anisotropic
+                max_anisotropy 8
 				texture NighthawkWing.png
 				colour_op modulate
 			}
