@@ -5,6 +5,14 @@
 Gain master_gain => dac;
 .4 => master_gain.gain;
 
+// echo effect:
+
+DelayL echo => JCRev reverb => master_gain;
+.05 => reverb.mix;
+echo => echo;
+.8 => echo.gain;
+
+
 ////////////
 // GLOBALS
 ////////////
@@ -16,6 +24,7 @@ Gain master_gain => dac;
 
 Event downbeat_e;
 Event beat_e;
+Event beat_frac_e;
 
 ////////////////
 // BEAT SENDER
@@ -42,12 +51,34 @@ recv.event( "/loop/load, i s i i" ) @=> OscEvent @ load_loop_e;
 recv.event( "/loop/start, i f" ) @=> OscEvent @ start_loop_e;
 recv.event( "/loop/stop, i" ) @=> OscEvent @ stop_loop_e;
 
+recv.event( "/sfx/load i s" ) @=> OscEvent @ load_sfx_e;
+recv.event( "/sfx/play, i f" ) @=> OscEvent @ play_sfx_e;
+
 recv.event( "/server/start, i" ) @=> OscEvent @ start_server_e;
 recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 
 ////////////
 // CLASSES
 ////////////
+
+class SoundEffect {
+    SndBuf sndbuf => echo;
+    0 => sndbuf.rate;
+    .1 => sndbuf.gain;
+
+    public void load(string path_name) {
+        path_name => sndbuf.read;
+
+        0 => sndbuf.rate;
+    }
+
+    public void play(float gain) {
+        beat_frac_e => now;
+        gain => sndbuf.gain;
+        0 => sndbuf.pos;
+        1 => sndbuf.rate;
+    }
+}
 
 class BeatLoop {
     SndBuf @ sndbuf;
@@ -121,6 +152,7 @@ class Metronome {
                 cur_beat => xmit.addInt;
                 <<< "beat: ", cur_beat >>>;
                 for (0 => cur_frac; cur_frac < 4; cur_frac++) {
+                    beat_frac_e.broadcast();
                     1::minute / g_bpm / 4 => now;
                 }
             }
@@ -144,6 +176,7 @@ class Metronome {
 class BeatServer {
     Metronome metronome;
     BeatLoop loops[20];
+    SoundEffect sfx[20];
     0 => int n_loops;
 
     Shred @ start_s;
@@ -151,6 +184,8 @@ class BeatServer {
     Shred @ load_loop_s;
     Shred @ start_loop_s;
     Shred @ stop_loop_s;
+    Shred @ load_sfx_s;
+    Shred @ play_sfx_s;
 
     public void addListeners() {
         <<< "adding listeners...">>>;
@@ -159,9 +194,34 @@ class BeatServer {
         spork ~ load_loop_f() @=> load_loop_s;
         spork ~ start_loop_f() @=> start_loop_s;
         spork ~ stop_loop_f() @=> stop_loop_s;
-        //<<< "before listener yield...">>>;
+        spork ~ load_sfx_f() @=> load_sfx_s;
+        spork ~ play_sfx_f() @=> play_sfx_s;
+
+        <<< "before listener yield...">>>;
         me.yield();
-        //<<< "after listener yield...">>>;
+        <<< "after listener yield...">>>;
+    }
+
+    private void play_sfx_f() {
+        while(true) {
+            play_sfx_e => now;
+            while(play_sfx_e.nextMsg()) {
+                play_sfx_e.getInt() => int index;
+                play_sfx_e.getFloat() => float gain;
+                sfx[index].play(gain);
+            }
+        }
+    }
+
+    private void load_sfx_f() {
+        while(true) {
+            load_sfx_e => now;
+            while(load_sfx_e.nextMsg()) {
+                load_sfx_e.getInt() => int index;
+                load_sfx_e.getString() => string path_name;
+                sfx[index].load(path_name);
+            }
+        }
     }
 
     private void start_loop_f() {
@@ -219,6 +279,11 @@ class BeatServer {
 
             // give other processes a chance to finish:
             // me.yield();
+
+            // set echo based on bpm
+            1::minute / g_bpm => echo.max;
+            1::minute / g_bpm => echo.delay;
+
             metronome.start();
         }
     }
