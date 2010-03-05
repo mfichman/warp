@@ -33,7 +33,10 @@ Player::Player(Game* game, Level* level, const string& name) :
 	// Set up OGRE scene nodes
 	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
 	shipNode_ = node_->createChildSceneNode(name_ + ".ShipNode");
-	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_, "Dagger.mesh"));
+	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".Hull", "DaggerHull.mesh"));
+	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".LeftWing", "DaggerLeftWing.mesh"));
+	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".RightWing", "DaggerRightWing.mesh"));
+	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".Engine", "DaggerEngine.mesh"));
 	shipNode_->setInheritOrientation(false);
     
     transform_.setIdentity();
@@ -230,7 +233,7 @@ void Player::updateRay() {
 			if (body) {
 				Collidable* c = static_cast<Collidable*>(body->getUserPointer());
 				Object* obj = dynamic_cast<Object*>(c);
-				if (obj && obj->projectileCount() == 0) {
+				if (obj && obj->getProjectileCount() == 0) {
 					level_->createProjectile(obj, node_->getPosition());
 					obj->select();
 				}

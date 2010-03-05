@@ -13,7 +13,8 @@ Projectile::Projectile(Game* game, const std::string& material, int id, const Ve
 	game_(game),
 	alive_(true),
 	target_(target),
-	time_(0) {
+	time_(0),
+	hit_(false) {
 
 	ostringstream os;
 	os << id;
@@ -50,7 +51,7 @@ Projectile::Projectile(Game* game, const std::string& material, int id, const Ve
 
 /** Destructor */
 Projectile::~Projectile() {
-	deactivatePhysics();
+	game_->getWorld()->removeCollisionObject(body_.get());
 	node_->detachObject(billboards_);
 	node_->getParentSceneNode()->removeAndDestroyChild(node_->getName());
 	game_->getSceneManager()->destroyBillboardSet(billboards_);
@@ -59,7 +60,7 @@ Projectile::~Projectile() {
 
 /* Called when the tracked object changes position */
 void Projectile::onTargetMovement(const Ogre::Vector3& newPosition) {
-	if (body_.get()) {
+	if (!hit_) {
 		Vector3 velocity = newPosition - node_->getPosition();
 		velocity.normalise();
 		velocity *= PROJECTILE_SPEED;
@@ -78,7 +79,6 @@ void Projectile::onTargetMovement(const Ogre::Vector3& newPosition) {
 /* Called when the tracked object is removed from memory */
 void Projectile::onTargetDelete() {
 	alive_ = false;
-	deactivatePhysics();
 	target_ = 0;
 }
 
@@ -100,13 +100,9 @@ void Projectile::setWorldTransform(const btTransform& transform) {
 }
 
 void Projectile::onCollision(Object* object) {
-	if (object == target_) deactivatePhysics();
-}
-
-void Projectile::deactivatePhysics() {
-	if (body_.get()) {
-		body_->setUserPointer(0);
+	if (object == target_) {
 		game_->getWorld()->removeCollisionObject(body_.get());
+		hit_ = true;
 	}
 }
 
@@ -122,5 +118,5 @@ void Projectile::onTimeStep() {
 	height = 0.2 * sinf(time_) + 1;
 
 	billboard->setDimensions(width, height);
-
+	if (target_) onTargetMovement(target_->getPosition());
 }

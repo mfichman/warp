@@ -46,7 +46,10 @@ public:
 	/** Removes a projectile from this object */
 	void removeProjectile(Projectile* p);
 
-	size_t projectileCount() { return projectiles_.size(); }
+	size_t getProjectileCount() { return projectiles_.size(); }
+
+	Ogre::Vector3 getPosition() { return node_->getPosition(); }
+
 
 private:
     Object(const Object&);

@@ -48,6 +48,7 @@ private:
 	std::auto_ptr<btRigidBody> body_;
 	btTransform transform_;
 	bool alive_;
+	bool hit_;
 
 	Ogre::SceneNode* node_;
 	Ogre::BillboardSet* billboards_;
