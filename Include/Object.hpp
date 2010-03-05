@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Warp.hpp"
+#include "Collidable.hpp"
 
 #include <list>
 #include <boost/shared_ptr.hpp>
@@ -12,7 +13,7 @@
 
 namespace Warp {
 
-class Object : public btMotionState {
+class Object : public Collidable, public btMotionState {
 public:
 
 	/** Creates a new script and begins executing it inside a coroutine */
@@ -43,6 +44,10 @@ private:
     Object(const Object&);
     Object& operator=(const Object&);
 	void loadScriptCallbacks();
+
+	// Collision callbacks
+	virtual void collide(Collidable* other) { other->onCollision(this); }
+	virtual void onCollision(Player* player) { std::cout << "Hit player" << std::endl; }
 
 	// Bullet callbacks
 	virtual void getWorldTransform(btTransform& transform) const;

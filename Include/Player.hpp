@@ -5,12 +5,13 @@
 #pragma once
 
 #include "Warp.hpp"
+#include "Collidable.hpp"
 
 #include <Bullet/btBulletDynamicsCommon.h>
 
 namespace Warp {
 
-class Player : public GameListener, public btMotionState {
+class Player : public Collidable, public GameListener, public btMotionState {
 public:
 	/** Creates a new ball */
     Player(Game* game, Level* level, const std::string& name);
@@ -30,6 +31,10 @@ public:
 private:
 	Player(const Player&);
     Player& operator=(const Player&);
+
+	// Collision callbacks
+	virtual void collide(Collidable* other) { other->onCollision(this); }
+	virtual void onCollision(Object* object) { std::cout << "Hit" << std::endl; }
 
 	// Bullet callbacks
 	virtual void getWorldTransform(btTransform& transform) const;

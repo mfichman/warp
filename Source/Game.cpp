@@ -243,8 +243,25 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 
         // Step the world using the fixed timestep
         world_->stepSimulation(PHYSICSUPDATEINTERVAL, 0);
-
         physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
+
+		// Check for collisions
+		int nmanifolds = world_->getDispatcher()->getNumManifolds();
+		for (int i = 0; i < nmanifolds; i++) {
+			btPersistentManifold* manifold = world_->getDispatcher()->getManifoldByIndexInternal(i);
+			btCollisionObject* a = static_cast<btCollisionObject*>(manifold->getBody0());
+			btCollisionObject* b = static_cast<btCollisionObject*>(manifold->getBody1());
+
+			Collidable* ca = static_cast<Collidable*>(a->getUserPointer());
+			Collidable* cb = static_cast<Collidable*>(b->getUserPointer());
+
+			// Perform double dynamic dispatch
+			if (ca && cb) {
+				ca->collide(cb);
+				cb->collide(ca);
+			}
+
+		}
     }
 
 	return true;

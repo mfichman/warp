@@ -67,6 +67,8 @@ class Game;
 class Object;
 class GameListener;
 class SubObject;
+class Projectile;
+
 
 inline int mod(int num, int divisor) {
     int remainder = num % divisor;

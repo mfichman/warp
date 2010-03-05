@@ -48,6 +48,7 @@ Player::Player(Game* game, Level* level, const string& name) :
     body_.reset(new btRigidBody(rbinfo));
 	body_->setFriction(0.0f);
 	body_->setRestitution(0.0f);
+	body_->setUserPointer(static_cast<Collidable*>(this));
 
     game_->getWorld()->addRigidBody(body_.get());
     game_->addListener(this);
@@ -178,7 +179,8 @@ void Player::updateRay() {
 		if (callback.hasHit()) {
 			btRigidBody* body = btRigidBody::upcast(callback.m_collisionObject);
 			if (body) {
-				Object* obj = static_cast<Object*>(body->getUserPointer());
+				Collidable* c = static_cast<Collidable*>(body->getUserPointer());
+				Object* obj = dynamic_cast<Object*>(c);
 				if (obj) {
 					obj->select();
 				}
