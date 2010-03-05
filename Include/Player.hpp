@@ -27,6 +27,8 @@ public:
 
 	/** Returns the spine projection where enemies should spawn */
 	const SpineProjection& getSpawnProjection() const;
+
+
 		
 private:
 	Player(const Player&);
@@ -34,13 +36,14 @@ private:
 
 	// Collision callbacks
 	virtual void collide(Collidable* other) { other->onCollision(this); }
-	virtual void onCollision(Object* object) { std::cout << "Hit" << std::endl; }
+	virtual void onCollision(Object* object) { }
 
 	// Bullet callbacks
 	virtual void getWorldTransform(btTransform& transform) const;
 	virtual void setWorldTransform(const btTransform& transform);
 
 	virtual void onTimeStep();
+	virtual void onFrame(float delta);
 	void computeForces();
 	void updateRay();
 
@@ -62,6 +65,10 @@ private:
 
 	SpineProjection spawnProjection_;
 	SpineProjection playerProjection_;
+
+	Ogre::Vector3 right_;
+	Ogre::Vector3 up_;
+	Ogre::Vector3 forward_;
 
 };
 

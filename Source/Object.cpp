@@ -9,6 +9,7 @@
 #include "SubObject.hpp"
 #include "Level.hpp"
 #include "Player.hpp"
+#include "Projectile.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -66,10 +67,14 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 
 Object::~Object() {
 
-	cout << name_ << " deallocated" << endl;
+	// Notify projectiles that the object is toast
+	for_each(projectiles_.begin(), projectiles_.end(), mem_fun(&Projectile::onTargetDelete));
+
+	//cout << name_ << " deallocated" << endl;
 
 	// Clean up physics
 	if (body_.get()) { 
+		body_->setUserPointer(0);
 		game_->getWorld()->removeCollisionObject(body_.get());
 	}
 
@@ -337,7 +342,6 @@ int Object::luaExplode(lua_State* env) {
 
 	// Disable the original rigid body for the object
 	self->game_->getWorld()->removeCollisionObject(self->body_.get());
-	self->body_.reset();
 
 	// Turn off the targeting billboard, if it is on
 	if (self->billboards_) {
@@ -345,6 +349,11 @@ int Object::luaExplode(lua_State* env) {
 		self->game_->getSceneManager()->destroyBillboardSet(self->billboards_);
 		self->billboards_ = 0;
 	}
+
+	// Deactive projectiles
+	for_each(self->projectiles_.begin(), self->projectiles_.end(), mem_fun(&Projectile::onTargetDelete));
+	self->projectiles_.clear();
+
 
 	return 0;
 }
@@ -448,15 +457,35 @@ void Object::setWorldTransform(const btTransform& transform) {
 
 	// Get info from bullet
     const btQuaternion& rotation = transform.getRotation();
-    const btVector3& position = transform.getOrigin();
+    const btVector3& origin = transform.getOrigin();
     // Apply to scene node
     node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
-    node_->setPosition(position.x(), position.y(), position.z());
+    node_->setPosition(origin.x(), origin.y(), origin.z());
     // Set local info
     transform_ = transform;
+
+	Vector3 position(origin.x(), origin.y(), origin.z());
+
+	// Notify projectiles
+	for (list<Projectile*>::iterator i = projectiles_.begin(); i != projectiles_.end(); i++) {
+		(*i)->onTargetMovement(position);
+	}
 }
 
 /** Called when the object is selected */
 void Object::select() {
 	callMethod("onSelect");
+}
+
+void Object::addProjectile(Projectile* p) {
+	projectiles_.push_back(p);
+}
+
+void Object::removeProjectile(Projectile* p) {
+	list<Projectile*>::iterator i = find(projectiles_.begin(), projectiles_.end(), p);
+	if (i != projectiles_.end()) projectiles_.erase(i);
+}
+
+void Object::onCollision(Projectile* projectile) {
+	callMethod("onProjectileHit");
 }

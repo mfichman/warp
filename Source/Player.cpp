@@ -34,6 +34,7 @@ Player::Player(Game* game, Level* level, const string& name) :
 	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
 	shipNode_ = node_->createChildSceneNode(name_ + ".ShipNode");
 	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_, "Dagger.mesh"));
+	shipNode_->setInheritOrientation(false);
     
     transform_.setIdentity();
     
@@ -56,6 +57,7 @@ Player::Player(Game* game, Level* level, const string& name) :
 }
 
 Player::~Player() {
+	body_->setUserPointer(0);
 	node_->removeAndDestroyChild(shipNode_->getName());
     game_->getSceneManager()->getRootSceneNode()->removeAndDestroyChild(name_);
     game_->getSceneManager()->destroyEntity(name_);
@@ -70,21 +72,65 @@ void Player::getWorldTransform(btTransform& transform) const {
 
 /** Called by Bullet to update the scene node */
 void Player::setWorldTransform(const btTransform& transform) {
-    // get info from bullet
-    const btQuaternion& rotation = transform.getRotation();
-    const btVector3& position = transform.getOrigin();
-    // apply to scene node
-    node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
-    node_->setPosition(position.x(), position.y(), position.z());
-    // set local info
-    transform_ = transform;
-    position_ = Vector3(position.x(), position.y(), position.z());
+	
+	// BEGIN TODO
+	const btQuaternion& btrotation = transform.getRotation();
+	const btVector3& btposition = transform.getOrigin();
+	const btVector3& btvelocity = body_->getLinearVelocity();
+	Vector3 position(btposition.x(), btposition.y(), btposition.z());
+	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
+	position_ = position;
+
+	node_->setOrientation(btrotation.w(), btrotation.x(), btrotation.y(), btrotation.z());
+    node_->setPosition(btposition.x(), btposition.y(), btposition.z());
+
+	// Get the player location
+    playerProjection_ = level_->getTube()->getSpineProjection(position, playerProjection_.index);
+
+	// Get the spawn location
+	spawnProjection_ = level_->getTube()->getSpineProjection(playerProjection_.distance + SPAWN_DISTANCE, spawnProjection_.index);
+
+	const SpineProjection& projection = playerProjection_;
+    assert(projection.forward != Vector3::ZERO);
+    assert(projection.position - position != Vector3::ZERO);
+
+    // Up points toward spine node
+    Vector3 forward = projection.forward;
+	Vector3 up = (projection.position - position).normalisedCopy();//Vector3::UNIT_Y;
+	
+	// Need to make sure up is orthogonal to forward
+    assert(up.crossProduct(forward) != Vector3::ZERO);
+	
+    // Project the gravity vector into the plane with "forward" as the
+    // normal vector.  This forces the ball to the outside of the ring, and
+    // removes and component that would make the ball move forward/backward
+    up = up - (up.dotProduct(projection.forward)) * projection.forward;
+    assert(up != Vector3::ZERO);
+    up.normalise();
+    Vector3 right = up.crossProduct(forward);
+	// END TODO
+	
+	right.normalise();
+    up.normalise();
+    forward.normalise(); 
+	
+	shipNode_->setOrientation(Quaternion(-right, up, -forward));
+	game_->getCamera()->setPosition(position - forward*8.0 + up*1.7);
+	game_->getCamera()->setOrientation(Quaternion(-right, up, -forward));
+
+	///position = POSITION_SMOOTHNESS*game_->getCamera()->getPosition() + (1 - POSITION_SMOOTHNESS)*position;
+	//game_->getCamera()->setPosition(position - forward*2.0 + up*0.5);
+	//game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
 }
 
 /** Called when a new frame is detected */
 void Player::onTimeStep() {
 	computeForces();
 	updateRay();
+}
+
+void Player::onFrame(float delta) {
+
 }
 
 void Player::computeForces() {
@@ -103,8 +149,6 @@ void Player::computeForces() {
 	const SpineProjection& projection = playerProjection_;
     assert(projection.forward != Vector3::ZERO);
     assert(projection.position - position != Vector3::ZERO);
-
-
 
     // Up points toward spine node
     Vector3 forward = projection.forward;
@@ -125,13 +169,16 @@ void Player::computeForces() {
 	// We want the ship to hover at 2.0 meters above the ground
 	float distance = (projection.position - position).length();
 
-	Vector3 gravity = -20.0f * BALL_MASS * up;
-	body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
-
+	
+	float friction = 10.0f;
+	float centralForce = 40.0f;
 	if (distance > 5.5f) {
 		float v = velocity.dotProduct(up);
-		Vector3 force = ((distance - 6.0f) * 40.0f * BALL_MASS + 20.f * BALL_MASS - 10.0f * v) * up;
+		Vector3 force = ((distance - 6.0f) * centralForce * BALL_MASS - friction * v) * up;
 		body_->applyCentralForce(btVector3(force.x, force.y, force.z));
+	} else {
+		Vector3 gravity = -20.0f * BALL_MASS * up;
+		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
 	}
 
     // Apply user control forces
@@ -150,15 +197,17 @@ void Player::computeForces() {
 		body_->applyCentralForce(-20*btVector3(forward.x, forward.y, forward.z));
 	}
 
+	forward_ = forward.normalisedCopy();
+	right_ = right.normalisedCopy();
+	up_ = up.normalisedCopy();
 
-    right.normalise();
+	right.normalise();
     up.normalise();
-    forward.normalise();   
-	shipNode_->setOrientation(Quaternion(-right, up, -forward));
-    game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
-	
-	position = POSITION_SMOOTHNESS * game_->getCamera()->getPosition() + (1-POSITION_SMOOTHNESS) * position;
+    forward.normalise(); 
+
+	position = POSITION_SMOOTHNESS*game_->getCamera()->getPosition() + (1 - POSITION_SMOOTHNESS)*position;
 	game_->getCamera()->setPosition(position - forward*2.0 + up*0.5);
+	//game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
 }
 
 void Player::updateRay() {
@@ -181,7 +230,8 @@ void Player::updateRay() {
 			if (body) {
 				Collidable* c = static_cast<Collidable*>(body->getUserPointer());
 				Object* obj = dynamic_cast<Object*>(c);
-				if (obj) {
+				if (obj && obj->projectileCount() == 0) {
+					level_->createProjectile(obj, node_->getPosition());
 					obj->select();
 				}
 			}

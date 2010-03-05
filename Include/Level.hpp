@@ -29,11 +29,14 @@ public:
 		return tube_.get();
 	}
 
+	/** Adds a projectile*/
+	void createProjectile(Object* target, const Ogre::Vector3& pos);
+
 private:
     Level(const Level&);
     Level& operator=(const Level&);
 	void loadScriptCallbacks();
-	void onTimeStep();
+	virtual void onTimeStep();
 	
 
 	// Lua callbacks
@@ -50,6 +53,7 @@ private:
 
 	Game* game_;
 	std::list<boost::shared_ptr<Object>> objects_;
+	std::list<boost::shared_ptr<Projectile>> projectiles_;
 	std::list<boost::shared_ptr<ScriptTask>> tasks_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Player> player_;

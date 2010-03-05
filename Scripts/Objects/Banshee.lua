@@ -14,6 +14,7 @@ function Banshee:init()
     self:addEntity{name="Wing", mesh="BansheeWings.mesh"}
     self:addEntity{name="Pylon", mesh="BansheePylon.mesh"}
     self.selected = false
+    self.destroyed = false
 end
 
 -- This function gets called once per timestep by the
@@ -26,12 +27,17 @@ end
 function Banshee:onSelect()
     if (self.selected) then return end -- Make sure we don't launch > 1 task
     self.selected = true
+    self:target()
+end
+
+-- This function is called when a projectile hits the object
+function Banshee:onProjectileHit()
+    if (self.destroyed) then return end
+    self.destroyed = true
     Level:createTask(function()
-        self:target()
         --Level:waitForBeat()
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}
         self:explode()
-        
     end)
 end

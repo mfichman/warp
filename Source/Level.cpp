@@ -10,6 +10,7 @@
 #include "Player.hpp"
 #include "ScriptTask.hpp"
 #include "Game.hpp"
+#include "Projectile.hpp"
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
 
@@ -218,32 +219,45 @@ int Level::luaStartBeatServer(lua_State* env) {
     return 1;
 }
 
-template <typename T>
-class Updater {
-public:
-	bool operator()(shared_ptr<T> t) {
-		t->onTimeStep();
-		return !t->isAlive();
-	}
-};
-
 #include <OIS/OIS.h>
 /** Called once for each game loop */
 void Level::onTimeStep() {
 
-	static Updater<Object> objectUpdater;
-	static Updater<ScriptTask> taskUpdater;
-	objects_.erase(remove_if(objects_.begin(), objects_.end(), objectUpdater), objects_.end());
-	tasks_.erase(remove_if(tasks_.begin(), tasks_.end(), taskUpdater), tasks_.end());
+	for (list<shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end();) {
+		(*i)->onTimeStep();
+		if (!(*i)->isAlive()) {
+			i = objects_.erase(i);
+		} else {
+			i++;
+		}
+	}
 
-	//for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
-	//	(*i)->onTimeStep();
-	//}
+	for (list<shared_ptr<ScriptTask>>::iterator i = tasks_.begin(); i != tasks_.end();) {
+		(*i)->onTimeStep();
+		if (!(*i)->isAlive()) {
+			i = tasks_.erase(i);
+		} else {
+			i++;
+		}
+	}
+
+	for (list<shared_ptr<Projectile>>::iterator i = projectiles_.begin(); i != projectiles_.end();) {
+		(*i)->onTimeStep();
+		if (!(*i)->isAlive()) {
+			i = projectiles_.erase(i);
+		} else {
+			i++;
+		}
+	}
 	
 	// Hack hack hack
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_R)) {
 		game_->setLevel("Tube1");
 	}
+}
 
-
+void Level::createProjectile(Object* target, const Vector3& position) {
+	shared_ptr<Projectile> p(new Projectile(game_, "PhotonBlue", entitiesCreated_++, position, target));
+	target->addProjectile(p.get());
+	projectiles_.push_back(p);
 }

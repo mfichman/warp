@@ -17,6 +17,25 @@ material Circle
 	}
 }
 
+material PhotonBlue
+{
+	technique
+	{
+		pass
+		{
+		    fog_override true
+            transparent
+            lighting off
+            scene_blend alpha_blend
+            depth_write off
+			texture_unit
+			{
+				texture PhotonBlue.png
+			}
+		}
+	}
+}
+
 material Road
 {
 	technique

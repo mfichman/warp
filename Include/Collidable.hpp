@@ -17,7 +17,7 @@ public:
 	virtual ~Collidable() {}
 
 	/* Called to collide this object with another */
-	virtual void collide(Collidable* other) {}
+	virtual void collide(Collidable* other)=0;
 
 	/* Called when a collision with an object occurs (enemy, or other obstacle) */
 	virtual void onCollision(Object* object) {}

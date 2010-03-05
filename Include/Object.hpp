@@ -40,6 +40,14 @@ public:
 	/** Called every timestep by Level */
 	void onTimeStep();
 
+	/** Adds a projectile that tracks this object */
+	void addProjectile(Projectile* p);
+
+	/** Removes a projectile from this object */
+	void removeProjectile(Projectile* p);
+
+	size_t projectileCount() { return projectiles_.size(); }
+
 private:
     Object(const Object&);
     Object& operator=(const Object&);
@@ -47,7 +55,8 @@ private:
 
 	// Collision callbacks
 	virtual void collide(Collidable* other) { other->onCollision(this); }
-	virtual void onCollision(Player* player) { std::cout << "Hit player" << std::endl; }
+	virtual void onCollision(Player* player) { }
+	virtual void onCollision(Projectile* projectile);
 
 	// Bullet callbacks
 	virtual void getWorldTransform(btTransform& transform) const;
@@ -83,6 +92,8 @@ private:
 	std::list<Ogre::AnimationState*> activeAnimations_;
 	std::list<boost::shared_ptr<SubObject>> subObjects_;
 
+	// Projectiles tracking this object
+	std::list<Projectile*> projectiles_;
 
 	// Physics data
 	std::auto_ptr<btCompoundShape> shape_;
