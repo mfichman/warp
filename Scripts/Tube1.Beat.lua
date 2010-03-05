@@ -9,14 +9,14 @@ Level:waitForDistance(350)
 
 Level:queueStartLoop{name="loop2", path="loops/Effected Beat 02.wav", bpm=110, n_beats=16}
 Level:waitForBeatSet()
-Level:setLight{name="Light", diffuse={0, 0, 1}}
+Level:setLight{name="Light", diffuse={0, 0, 0.4}}
 
 while (true) do
 
 Level:waitForBeat()
-Level:setLight{name="Light", diffuse={1, 0, 0}}
+Level:setLight{name="Light", diffuse={0.4, 0, 0}}
 
 Level:waitForBeat()
-Level:setLight{name="Light", diffuse={0, 1, 0}}
+Level:setLight{name="Light", diffuse={0, 0.4, 0}}
 
 end

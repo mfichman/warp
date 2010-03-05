@@ -58,7 +58,7 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 	body_.reset(new btRigidBody(rbinfo));
 	body_->setFriction(0.0f);
 	body_->setRestitution(1.0f);
-	body_->setUserPointer(this);
+	body_->setUserPointer(static_cast<Collidable*>(this));
 	game_->getWorld()->addRigidBody(body_.get());
 
 	loadScriptCallbacks();

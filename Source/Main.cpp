@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 #ifdef WIN32
-	//system("start /Daudio \"Warp: Chuck Server\" chuck.exe play.ck");
+	system("start /Daudio \"Warp: Chuck Server\" chuck.exe play.ck");
 #endif
 
 	try {
@@ -25,12 +25,15 @@ int main(int argc, char** argv) {
         game->getCamera()->lookAt(0, -10, 100);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.0, 0.0, 0.0));
 		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.0, 0.0, 0.0), 0.0, 0, 150);
+		game->getSceneManager()->setAmbientLight(ColourValue(0.0, 0.0, 0.0));
 
 		Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
-		light->setDiffuseColour(ColourValue(0.8, 0.8, 0.8));
-		light->setSpecularColour(ColourValue(2.0, 2.0, 2.0));
+		light->setDiffuseColour(ColourValue(0.4, 0.4, 0.4));
+		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
 		light->setDirection(Vector3(0, -1, 1)); 
+		light->setPosition(Vector3(0, -1, 1));
+
 
 
 	
@@ -43,8 +46,8 @@ int main(int argc, char** argv) {
         Warp::FreeCamera camera(game.get());
         Warp::Overlays overlays(game.get());
 
-        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
-       //O/gre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
+        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Bloom");
+        //Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Bloom", true);
 
 		game->setLevel("Tube1");
 		game->getRoot()->startRendering();
@@ -56,7 +59,7 @@ int main(int argc, char** argv) {
         cerr << "Exception: " << ex.what() << endl;
     }   
 #ifdef WIN32   
-	//system("taskkill /IM chuck.exe");
+	system("taskkill /IM chuck.exe");
 #endif
 
     return 0;

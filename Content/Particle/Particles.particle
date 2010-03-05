@@ -81,7 +81,7 @@ particle_system Explosion
     particle_width 5
     particle_height 5
     cull_each false
-    quota 35
+    quota 15
     billboard_type point
     billboard_rotation_type vertex
 

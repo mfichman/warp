@@ -48,6 +48,7 @@ Player::Player(Game* game, Level* level, const string& name) :
     body_.reset(new btRigidBody(rbinfo));
 	body_->setFriction(0.0f);
 	body_->setRestitution(0.0f);
+	body_->setUserPointer(static_cast<Collidable*>(this));
 
     game_->getWorld()->addRigidBody(body_.get());
     game_->addListener(this);
@@ -127,9 +128,9 @@ void Player::computeForces() {
 	Vector3 gravity = -20.0f * BALL_MASS * up;
 	body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
 
-	if (distance > 7.5f) {
+	if (distance > 5.5f) {
 		float v = velocity.dotProduct(up);
-		Vector3 force = ((distance - 8.0f) * 40.0f * BALL_MASS + 20.f * BALL_MASS - 10.0f * v) * up;
+		Vector3 force = ((distance - 6.0f) * 40.0f * BALL_MASS + 20.f * BALL_MASS - 10.0f * v) * up;
 		body_->applyCentralForce(btVector3(force.x, force.y, force.z));
 	}
 
@@ -178,7 +179,8 @@ void Player::updateRay() {
 		if (callback.hasHit()) {
 			btRigidBody* body = btRigidBody::upcast(callback.m_collisionObject);
 			if (body) {
-				Object* obj = static_cast<Object*>(body->getUserPointer());
+				Collidable* c = static_cast<Collidable*>(body->getUserPointer());
+				Object* obj = dynamic_cast<Object*>(c);
 				if (obj) {
 					obj->select();
 				}

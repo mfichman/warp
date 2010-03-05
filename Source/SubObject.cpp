@@ -97,7 +97,8 @@ void SubObject::separateFromParent() {
 	btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
 	body_.reset(new btRigidBody(rbinfo));
 	body_->setFriction(1.0f);
-	body_->setRestitution(0.0f);
+	body_->setRestitution(1.0f);
+	body_->setUserPointer(static_cast<Collidable*>(parent_));
 	game_->getWorld()->addRigidBody(body_.get());
 
 	// Shoot the object in a random direction

@@ -1,9 +1,12 @@
 material Flare
 {
+
+
 	technique
 	{
 		pass
 		{
+            fog_override true
 			lighting off
 			scene_blend add
 			depth_write off
@@ -22,6 +25,7 @@ material RedFire
 	{
 		pass
 		{
+            fog_override true
 			lighting off
 			scene_blend add
 			depth_write off
@@ -41,6 +45,7 @@ material GoldFire
 	{
 		pass
 		{
+            fog_override true
 			lighting off
 			scene_blend add
 			depth_write off
@@ -60,6 +65,7 @@ material RedFire
 	{
 		pass
 		{
+            fog_override true
 			lighting off
 			scene_blend add
 			depth_write off
