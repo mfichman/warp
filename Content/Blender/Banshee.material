@@ -5,10 +5,10 @@ material BansheePylon/TEXFACE/BansheePylon.png
 	{
 		pass
 		{
-			ambient 0.500000 0.500000 0.500000 1.000000
-			diffuse 0.800000 0.800000 0.800000 1.000000
+			ambient 0.100000 0.100000 0.100000 1.000000
+			diffuse 0.100000 0.100000 0.100000 1.000000
 			emissive 0.000000 0.000000 0.000000 1.000000
-		    specular 0.383736 0.383736 0.383736 1.000000 18.000000
+			specular 0.000000 0.000000 0.000000 1.000000 1.000000
 			texture_unit
 			{
 				texture BansheePylon.png
@@ -16,6 +16,8 @@ material BansheePylon/TEXFACE/BansheePylon.png
 			}
 		    texture_unit
 			{
+				filtering anisotropic
+				max_anisotropy 8
 				texture BansheePylonGlow.png
 			}
 		    vertex_program_ref WarpBasic {}
@@ -33,10 +35,10 @@ material BansheeBody/TEXFACE/BansheeBody.png
 	{
 		pass
 		{
-			ambient 0.500000 0.500000 0.500000 1.000000
-			diffuse 0.800000 0.800000 0.800000 1.000000
+			ambient 0.100000 0.100000 0.100000 1.000000
+			diffuse 0.100000 0.100000 0.100000 1.000000
 			emissive 0.000000 0.000000 0.000000 1.000000
-			specular 0.383736 0.383736 0.383736 1.000000 18.000000
+			specular 0.000000 0.000000 0.000000 1.000000 1.000000
 			texture_unit
 			{
 				texture BansheeBody.png
@@ -44,6 +46,8 @@ material BansheeBody/TEXFACE/BansheeBody.png
 			}
 		    texture_unit
 			{
+				filtering anisotropic
+				max_anisotropy 8
 				texture BansheeBodyGlow.png
 			}
 			vertex_program_ref WarpBasic {}
@@ -61,10 +65,10 @@ material BansheeWings/TEXFACE/BansheeWings.png
 	{
 		pass
 		{
-			ambient 0.500000 0.500000 0.500000 1.000000
-			diffuse 0.800000 0.800000 0.800000 1.000000
+			ambient 0.100000 0.100000 0.100000 1.000000
+			diffuse 0.100000 0.100000 0.100000 1.000000
 			emissive 0.000000 0.000000 0.000000 1.000000
-			specular 0.383736 0.383736 0.383736 1.000000 18.000000
+			specular 0.000000 0.000000 0.000000 1.000000 1.000000
 			texture_unit
 			{
 				texture BansheeWings.png
@@ -72,6 +76,8 @@ material BansheeWings/TEXFACE/BansheeWings.png
 			}
 			texture_unit
 			{
+				filtering anisotropic
+				max_anisotropy 8
 				texture BansheeWingsGlow.png
 			}
 			vertex_program_ref WarpBasic {}

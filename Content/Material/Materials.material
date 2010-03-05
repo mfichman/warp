@@ -23,8 +23,8 @@ material Road
 	{	
 		pass
 		{
-			ambient 0.200000 0.200000 0.200000 1.000000
-			diffuse 0.80000 0.800000 0.80000 1.000000
+			ambient 0.100000 0.100000 0.100000 1.000000
+			diffuse 0.40000 0.400000 0.40000 1.000000
 
 		    vertex_program_ref WarpBasic {}
 			
