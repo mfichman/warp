@@ -417,8 +417,9 @@ lua_State* Warp::operator>>(lua_State* env, std::string& s) {
 lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
     assert(lua_istable(env, -1));
 
-	lua_getfield(env, -1, "name");
-	env >> bl.name; // name must not be nil, so this will throw an exception if it is
+	lua_getfield(env, -1, "id");
+    bl.id = lua_tointeger(env, -1);
+    lua_pop(env, 1); // id must not be nil, so this will throw an exception if it is
 
     lua_getfield(env, -1, "path");
     if (!lua_isnil(env, -1)) {

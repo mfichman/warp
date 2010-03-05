@@ -44,6 +44,12 @@ Level::Level(Game* game, const std::string& name) :
 
 /** Destroys the level */
 Level::~Level() {
+    // send kill signal to chuck beat server:
+    OscSender* sender = game_->getOscSender();
+    sender->beginMsg("/server/stop");
+    sender->addInt(1);
+    sender->sendMsg();
+
 	game_->removeListener(this);
 }
 
@@ -74,19 +80,31 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaGetBeat, 1);
     lua_setfield(env, -2, "getBeat");
 
-    lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
-    lua_pushcclosure(env, &Level::luaQueueStartLoop, 1);
-    lua_setfield(env, -2, "queueStartLoop");
+    lua_pushlightuserdata(env, this); // tell chuck to load loop
+    lua_pushcclosure(env, &Level::luaLoadLoop, 1);
+    lua_setfield(env, -2, "loadLoop");
 
     lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
+    lua_pushcclosure(env, &Level::luaStartLoop, 1);
+    lua_setfield(env, -2, "startLoop");
+
+    lua_pushlightuserdata(env, this); // tell chuck to stop loop
+    lua_pushcclosure(env, &Level::luaStopLoop, 1);
+    lua_setfield(env, -2, "stopLoop");
+
+    lua_pushlightuserdata(env, this);
     lua_pushcclosure(env, &Level::luaStartBeatServer, 1);
     lua_setfield(env, -2, "startBeatServer");
 
-    lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
+    lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaStopBeatServer, 1);
+    lua_setfield(env, -2, "stopBeatServer");
+
+    lua_pushlightuserdata(env, this);
     lua_pushcclosure(env, &Level::luaCreateObject, 1);
     lua_setfield(env, -2, "createObject");
 
-	lua_pushlightuserdata(env, this); // tell chuck to enqueue loop
+	lua_pushlightuserdata(env, this);
     lua_pushcclosure(env, &Level::luaCreateTask, 1);
     lua_setfield(env, -2, "createTask");
 
@@ -178,45 +196,93 @@ int Level::luaGetBeat(lua_State* env) {
 }
 
 /**
- *  Lua callback.  Sends chuck the message to start a loop
- *  It gives a string id for the loop and the pathname to find it
+ *  Lua callback.  Sends chuck the message to stop a loop
+ *  takes an id.
  */
-int Level::luaQueueStartLoop(lua_State* env) {
-    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	Game* game = level->game_;
+int Level::luaStartLoop(lua_State* env) {
+    lua_getfield(env, -1, "id");
+    int id = lua_tointeger(env, -1); // required
+    lua_pop(env, 1); 
 
+    float gain = 1; // default value
+    lua_getfield(env, -1, "gain");
+    if (!lua_isnil(env, -1)) {
+        gain = lua_tonumber(env, -1);
+    }
+    lua_pop(env, 1); 
+
+    lua_pop(env, 1);
+
+    // send msg
+    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+    OscSender* sender = level->game_->getOscSender();
+    sender->beginMsg("/loop/start");
+    sender->addInt(id);
+    sender->addFloat(gain);
+    sender->sendMsg();
+    return 0;
+}
+
+/**
+ *  Lua callback.  Sends chuck the message to stop a loop
+ *  takes an id
+ */
+int Level::luaStopLoop(lua_State* env) {
+    lua_getfield(env, -1, "id");
+    int id = lua_tointeger(env, -1); // required
+    lua_pop(env, 1); 
+
+    lua_pop(env, 1);
+
+    // send msg
+    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+    OscSender* sender = level->game_->getOscSender();
+    sender->beginMsg("/loop/stop");
+    sender->addInt(id);
+    sender->sendMsg();
+    return 0;
+}
+
+int Level::luaLoadLoop(lua_State* env) {
     // get msg
 	BeatLoop beat_loop;
     env >> beat_loop;
 
+    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+    OscSender* sender = level->game_->getOscSender();
     // send msg
-    OscSender* sender = game->getOscSender();
-    sender->beginMsg("/loop/start");
-    sender->addString(beat_loop.name);
+    sender->beginMsg("/loop/load");
+    sender->addInt(beat_loop.id);
     sender->addString(beat_loop.path_name);
     sender->addInt(beat_loop.bpm);
     sender->addInt(beat_loop.n_beats);
     sender->sendMsg();
-    return 1;
+    return 0;
 }
 
 int Level::luaStartBeatServer(lua_State* env) {
-    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	Game* game = level->game_;
-	lua_remove(env, 1);
-
-    OscSender* sender = game->getOscSender();
-
     int bpm = 120; // default value
     lua_getfield(env, -1, "bpm");
     if (!lua_isnil(env, -1)) {
         bpm = lua_tointeger(env, -1);
     }
     lua_pop(env, 1); 
+
+    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+    OscSender* sender = level->game_->getOscSender();
     sender->beginMsg("/server/start");
     sender->addInt(bpm);
     sender->sendMsg();
-    return 1;
+    return 0;
+}
+
+int Level::luaStopBeatServer(lua_State* env) {
+    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+    OscSender* sender = level->game_->getOscSender();
+    sender->beginMsg("/server/stop");
+    sender->addInt(1);
+    sender->sendMsg();
+    return 0;
 }
 
 #include <OIS/OIS.h>
