@@ -37,8 +37,4 @@ void phong(out vec4 diffuse, out vec4 specular, out vec4 ambient) {
         ambient += a * gl_FrontMaterial.ambient * gl_LightSource[i].ambient;
     }
     ambient += gl_FrontMaterial.ambient * vec4(ambient_light, 1.0);
-    
-    clamp(diffuse, 0.0, 1.0);
-    clamp(specular, 0.0, 1.0);
-    clamp(ambient, 0.0, 1.0);
 }
