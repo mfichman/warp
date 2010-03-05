@@ -39,6 +39,9 @@ OscRecv recv;
 recv.listen();
 
 recv.event( "/loop/load, i s i i" ) @=> OscEvent @ load_loop_e;
+recv.event( "/loop/start, i f" ) @=> OscEvent @ start_loop_e;
+recv.event( "/loop/stop, i" ) @=> OscEvent @ stop_loop_e;
+
 recv.event( "/server/start, i" ) @=> OscEvent @ start_server_e;
 recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 
@@ -49,13 +52,14 @@ recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 class BeatLoop {
     SndBuf @ sndbuf;
     int bpm;
+    1 => float gain;
     int n_beats;
     0 => int is_playing;
 
     Shred @ loop_s;
 
     public void load(string path_name, int _bpm_, int _n_beats_) {
-        new SndBuf => sndbuf;
+        new SndBuf @=> sndbuf;
         path_name => sndbuf.read;
         _bpm_ => bpm;
         _n_beats_ => n_beats;
@@ -65,7 +69,9 @@ class BeatLoop {
         0 => sndbuf.rate;
     }
 
-    public void start() {
+    public void start(float gain) {
+        if (is_playing) return;
+        gain => sndbuf.gain;
         spork ~ loop_f() @=> loop_s;
     }
 
@@ -99,7 +105,6 @@ class Metronome {
 
     // sets the pulse for the application
     private void loop_f() {
-        <<< "hello?" >>>;
         while (is_on) {
             downbeat_e.broadcast();
             for (0 => cur_beat; cur_beat < g_n_beats; cur_beat++) {
@@ -118,8 +123,7 @@ class Metronome {
         if (is_on) return;
         1 => is_on;
         spork ~ loop_f() @=> loop_s;
-        <<< "1hello?" >>>;
-        //me.yield();
+        me.yield();
     }
 
     public void stop() {
@@ -137,21 +141,51 @@ class BeatServer {
     Shred @ start_s;
     Shred @ stop_s;
     Shred @ load_loop_s;
+    Shred @ start_loop_s;
+    Shred @ stop_loop_s;
 
     public void addListeners() {
+        <<< "adding listeners...">>>;
         spork ~ start_f() @=> start_s;
         spork ~ stop_f() @=> stop_s;
         spork ~ load_loop_f() @=> load_loop_s;
+        spork ~ start_loop_f() @=> start_loop_s;
+        spork ~ stop_loop_f() @=> stop_loop_s;
+        //<<< "before listener yield...">>>;
         me.yield();
+        //<<< "after listener yield...">>>;
+    }
+
+    private void start_loop_f() {
+        while(true) {
+            start_loop_e => now;
+            while (start_loop_e.nextMsg()) {
+                start_loop_e.getInt() => int index;
+                start_loop_e.getFloat() => float gain;
+
+                loops[index].start(gain);
+            }
+        }
+    }
+
+    private void stop_loop_f() {
+        while(true) {
+            stop_loop_e => now;
+            while (start_loop_e.nextMsg()) {
+                stop_loop_e.getInt() => int index;
+                stop_loop_e.getFloat() => float gain;
+
+                loops[index].stop();
+            }
+        }
     }
 
     // music event handlers:
     private void load_loop_f() {
         while(true) {
+            load_loop_e => now;
             while( load_loop_e.nextMsg() )
             { 
-                load_loop_e => now;
-
                 int index;
                 string path_name;
                 int bpm;
@@ -174,7 +208,9 @@ class BeatServer {
             start_server_e.nextMsg();
             start_server_e.getInt() => g_bpm;
             <<< "server started at ", g_bpm, " bpm" >>>;
+
             // give other processes a chance to finish:
+            // me.yield();
             metronome.start();
         }
     }
@@ -184,7 +220,7 @@ class BeatServer {
             stop_server_e => now;
             stop_server_e.nextMsg();
             // give other processes a chance to finish:
-            me.yield();
+            // me.yield();
             stop_loops();
             metronome.stop();
         }
