@@ -41,6 +41,10 @@ public:
         *op_stream << cstr;
     }
 
+    void addFloat(const float f) {
+        *op_stream << f;
+    }
+
     void addInt(int i) {
         *op_stream << i;
     }

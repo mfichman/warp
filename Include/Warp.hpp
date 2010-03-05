@@ -98,13 +98,13 @@ struct SpineProjection {
 struct BeatLoop {
 
     BeatLoop()
-        : name("Default")
+        : id(1)
         , path_name("no_path_name")
         , bpm(120)
         , n_beats(8)
     {}
     
-    std::string name;
+    int id;
     std::string path_name;
     int bpm;
     int n_beats;
