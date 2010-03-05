@@ -76,7 +76,15 @@ class BeatLoop {
     }
 
     public void stop() {
+        0 => is_playing;
+    }
+
+    public void kill() {
         if (!is_playing) return;
+
+        /* deallocate */
+        sndbuf =< master_gain;
+        NULL @=> sndbuf;
         0 => is_playing;
         loop_s.exit();
     }
@@ -221,15 +229,15 @@ class BeatServer {
             stop_server_e.nextMsg();
             // give other processes a chance to finish:
             // me.yield();
-            stop_loops();
+            kill_loops();
             metronome.stop();
         }
     }
 
-    private void stop_loops() {
+    private void kill_loops() {
         for(0 => int i; i < 20; i++) {
             if(loops[i] != NULL) {
-                loops[i].stop();
+                loops[i].kill();
             }
         }
     }

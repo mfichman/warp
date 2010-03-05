@@ -43,6 +43,12 @@ Level::Level(Game* game, const std::string& name) :
 
 /** Destroys the level */
 Level::~Level() {
+    // send kill signal to chuck beat server:
+    OscSender* sender = game_->getOscSender();
+    sender->beginMsg("/server/stop");
+    sender->addInt(1);
+    sender->sendMsg();
+
 	game_->removeListener(this);
 }
 
