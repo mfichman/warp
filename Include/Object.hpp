@@ -27,6 +27,9 @@ public:
 	/** Sets the position of this object */
 	void setPosition(const Ogre::Vector3& p);
 
+	/** Sets the speed of the object */
+	void setSpeed(float speed) { speed_ = speed; }
+
 	/** Returns true if the object is alive */
 	bool isAlive() const { return alive_; }
 
@@ -122,6 +125,8 @@ private:
 
 	// Projectiles tracking this object
 	std::list<Object*> trackers_;
+
+	float speed_;
 };
 
 }
