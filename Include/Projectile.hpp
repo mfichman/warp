@@ -5,55 +5,28 @@
 #pragma once
 
 #include "Warp.hpp"
-#include "Collidable.hpp"
-#include <Bullet/btBulletDynamicsCommon.h>
+#include "Enemy.hpp"
 
 namespace Warp {
 
-class Projectile : public Collidable, public btMotionState {
+class Projectile : public Object {
 public:
 	/** Creates a new projectile */
-	Projectile(Game* game, const std::string& material, int id, const Ogre::Vector3& pos, Object* target);
+	Projectile(Game* game, Level* level, const std::string& type, int id);
 
 	/** Destructor */
-	~Projectile();
+	virtual ~Projectile();
 
-	/* Called when the tracked object changes position */
-	void onTargetMovement(const Ogre::Vector3& newPosition);
-
-	/* Called when the tracked object is removed from memory */
-	void onTargetDelete();
-
-	/** Returns true if the object is alive */
-	bool isAlive() const { return alive_; }
-
-	/** Called on timestep */
-	void onTimeStep();
 
 private:
-	// Bullet callbacks
-	virtual void getWorldTransform(btTransform& transform) const;
-	virtual void setWorldTransform(const btTransform& transform);
+	virtual void collide(Object* other) { other->onCollision(this); }
+	virtual void onCollision(Enemy* enemy);
 
-	// Collision callbacks
-	virtual void collide(Collidable* other) { other->onCollision(this); }
-	virtual void onCollision(Object* object);
+	virtual void onTimeStep();
 
-	void deactivatePhysics();
-
-	Game* game_;
-
-	// Collision data
-	std::auto_ptr<btCollisionShape> shape_;
-	std::auto_ptr<btRigidBody> body_;
-	btTransform transform_;
-	bool alive_;
-	bool hit_;
-
-	Ogre::SceneNode* node_;
 	Ogre::BillboardSet* billboards_;
-	std::string name_;
-	Object* target_;
+	std::auto_ptr<btSphereShape> shape_;
+	bool hit_;
 	float time_;
 };
 

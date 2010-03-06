@@ -19,6 +19,8 @@
 #include <lua/lauxlib.h>
 }
 
+#define OBJECT_SPEED 100
+
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
@@ -30,36 +32,32 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 	type_(type),
 	exploded_(false),
 	alive_(true),
-	billboards_(0),
-	spineNodeIndex_(0),
-	level_(level)
+	level_(level),
+	target_(0)
 {
 	ostringstream os;
 	os << type << id;
 	name_ = os.str();
 
+	// Create scene node
 	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
 
 	// Initialize the physics shape
 	shape_.reset(new btCompoundShape());
 
 	// Initialize the mass and inertia
-	btScalar mass(1.0f);
+	mass_ = 1.0f;
+	btScalar mass(mass_);
 	btVector3 inertia(0.0f, 0.0f, 0.0f);
 	shape_->calculateLocalInertia(mass, inertia);
 
-	// Find the spawn position
-	const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection();
-
-	// TODO: Align the object so it's facing down the tube
-
 	// Initialize the rigid body
-	transform_ = btTransform(btQuaternion::getIdentity(), btVector3(spawn.position.x, spawn.position.y, spawn.position.z));
+	transform_ = btTransform(btQuaternion::getIdentity(), btVector3(0.0f, 0.0f, 0.0f));
 	btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
 	body_.reset(new btRigidBody(rbinfo));
 	body_->setFriction(0.0f);
-	body_->setRestitution(1.0f);
-	body_->setUserPointer(static_cast<Collidable*>(this));
+	body_->setRestitution(0.0f);
+	body_->setUserPointer(this);
 	game_->getWorld()->addRigidBody(body_.get());
 
 	loadScriptCallbacks();
@@ -68,24 +66,22 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 Object::~Object() {
 
 	// Notify projectiles that the object is toast
-	for_each(projectiles_.begin(), projectiles_.end(), mem_fun(&Projectile::onTargetDelete));
+	for_each(trackers_.begin(), trackers_.end(), mem_fun(&Object::onTargetDelete));
+	if (target_) target_->removeTracker(this);
 
-	//cout << name_ << " deallocated" << endl;
+	cout << name_ << " deallocated" << endl;
 
 	// Clean up physics
-	if (body_.get()) { 
-		body_->setUserPointer(0);
-		game_->getWorld()->removeCollisionObject(body_.get());
-	}
+	game_->getWorld()->removeCollisionObject(body_.get());
 
 	// Destroy all subobjects
 	subObjects_.clear();
 
-	// Remove targeting billboard
-	if (billboards_) {
-		node_->detachObject(billboards_);
-		game_->getSceneManager()->destroyBillboardSet(billboards_);
-		billboards_ = 0;
+	// Destroy objects attached to the scene node
+	while (node_->numAttachedObjects() > 0) {
+		MovableObject* obj = node_->getAttachedObject(0U);
+		node_->detachObject((unsigned short)0U);
+		node_->getCreator()->destroyMovableObject(obj->getName(), obj->getMovableType());
 	}
 
 	// Destroy all attached entities and scene nodes
@@ -93,7 +89,7 @@ Object::~Object() {
 	while (i.hasMoreElements()) {
 		SceneNode* node = static_cast<SceneNode*>(i.getNext());
 		MovableObject* obj = node->getAttachedObject(0U);
-		node->detachAllObjects();
+		node->detachObject((unsigned short)0U);
 		node->getCreator()->destroyMovableObject(obj->getName(), obj->getMovableType());
 	}
 	node_->removeAndDestroyAllChildren();
@@ -117,9 +113,94 @@ Object::~Object() {
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "destroy");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "target");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "getPosition");
 	lua_pop(env, 1);
 	lua_unref(env, table_);
+}
+
+/** Called when the game updates */
+void Object::onTimeStep() {
+	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
+		(*i)->addTime(0.01);
+	}
+
+	callMethod("onTimeStep");
+
+	const SpineProjection proj = level_->getPlayer()->getPlayerProjection();
+	Vector3 to = proj.position - node_->getPosition();
+
+	// If the players forward vector is facing away from us, then the object is
+	// out of the field of view so this object should be deleted.  N.B.:
+	// there is probably a better way to do this using the distance along the
+	// spine node path.
+	if (to.dotProduct(proj.forward) > 0 && to.squaredLength() > 120) {
+		alive_ = false;
+	}
+
+	// Track target by setting the vector towards the target
+	if (target_) {
+		Vector3 velocity = target_->getPosition() - node_->getPosition();
+		velocity.normalise();
+		velocity *= OBJECT_SPEED;
+		body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+	}
+}
+
+void Object::getWorldTransform(btTransform& transform) const {
+	transform = transform_;
+}
+
+void Object::setWorldTransform(const btTransform& transform) {
+
+	// Get info from bullet
+    const btQuaternion& rotation = transform.getRotation();
+    const btVector3& origin = transform.getOrigin();
+    // Apply to scene node
+    node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
+    node_->setPosition(origin.x(), origin.y(), origin.z());
+    // Set local info
+    transform_ = transform;
+
+	Vector3 position(origin.x(), origin.y(), origin.z());
+}
+
+void Object::setTarget(Object* target) {
+	if (target_ == target) return;
+
+	if (target_) {
+		target_->removeTracker(this);
+	}
+	target_ = target;
+	if (target_) {
+		target_->addTracker(this);
+	}
+}
+
+void Object::addTracker(Object* p) {
+	trackers_.push_back(p);
+}
+
+void Object::removeTracker(Object* p) {
+	list<Object*>::iterator i = find(trackers_.begin(), trackers_.end(), p);
+	if (i != trackers_.end()) trackers_.erase(i);
+}
+
+void Object::setPosition(const Ogre::Vector3& p) {
+	btTransform transform = body_->getCenterOfMassTransform();
+	transform.setOrigin(btVector3(p.x, p.y, p.z));
+	body_->setCenterOfMassTransform(transform);
+}
+
+void Object::onTargetDelete() {
+	target_ = 0;
+	alive_ = false;
+}
+
+lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {
+	lua_getref(env, e.table_);
+	return env;
 }
 
 void Object::loadScriptCallbacks() {
@@ -160,10 +241,6 @@ void Object::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaDestroy, 1);
 	lua_setfield(env, -2, "destroy");
-
-	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Object::luaTarget, 1);
-	lua_setfield(env, -2, "target");
 
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaGetPosition, 1);
@@ -313,7 +390,6 @@ int Object::luaSetParticleSystem(lua_State* env) {
 		name = self->name_ + "." + name;
 
 		SceneNode* node = self->game_->getSceneManager()->getSceneNode(name);
-
 		env >> *node;
 
 	} catch (Exception& ex) {
@@ -343,17 +419,9 @@ int Object::luaExplode(lua_State* env) {
 	// Disable the original rigid body for the object
 	self->game_->getWorld()->removeCollisionObject(self->body_.get());
 
-	// Turn off the targeting billboard, if it is on
-	if (self->billboards_) {
-		self->node_->detachObject(self->billboards_);
-		self->game_->getSceneManager()->destroyBillboardSet(self->billboards_);
-		self->billboards_ = 0;
-	}
-
 	// Deactive projectiles
-	for_each(self->projectiles_.begin(), self->projectiles_.end(), mem_fun(&Projectile::onTargetDelete));
-	self->projectiles_.clear();
-
+	for_each(self->trackers_.begin(), self->trackers_.end(), mem_fun(&Projectile::onTargetDelete));
+	self->trackers_.clear();
 
 	return 0;
 }
@@ -365,24 +433,6 @@ int Object::luaDestroy(lua_State* env) {
 
 	return 0;
 }
-
-
-/** Destroys the object */
-int Object::luaTarget(lua_State* env) {
-	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	
-	if (!self->billboards_) {
-		self->billboards_ = self->game_->getSceneManager()->createBillboardSet(self->name_ + ".Target", 1);
-		self->billboards_->setMaterialName("Circle");
-		self->billboards_->setDefaultWidth(5.0f);
-		self->billboards_->setDefaultHeight(5.0f);
-		self->billboards_->createBillboard(0.0f, 0.0f, 0.0f);
-		self->node_->attachObject(self->billboards_);
-	}
-
-	return 0;
-}
-
 
 /** Warning */
 int Object::luaWarningDestroyed(lua_State* env) {
@@ -396,6 +446,7 @@ int Object::luaGetPosition(lua_State* env) {
 	env << self->node_->getPosition();
 	return 1;
 }
+
 
 /** Calls a method on the peer Lua object */
 void Object::callMethod(const std::string& method) {
@@ -419,73 +470,4 @@ void Object::callMethod(const std::string& method) {
 	}
 
 	assert(lua_gettop(env) == 0);
-}
-
-/** Called when the game updates */
-void Object::onTimeStep() {
-	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
-		(*i)->addTime(0.01);
-	}
-
-	callMethod("onTimeStep");
-
-	const SpineProjection proj = level_->getPlayer()->getPlayerProjection();
-	Vector3 to = proj.position - node_->getPosition();
-
-	// If the players forward vector is facing away from us, then the object is
-	// out of the field of view so this object should be deleted.  N.B.:
-	// there is probably a better way to do this using the distance along the
-	// spine node path.
-	if (to.dotProduct(proj.forward) > 0 && to.squaredLength() > 120) {
-		alive_ = false;
-	}
-
-	// Fly down the tube in the opposite direction of the player
-
-}
-
-lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {
-	lua_getref(env, e.table_);
-	return env;
-}
-
-void Object::getWorldTransform(btTransform& transform) const {
-	transform = transform_;
-}
-
-void Object::setWorldTransform(const btTransform& transform) {
-
-	// Get info from bullet
-    const btQuaternion& rotation = transform.getRotation();
-    const btVector3& origin = transform.getOrigin();
-    // Apply to scene node
-    node_->setOrientation(rotation.w(), rotation.x(), rotation.y(), rotation.z());
-    node_->setPosition(origin.x(), origin.y(), origin.z());
-    // Set local info
-    transform_ = transform;
-
-	Vector3 position(origin.x(), origin.y(), origin.z());
-
-	// Notify projectiles
-	for (list<Projectile*>::iterator i = projectiles_.begin(); i != projectiles_.end(); i++) {
-		(*i)->onTargetMovement(position);
-	}
-}
-
-/** Called when the object is selected */
-void Object::select() {
-	callMethod("onSelect");
-}
-
-void Object::addProjectile(Projectile* p) {
-	projectiles_.push_back(p);
-}
-
-void Object::removeProjectile(Projectile* p) {
-	list<Projectile*>::iterator i = find(projectiles_.begin(), projectiles_.end(), p);
-	if (i != projectiles_.end()) projectiles_.erase(i);
-}
-
-void Object::onCollision(Projectile* projectile) {
-	callMethod("onProjectileHit");
 }

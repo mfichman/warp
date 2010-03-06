@@ -67,6 +67,7 @@ class DynamicTube;
 class Level;
 class Game;
 class Object;
+class Enemy;
 class GameListener;
 class SubObject;
 class Projectile;
@@ -118,7 +119,6 @@ public:
 
 	/** Called for every physics timestep (fixed at every 0.01 s) */
 	virtual void onTimeStep() {}
-	virtual void onFrame(float delta) {}
 };
 
 /** Methods for sending Ogre and ODE values to a script */

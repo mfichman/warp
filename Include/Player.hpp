@@ -5,22 +5,19 @@
 #pragma once
 
 #include "Warp.hpp"
-#include "Collidable.hpp"
+#include "Object.hpp"
 
 #include <Bullet/btBulletDynamicsCommon.h>
 
 namespace Warp {
 
-class Player : public Collidable, public GameListener, public btMotionState {
+class Player : public Object {
 public:
 	/** Creates a new ball */
-    Player(Game* game, Level* level, const std::string& name);
+    Player(Game* game, Level* level, const std::string& name, int id);
 
     /** Destructor */
-    ~Player();
-
-	/** Returns the player's current position */
-    const Ogre::Vector3& getPosition() const;
+    virtual ~Player();
 
 	/** Gets the current player spine node projection */
 	const SpineProjection& getPlayerProjection() const;
@@ -28,40 +25,20 @@ public:
 	/** Returns the spine projection where enemies should spawn */
 	const SpineProjection& getSpawnProjection() const;
 
-
+	/** Call to update the player */
+	virtual void onTimeStep();
 		
 private:
 	Player(const Player&);
     Player& operator=(const Player&);
 
-	// Collision callbacks
-	virtual void collide(Collidable* other) { other->onCollision(this); }
-	virtual void onCollision(Object* object) { }
+	virtual void collide(Object* other) { other->onCollision(this); }
 
 	// Bullet callbacks
-	virtual void getWorldTransform(btTransform& transform) const;
 	virtual void setWorldTransform(const btTransform& transform);
 
-	virtual void onTimeStep();
-	virtual void onFrame(float delta);
 	void computeForces();
 	void updateRay();
-
-	Game* game_;
-	Level* level_;
-
-	// Ogre scene data
-	std::string name_;
-	Ogre::SceneNode* node_;
-	Ogre::SceneNode* shipNode_;
-
-	// Collision data
-	std::auto_ptr<btCollisionShape> shape_;
-	std::auto_ptr<btRigidBody> body_;
-
-    // Information about position and orientation from Bullet
-    btTransform transform_;
-	Ogre::Vector3 position_;
 
 	SpineProjection spawnProjection_;
 	SpineProjection playerProjection_;

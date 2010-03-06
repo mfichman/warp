@@ -29,8 +29,7 @@ public:
 		return tube_.get();
 	}
 
-	/** Adds a projectile*/
-	void createProjectile(Object* target, const Ogre::Vector3& pos);
+	Projectile* createProjectile(const std::string& type);
 
 private:
     Level(const Level&);
@@ -52,15 +51,15 @@ private:
 	static int luaStartBeatServer(lua_State* env);
 	static int luaStopBeatServer(lua_State* env);
 	static int luaCreateObject(lua_State* env);
+	static int luaCreateEnemy(lua_State* env);
 	static int luaCreateTask(lua_State* env);
 
 	Game* game_;
 	std::list<boost::shared_ptr<Object>> objects_;
-	std::list<boost::shared_ptr<Projectile>> projectiles_;
 	std::list<boost::shared_ptr<ScriptTask>> tasks_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Player> player_;
-	size_t entitiesCreated_;
+	size_t objectsCreated_;
 };
 
 

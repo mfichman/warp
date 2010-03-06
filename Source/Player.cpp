@@ -6,7 +6,9 @@
 #include "Player.hpp"
 #include "Game.hpp"
 #include "Level.hpp"
+#include "Enemy.hpp"
 #include "Object.hpp"
+#include "Projectile.hpp"
 #include "DynamicTube.hpp"
 
 #include <OIS/OIS.h>
@@ -15,77 +17,29 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-#define BALL_RADIUS 0.5f // meters
-#define BALL_MASS 1.0f // kilograms
-
 #define POSITION_SMOOTHNESS 0.60f
 #define ROTATION_SMOOTHNESS 0.05f
 
 #define SPAWN_DISTANCE 150.0f
 
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
-Player::Player(Game* game, Level* level, const string& name) :
-    game_(game),
-	level_(level),
-    name_(name),
-    position_(Vector3::ZERO)
-{
-	// Set up OGRE scene nodes
-	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
-	shipNode_ = node_->createChildSceneNode(name_ + ".ShipNode");
-	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".Hull", "DaggerHull.mesh"));
-	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".LeftWing", "DaggerLeftWing.mesh"));
-	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".RightWing", "DaggerRightWing.mesh"));
-	shipNode_->attachObject(game_->getSceneManager()->createEntity(name_ + ".Engine", "DaggerEngine.mesh"));
-	shipNode_->setInheritOrientation(false);
-    
-    transform_.setIdentity();
-    
-    transform_.setOrigin(btVector3(0, -5, 5));
-    shape_.reset(new btSphereShape(BALL_RADIUS));
+Player::Player(Game* game, Level* level, const string& name, int id) :
+	Object(game, level, name, id) {
 
-    btScalar mass(BALL_MASS);
-    btVector3 inertia(0.0f, 0.0f, 0.0f);
-    shape_->calculateLocalInertia(mass, inertia);
-
-    btRigidBody::btRigidBodyConstructionInfo rbinfo(mass, this, shape_.get(), inertia);
-    body_.reset(new btRigidBody(rbinfo));
-	body_->setFriction(0.0f);
-	body_->setRestitution(0.0f);
-	body_->setUserPointer(static_cast<Collidable*>(this));
-
-    game_->getWorld()->addRigidBody(body_.get());
-    game_->addListener(this);
-
+	setPosition(Vector3(0, -5, 5));
 }
 
 Player::~Player() {
-	body_->setUserPointer(0);
-	node_->removeAndDestroyChild(shipNode_->getName());
-    game_->getSceneManager()->getRootSceneNode()->removeAndDestroyChild(name_);
-    game_->getSceneManager()->destroyEntity(name_);
-    game_->getWorld()->removeCollisionObject(body_.get());
-    game_->removeListener(this);
-}
-
-/** Called by bullet to get the transform state */
-void Player::getWorldTransform(btTransform& transform) const {
-    transform = transform_;
 }
 
 /** Called by Bullet to update the scene node */
 void Player::setWorldTransform(const btTransform& transform) {
 	
 	// BEGIN TODO
-	const btQuaternion& btrotation = transform.getRotation();
 	const btVector3& btposition = transform.getOrigin();
 	const btVector3& btvelocity = body_->getLinearVelocity();
 	Vector3 position(btposition.x(), btposition.y(), btposition.z());
-	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
-	position_ = position;
-
-	node_->setOrientation(btrotation.w(), btrotation.x(), btrotation.y(), btrotation.z());
-    node_->setPosition(btposition.x(), btposition.y(), btposition.z());
+	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());    
 
 	// Get the player location
     playerProjection_ = level_->getTube()->getSpineProjection(position, playerProjection_.index);
@@ -117,23 +71,17 @@ void Player::setWorldTransform(const btTransform& transform) {
     up.normalise();
     forward.normalise(); 
 	
-	shipNode_->setOrientation(Quaternion(-right, up, -forward));
+	node_->setOrientation(Quaternion(-right, up, -forward));
+	node_->setPosition(btposition.x(), btposition.y(), btposition.z());
 	game_->getCamera()->setPosition(position - forward*8.0 + up*1.7);
 	game_->getCamera()->setOrientation(Quaternion(-right, up, -forward));
-
-	///position = POSITION_SMOOTHNESS*game_->getCamera()->getPosition() + (1 - POSITION_SMOOTHNESS)*position;
-	//game_->getCamera()->setPosition(position - forward*2.0 + up*0.5);
-	//game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
 }
 
 /** Called when a new frame is detected */
 void Player::onTimeStep() {
+	Object::onTimeStep();
 	computeForces();
 	updateRay();
-}
-
-void Player::onFrame(float delta) {
-
 }
 
 void Player::computeForces() {
@@ -147,7 +95,6 @@ void Player::computeForces() {
 
 	// Get the spawn location
 	spawnProjection_ = level_->getTube()->getSpineProjection(playerProjection_.distance + SPAWN_DISTANCE, spawnProjection_.index);
-    
 
 	const SpineProjection& projection = playerProjection_;
     assert(projection.forward != Vector3::ZERO);
@@ -172,15 +119,14 @@ void Player::computeForces() {
 	// We want the ship to hover at 2.0 meters above the ground
 	float distance = (projection.position - position).length();
 
-	
 	float friction = 10.0f;
 	float centralForce = 40.0f;
 	if (distance > 5.5f) {
 		float v = velocity.dotProduct(up);
-		Vector3 force = ((distance - 6.0f) * centralForce * BALL_MASS - friction * v) * up;
+		Vector3 force = ((distance - 6.0f) * centralForce * mass_ - friction * v) * up;
 		body_->applyCentralForce(btVector3(force.x, force.y, force.z));
 	} else {
-		Vector3 gravity = -20.0f * BALL_MASS * up;
+		Vector3 gravity = -20.0f * mass_ * up;
 		body_->applyCentralForce(btVector3(gravity.x, gravity.y, gravity.z));
 	}
 
@@ -207,10 +153,6 @@ void Player::computeForces() {
 	right.normalise();
     up.normalise();
     forward.normalise(); 
-
-	position = POSITION_SMOOTHNESS*game_->getCamera()->getPosition() + (1 - POSITION_SMOOTHNESS)*position;
-	game_->getCamera()->setPosition(position - forward*2.0 + up*0.5);
-	//game_->getCamera()->setOrientation(Quaternion::Slerp(ROTATION_SMOOTHNESS, game_->getCamera()->getOrientation(), Quaternion(-right, up, -forward), true));
 }
 
 void Player::updateRay() {
@@ -231,19 +173,17 @@ void Player::updateRay() {
 		if (callback.hasHit()) {
 			btRigidBody* body = btRigidBody::upcast(callback.m_collisionObject);
 			if (body) {
-				Collidable* c = static_cast<Collidable*>(body->getUserPointer());
-				Object* obj = dynamic_cast<Object*>(c);
-				if (obj && obj->getProjectileCount() == 0) {
-					level_->createProjectile(obj, node_->getPosition());
-					obj->select();
+				Object* o = static_cast<Object*>(body->getUserPointer());
+				Enemy* e = dynamic_cast<Enemy*>(o);
+				if (e && e->getTrackerCount() == 0) {
+					Projectile* p = level_->createProjectile("Photon");
+					p->setTarget(e);
+					p->setPosition(forward_ + getPosition());
+					e->setSelected(true);
 				}
 			}
 		}
 	}
-}
-
-const Vector3& Player::getPosition() const {
-    return position_;
 }
 
 const SpineProjection& Player::getPlayerProjection() const {

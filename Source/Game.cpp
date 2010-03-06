@@ -237,14 +237,6 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 		world_->stepSimulation(evt.timeSinceLastFrame, 3);
 	}
 
-	list<GameListener*>::iterator i = listeners_.begin();
-	while (i != listeners_.end()) {
-		GameListener* listener = *i;
-		i++;
-		listener->onFrame(evt.timeSinceLastFrame);
-	}
-
-
 	return true;
 }
 
@@ -258,8 +250,8 @@ void Game::onTick(btDynamicsWorld* world, btScalar step) {
 		btCollisionObject* a = static_cast<btCollisionObject*>(manifold->getBody0());
 		btCollisionObject* b = static_cast<btCollisionObject*>(manifold->getBody1());
 
-		Collidable* ca = static_cast<Collidable*>(a->getUserPointer());
-		Collidable* cb = static_cast<Collidable*>(b->getUserPointer());
+		Object* ca = static_cast<Object*>(a->getUserPointer());
+		Object* cb = static_cast<Object*>(b->getUserPointer());
 
 		// Perform double dynamic dispatch
 		if (ca && cb) {
