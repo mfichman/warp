@@ -95,3 +95,7 @@ void Enemy::onCollision(Projectile* p) {
 		billboards_ = 0;
 	}
 }
+
+void Enemy::onCollision(Player* p) {
+	callMethod("onPlayerHit");
+}

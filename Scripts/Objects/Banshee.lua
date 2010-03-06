@@ -38,3 +38,12 @@ function Banshee:onProjectileHit()
         self:explode()
     end)
 end
+
+-- Called when an object hits a player
+function Banshee:onPlayerHit()
+    if (self.destroyed) then return end
+    self.destroyed = true
+    local explosion = Level:createObject("Explosion")  
+    explosion:set{position=self:getPosition()}
+    self:explode()
+end
