@@ -7,10 +7,10 @@ Gain master_gain => Gain effects => dac;
 
 // echo effect:
 
-DelayL echo => JCRev reverb => master_gain;
+Gain echo => JCRev reverb => master_gain;
+echo => DelayL echo_delay => echo;
 .05 => reverb.mix;
-echo => echo;
-.4 => echo.gain;
+.5 => echo_delay.gain;
 
 
 ////////////
@@ -66,7 +66,6 @@ recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 class SoundEffect {
     SndBuf sndbuf => echo;
     0 => sndbuf.rate;
-    .1 => sndbuf.gain;
 
     public void load(string path_name) {
         path_name => sndbuf.read;
@@ -210,7 +209,7 @@ class BeatServer {
             while(play_sfx_e.nextMsg()) {
                 play_sfx_e.getInt() => int index;
                 play_sfx_e.getFloat() => float gain;
-                sfx[index].play(gain);
+                spork ~ sfx[index].play(gain);
             }
         }
     }
@@ -283,8 +282,8 @@ class BeatServer {
             // me.yield();
 
             // set echo based on bpm
-            1::minute / g_bpm => echo.max;
-            1::minute / g_bpm => echo.delay;
+            1::minute / g_bpm => echo_delay.max;
+            1::minute / g_bpm => echo_delay.delay;
 
             metronome.start();
         }

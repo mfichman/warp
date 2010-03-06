@@ -9,21 +9,17 @@ Level:loadLoop{id=1, path="beats/Club Dance Beat 023 125_16.wav", bpm=125, n_bea
 Level:loadLoop{id=0, path="loops/Dance Floor Pattern 05.wav", bpm=120, n_beats=4}
 
 Level:startLoop{id=0}
-Level:startBeatServer{bpm=120} -- this should always be 120 for the loops to be in the right key
-
-Level:waitForBeat()
-
 Level:startLoop{id=1}
-
-Level:waitForBeatSet()
-Level:setLight{name="Light", diffuse={0, 0, 0.4}}
+Level:startBeatServer{bpm=120} -- this should always be 120 for the loops to be in the right key
 
 while (true) do
 
 Level:waitForBeat()
 Level:setLight{name="Light", diffuse={0.4, 0, 0}}
+print "beat"
 
 Level:waitForBeat()
 Level:setLight{name="Light", diffuse={0, 0.4, 0}}
+print "beat"
 
 end
