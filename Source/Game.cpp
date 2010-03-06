@@ -31,9 +31,6 @@ using namespace Warp;
 using namespace Ogre;
 using namespace std;
 
-#define PHYSICSUPDATEINTERVAL	0.01f // seconds
-#define PHYSICSMAXINTERVAL		0.25f // seconds
-
 // for OSC interface to chuck
 #define SEND_PORT 6449
 #define LISTEN_PORT 7000
@@ -188,6 +185,8 @@ void Game::loadPhysics() {
     //world_->getSolverInfo().m_erp = 1.00f;
     //world_->getSolverInfo().m_erp2 = 1.00f;
     world_->setGravity(btVector3(0, -2, 0));
+	world_->setInternalTickCallback(&Game::onTick, this, true);
+	world_->setWorldUserInfo(this);
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 
 }
@@ -225,46 +224,49 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 	keyboard_->capture();
 	mouse_->capture();
 
+
+	physicsAccumulator_ += evt.timeSinceLastFrame;
+
 	if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 		root_->queueEndRendering();
 	}
 
-	// Prevent physics from running while game doesn't have focus
-	physicsAccumulator_ += evt.timeSinceLastFrame;
-	physicsAccumulator_ = std::min(physicsAccumulator_, PHYSICSMAXINTERVAL); 
-
-    while (physicsAccumulator_ >= PHYSICSUPDATEINTERVAL) { 
-        list<GameListener*>::iterator i = listeners_.begin();
-        while (i != listeners_.end()) {
-            GameListener* listener = *i;
-            i++;
-            listener->onTimeStep();
-        }
-
-        // Step the world using the fixed timestep
-        world_->stepSimulation(PHYSICSUPDATEINTERVAL, 0);
-        physicsAccumulator_ -= PHYSICSUPDATEINTERVAL;
-
-		// Check for collisions
-		int nmanifolds = world_->getDispatcher()->getNumManifolds();
-		for (int i = 0; i < nmanifolds; i++) {
-			btPersistentManifold* manifold = world_->getDispatcher()->getManifoldByIndexInternal(i);
-			btCollisionObject* a = static_cast<btCollisionObject*>(manifold->getBody0());
-			btCollisionObject* b = static_cast<btCollisionObject*>(manifold->getBody1());
-
-			Collidable* ca = static_cast<Collidable*>(a->getUserPointer());
-			Collidable* cb = static_cast<Collidable*>(b->getUserPointer());
-
-			// Perform double dynamic dispatch
-			if (ca && cb) {
-				ca->collide(cb);
-				cb->collide(ca);
-			}
-
-		}
-    }
+	if (keyboard_->isKeyDown(OIS::KC_S)) {
+		world_->stepSimulation(evt.timeSinceLastFrame / 4.0, 3);
+	} else {
+		world_->stepSimulation(evt.timeSinceLastFrame, 3);
+	}
 
 	return true;
+}
+
+void Game::onTick(btDynamicsWorld* world, btScalar step) {
+	world->clearForces();
+
+	// Check for collisions
+	int nmanifolds = world->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < nmanifolds; i++) {
+		btPersistentManifold* manifold = world->getDispatcher()->getManifoldByIndexInternal(i);
+		btCollisionObject* a = static_cast<btCollisionObject*>(manifold->getBody0());
+		btCollisionObject* b = static_cast<btCollisionObject*>(manifold->getBody1());
+
+		Object* ca = static_cast<Object*>(a->getUserPointer());
+		Object* cb = static_cast<Object*>(b->getUserPointer());
+
+		// Perform double dynamic dispatch
+		if (ca && cb) {
+			ca->collide(cb);
+			cb->collide(ca);
+		}
+	}
+
+	Game* game = static_cast<Game*>(world->getWorldUserInfo());
+	list<GameListener*>::iterator i = game->listeners_.begin();
+	while (i != game->listeners_.end()) {
+		GameListener* listener = *i;
+		i++;
+		listener->onTimeStep();
+	}
 }
 
 OIS::Keyboard* Game::getKeyboard() const { 

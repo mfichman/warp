@@ -13,6 +13,8 @@
 #include <string>
 
 
+#define WARP_BT_FLAG 0x01000000 
+
 // Forward declarations to increase compilation speed
 namespace Ogre {
 	class SceneManager;
@@ -65,9 +67,11 @@ class DynamicTube;
 class Level;
 class Game;
 class Object;
+class Enemy;
 class GameListener;
 class SubObject;
 class Projectile;
+class Targetable;
 
 
 inline int mod(int num, int divisor) {

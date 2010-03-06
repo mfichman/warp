@@ -12,6 +12,7 @@ void main() {
     phong(diffuse, specular, ambient);
     
     vec2 texcoord = gl_TexCoord[0].st * texscale;
+    texcoord.t += time / 2.0;
     
     //vec4 tex = texture2D(tex_sampler, texcoord);
     vec4 glow = texture2D(glow_sampler, texcoord);

@@ -46,6 +46,7 @@ SubObject::~SubObject() {
 
 	// Remove from world if the subobject was separated off
 	if (body_.get()) { 
+		body_->setUserPointer(0);
 		game_->getWorld()->removeCollisionObject(body_.get()); 
 	}
 }
@@ -98,7 +99,7 @@ void SubObject::separateFromParent() {
 	body_.reset(new btRigidBody(rbinfo));
 	body_->setFriction(1.0f);
 	body_->setRestitution(1.0f);
-	body_->setUserPointer(static_cast<Collidable*>(parent_));
+	body_->setUserPointer(0);
 	game_->getWorld()->addRigidBody(body_.get());
 
 	// Shoot the object in a random direction

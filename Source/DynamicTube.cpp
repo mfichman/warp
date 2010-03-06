@@ -47,6 +47,7 @@ DynamicTube::DynamicTube(Game* game, const string& name) :
     object_->setCollisionShape(shape_.get());
 	object_->setFriction(0.0f);
 	object_->setRestitution(0.0f);
+	object_->setUserPointer(0);
     game_->getWorld()->addCollisionObject(object_.get());
 }
    
