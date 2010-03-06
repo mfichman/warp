@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 2.6)
 project(Criterium)
 
 
-set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
+#add_definitions("/O2")
 
 set(EXECUTABLE_OUTPUT_PATH ${Criterium_SOURCE_DIR}\\..)
 set(LIBRARY_OUTPUT_PATH ${Criterium_SOURCE_DIR}\\...\\Binary)

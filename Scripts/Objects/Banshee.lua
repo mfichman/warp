@@ -33,7 +33,6 @@ function Banshee:onProjectileHit()
     self.destroyed = true
     Level:createTask(function()
         Level:playSFX{id=0, gain=2} -- queue chuck sound effect
-        Level:waitForBeat()
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}
         self:explode()

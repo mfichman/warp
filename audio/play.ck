@@ -75,7 +75,7 @@ class SoundEffect {
     }
 
     public void play(float gain) {
-        beat_e => now;
+        beat_frac_e => now;
         gain => sndbuf.gain;
         0 => sndbuf.pos;
         1 => sndbuf.rate;

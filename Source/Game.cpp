@@ -230,13 +230,19 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 	if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 		root_->queueEndRendering();
 	}
-
+/*
 	if (keyboard_->isKeyDown(OIS::KC_S)) {
 		world_->stepSimulation(evt.timeSinceLastFrame / 4.0, 3);
 	} else {
 		world_->stepSimulation(evt.timeSinceLastFrame, 3);
 	}
-
+	*/
+	list<GameListener*>::iterator i = listeners_.begin();
+	while (i != listeners_.end()) {
+		GameListener* listener = *i;
+		i++;
+		listener->onTimeStep();
+	}
 	return true;
 }
 
