@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="Warp"
 	ProjectGUID="{6A9A390C-57FD-4B70-BE0D-F9BEAC54C897}"
+	RootNamespace="Warp"
 	Keyword="MakeFileProj"
 	TargetFrameworkVersion="196613"
 	>
@@ -69,6 +70,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\Enemy.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\FreeCamera.cpp"
 				>
 			</File>
@@ -97,6 +102,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\Projectile.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\ScriptTask.cpp"
 				>
 			</File>
@@ -112,6 +121,10 @@
 			>
 			<File
 				RelativePath="..\Include\DynamicTube.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Enemy.hpp"
 				>
 			</File>
 			<File
@@ -144,6 +157,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\Player.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Projectile.hpp"
 				>
 			</File>
 			<File

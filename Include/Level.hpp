@@ -29,11 +29,13 @@ public:
 		return tube_.get();
 	}
 
+	Projectile* createProjectile(const std::string& type);
+
 private:
     Level(const Level&);
     Level& operator=(const Level&);
 	void loadScriptCallbacks();
-	void onTimeStep();
+	virtual void onTimeStep();
 	
 
 	// Lua callbacks
@@ -51,6 +53,7 @@ private:
 	static int luaLoadSFX(lua_State* env);
 	static int luaPlaySFX(lua_State* env);
 	static int luaCreateObject(lua_State* env);
+	static int luaCreateEnemy(lua_State* env);
 	static int luaCreateTask(lua_State* env);
 
 	Game* game_;
@@ -58,7 +61,7 @@ private:
 	std::list<boost::shared_ptr<ScriptTask>> tasks_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Player> player_;
-	size_t entitiesCreated_;
+	size_t objectsCreated_;
 };
 
 

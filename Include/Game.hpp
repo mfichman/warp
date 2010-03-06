@@ -5,6 +5,7 @@
 #pragma once 
 
 #include "Warp.hpp"
+#include <Bullet/btBulletDynamicsCommon.h>
 
 #include <memory>
 #include <list>
@@ -76,6 +77,9 @@ private:
     void loadPhysics();
     void loadOsc();
 	void loadScript(const std::string& name);
+
+	// Bullet callbacks
+	static void onTick(btDynamicsWorld* world, btScalar step);
 
 	// Ogre callbacks
 	virtual void windowClosed(Ogre::RenderWindow* rw);

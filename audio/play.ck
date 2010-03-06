@@ -3,7 +3,7 @@
 ////////////////
 
 Gain master_gain => Gain effects => dac;
-.4 => master_gain.gain;
+.3 => master_gain.gain;
 
 // echo effect:
 

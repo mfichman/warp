@@ -10,6 +10,7 @@
 #include "Player.hpp"
 #include "ScriptTask.hpp"
 #include "Game.hpp"
+#include "Projectile.hpp"
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
 
@@ -30,15 +31,15 @@ using namespace boost;
 Level::Level(Game* game, const std::string& name) :
     game_(game),
     tube_(new DynamicTube(game, "Levels/" + name + ".tube")),
-	entitiesCreated_(0)
-{
-	player_.reset(new Player(game, this, "Ball"));
-    game_->addListener(this);
+	objectsCreated_(0) {
 
 	loadScriptCallbacks();
-
+	player_.reset(new Player(game, this, "Player", 0));
+    game_->addListener(this);
 	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Beat.lua")));
 	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Level.lua")));
+
+	player_->onTimeStep(); // Need this to initialize the spine node
 }
 
 /** Destroys the level */
@@ -50,6 +51,36 @@ Level::~Level() {
     sender->sendMsg();
 
 	game_->removeListener(this);
+}
+
+#include <OIS/OIS.h>
+/** Called once for each game loop */
+void Level::onTimeStep() {
+
+	for (list<shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end();) {
+		(*i)->onTimeStep();
+		if (!(*i)->isAlive()) {
+			i = objects_.erase(i);
+		} else {
+			i++;
+		}
+	}
+
+	for (list<shared_ptr<ScriptTask>>::iterator i = tasks_.begin(); i != tasks_.end();) {
+		(*i)->onTimeStep();
+		if (!(*i)->isAlive()) {
+			i = tasks_.erase(i);
+		} else {
+			i++;
+		}
+	}
+
+	player_->onTimeStep();
+	
+	// Hack hack hack
+	if (game_->getKeyboard()->isKeyDown(OIS::KC_R)) {
+		game_->setLevel("Tube1");
+	}
 }
 
 /** Loads Lua script functions for this level */
@@ -112,6 +143,10 @@ void Level::loadScriptCallbacks() {
     lua_setfield(env, -2, "createObject");
 
 	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaCreateEnemy, 1);
+    lua_setfield(env, -2, "createEnemy");
+
+	lua_pushlightuserdata(env, this);
     lua_pushcclosure(env, &Level::luaCreateTask, 1);
     lua_setfield(env, -2, "createTask");
 
@@ -128,10 +163,28 @@ int Level::luaCreateObject(lua_State* env) {
 #pragma warning (default:4800)
 
 	// Create a new Object and add it to the list
-	shared_ptr<Object> Object(new Object(level->game_, level, type, level->entitiesCreated_++));
-	level->objects_.push_back(Object);
+	shared_ptr<Object> object(new Object(level->game_, level, type, level->objectsCreated_++));
+	level->objects_.push_back(object);
 
-	env >> *Object;
+	env >> *object;
+
+	return 1;
+}
+
+/** Creates an Enemy */
+int Level::luaCreateEnemy(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	std::string type;
+	env >> type;
+#pragma warning (disable:4800)
+	bool snap = lua_toboolean(env, -1);
+#pragma warning (default:4800)
+
+	// Create a new Object and add it to the list
+	shared_ptr<Object> object(new Enemy(level->game_, level, type, level->objectsCreated_++));
+	level->objects_.push_back(object);
+
+	env >> *object;
 
 	return 1;
 }
@@ -333,32 +386,9 @@ int Level::luaStopBeatServer(lua_State* env) {
     return 0;
 }
 
-template <typename T>
-class Updater {
-public:
-	bool operator()(shared_ptr<T> t) {
-		t->onTimeStep();
-		return !t->isAlive();
-	}
-};
 
-#include <OIS/OIS.h>
-/** Called once for each game loop */
-void Level::onTimeStep() {
-
-	static Updater<Object> objectUpdater;
-	static Updater<ScriptTask> taskUpdater;
-	objects_.erase(remove_if(objects_.begin(), objects_.end(), objectUpdater), objects_.end());
-	tasks_.erase(remove_if(tasks_.begin(), tasks_.end(), taskUpdater), tasks_.end());
-
-	//for (list<boost::shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end(); i++) {
-	//	(*i)->onTimeStep();
-	//}
-	
-	// Hack hack hack
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_R)) {
-		game_->setLevel("Tube1");
-	}
-
-
+Projectile* Level::createProjectile(const std::string& type) {
+	shared_ptr<Projectile> p(new Projectile(game_, this, type, objectsCreated_++));
+	objects_.push_back(p);
+	return p.get();
 }
