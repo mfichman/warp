@@ -2,11 +2,19 @@ cmake_minimum_required(VERSION 2.6)
 project(Criterium)
 
 
-set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 set(EXECUTABLE_OUTPUT_PATH ${Criterium_SOURCE_DIR}\\..)
 set(LIBRARY_OUTPUT_PATH ${Criterium_SOURCE_DIR}\\...\\Binary)
+
+
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+add_definitions(/MDd)
+else()
+add_definitions(/MD)
+endif()
 
 include_directories(${Criterium_SOURCE_DIR}\\..\\Include)
 
@@ -31,4 +39,6 @@ link_directories("D:\\Include\\OgreSDK\\lib")
 link_directories("D:\\Include\\OgreSDK\\lib\\opt")
 
 add_subdirectory(..\\Source ..\\Build\\Temp)
+
+SET_TARGET_PROPERTIES(Warp PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCMTD")
 
