@@ -18,5 +18,6 @@ Warp.exe*
 *~
 *.skeleton.xml
 *.mesh.xml
-*.blend+
+*.blend1
+*.blend2
 *.ignore
