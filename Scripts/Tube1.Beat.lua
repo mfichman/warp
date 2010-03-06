@@ -2,13 +2,16 @@
 -- Matt Fichman & Francesco Georg
 
 -- NOTE: my_function{val="blah"} is a shortcut for my_function({val="blah"})
-Level:loadLoop{id=0, path="loops/Effected Beat 01.wav", bpm=113, n_beats=16}
-Level:loadLoop{id=1, path="loops/Effected Beat 02.wav", bpm=110, n_beats=16}
+Level:loadSFX{id=0, path="sfx/Tape Rewinding 02_C.wav"} -- banshee explosion sound
+--Level:loadSFX{id=0, path="sfx/hiphop_snare_01.wav"} -- banshee explosion sound
+
+Level:loadLoop{id=1, path="beats/Club Dance Beat 023 125_16.wav", bpm=125, n_beats=16}
+Level:loadLoop{id=0, path="loops/Dance Floor Pattern 05.wav", bpm=120, n_beats=4}
 
 Level:startLoop{id=0}
-Level:startBeatServer{bpm=110}
+Level:startBeatServer{bpm=120} -- this should always be 120 for the loops to be in the right key
 
-Level:waitForDistance(350)
+Level:waitForBeat()
 
 Level:startLoop{id=1}
 

@@ -48,6 +48,8 @@ private:
 	static int luaStopLoop(lua_State* env);
 	static int luaStartBeatServer(lua_State* env);
 	static int luaStopBeatServer(lua_State* env);
+	static int luaLoadSFX(lua_State* env);
+	static int luaPlaySFX(lua_State* env);
 	static int luaCreateObject(lua_State* env);
 	static int luaCreateTask(lua_State* env);
 

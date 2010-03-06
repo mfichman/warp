@@ -2,7 +2,7 @@
 // BASIC PATCH
 ////////////////
 
-Gain master_gain => dac;
+Gain master_gain => Gain effects => dac;
 .4 => master_gain.gain;
 
 // echo effect:
@@ -10,7 +10,7 @@ Gain master_gain => dac;
 DelayL echo => JCRev reverb => master_gain;
 .05 => reverb.mix;
 echo => echo;
-.8 => echo.gain;
+.4 => echo.gain;
 
 
 ////////////
@@ -54,6 +54,8 @@ recv.event( "/loop/stop, i" ) @=> OscEvent @ stop_loop_e;
 recv.event( "/sfx/load i s" ) @=> OscEvent @ load_sfx_e;
 recv.event( "/sfx/play, i f" ) @=> OscEvent @ play_sfx_e;
 
+recv.event( "/effects/crackle f" ) @=>OscEvent @ crackle_effect_e;
+
 recv.event( "/server/start, i" ) @=> OscEvent @ start_server_e;
 recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 
@@ -73,7 +75,7 @@ class SoundEffect {
     }
 
     public void play(float gain) {
-        beat_frac_e => now;
+        beat_e => now;
         gain => sndbuf.gain;
         0 => sndbuf.pos;
         1 => sndbuf.rate;
@@ -313,9 +315,11 @@ class BeatServer {
 //////////////
 
 BeatServer beat_server;
+//EffectsServer effects_server;
 
 beat_server.addListeners();
+//effects_server.addListeners();
 
-<<< "beat server ready", "" >>>;
+<<< "servers ready", "" >>>;
 
 1::day => now;

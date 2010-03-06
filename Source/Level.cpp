@@ -100,6 +100,14 @@ void Level::loadScriptCallbacks() {
     lua_setfield(env, -2, "stopBeatServer");
 
     lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaLoadSFX, 1);
+    lua_setfield(env, -2, "loadSFX");
+
+    lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaPlaySFX, 1);
+    lua_setfield(env, -2, "playSFX");
+
+    lua_pushlightuserdata(env, this);
     lua_pushcclosure(env, &Level::luaCreateObject, 1);
     lua_setfield(env, -2, "createObject");
 
@@ -192,6 +200,47 @@ int Level::luaGetBeat(lua_State* env) {
 	Game* game = level->game_;
     lua_pushinteger(env, game->getOscBeatListener()->getCurBeat());
     return 1;
+}
+
+int Level::luaPlaySFX(lua_State* env) {
+    lua_getfield(env, -1, "id");
+    int id = lua_tointeger(env, -1); // required
+    lua_pop(env, 1); 
+
+    float gain = 1; // default value
+    lua_getfield(env, -1, "gain");
+    if (!lua_isnil(env, -1)) {
+        gain = lua_tonumber(env, -1);
+    }
+    lua_pop(env, 1); 
+
+    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+    OscSender* sender = level->game_->getOscSender();
+    // send msg
+    sender->beginMsg("/sfx/play");
+    sender->addInt(id);
+    sender->addFloat(gain);
+    sender->sendMsg();
+    return 0;
+}
+
+int Level::luaLoadSFX(lua_State* env) {
+    lua_getfield(env, -1, "id");
+    int id = lua_tointeger(env, -1); // required
+    lua_pop(env, 1); 
+
+    string path_name;
+    lua_getfield(env, -1, "path");
+    env >> path_name;
+
+    Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+    OscSender* sender = level->game_->getOscSender();
+    // send msg
+    sender->beginMsg("/sfx/load");
+    sender->addInt(id);
+    sender->addString(path_name);
+    sender->sendMsg();
+    return 0;
 }
 
 /**

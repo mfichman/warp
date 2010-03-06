@@ -28,10 +28,11 @@ function Banshee:onSelect()
     self.selected = true
     Level:createTask(function()
         self:target()
-        --Level:waitForBeat()
+        Level:playSFX{id=0, gain=2} -- queue chuck sound effect
+
+        Level:waitForBeat()
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}
         self:explode()
-        
     end)
 end
