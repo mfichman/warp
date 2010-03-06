@@ -43,6 +43,7 @@ private:
     float curveStep_;
     float ringRadius_;
     int ringDivisions_;
+	bool tubeVisible_;
 
     // These variables are for the loaded scene objects
     Game* game_;

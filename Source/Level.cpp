@@ -76,11 +76,6 @@ void Level::onTimeStep() {
 	}
 
 	player_->onTimeStep();
-	
-	// Hack hack hack
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_R)) {
-		game_->setLevel("Tube1");
-	}
 }
 
 /** Loads Lua script functions for this level */

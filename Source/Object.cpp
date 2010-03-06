@@ -19,8 +19,6 @@
 #include <lua/lauxlib.h>
 }
 
-#define OBJECT_SPEED 100
-
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
@@ -33,7 +31,8 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 	exploded_(false),
 	alive_(true),
 	level_(level),
-	target_(0)
+	target_(0),
+	speed_(0)
 {
 	ostringstream os;
 	os << type << id;
@@ -68,8 +67,6 @@ Object::~Object() {
 	// Notify projectiles that the object is toast
 	for_each(trackers_.begin(), trackers_.end(), mem_fun(&Object::onTargetDelete));
 	if (target_) target_->removeTracker(this);
-
-	cout << name_ << " deallocated" << endl;
 
 	// Clean up physics
 	game_->getWorld()->removeCollisionObject(body_.get());
@@ -143,7 +140,7 @@ void Object::onTimeStep() {
 	if (target_) {
 		Vector3 velocity = target_->getPosition() - node_->getPosition();
 		velocity.normalise();
-		velocity *= OBJECT_SPEED;
+		velocity *= speed_;
 		body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
 	}
 }

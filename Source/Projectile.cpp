@@ -23,6 +23,8 @@ Projectile::Projectile(Game* game, Level* level, const string& name, int id) :
 	shape_.reset(new btSphereShape(0.1));
 	body_->setCollisionShape(shape_.get());
 	body_->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+
+	setSpeed(100);
 }
 
 /** Destructor */
@@ -57,7 +59,6 @@ void Projectile::onTimeStep() {
 void Projectile::onCollision(Enemy* enemy) {
 	if (static_cast<Object*>(enemy) == target_) {
 		hit_ = true;
-		cout << "collision hit" << endl;
 		game_->getWorld()->removeCollisionObject(body_.get());
 	}
 }

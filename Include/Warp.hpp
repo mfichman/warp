@@ -86,6 +86,7 @@ struct SpineNode {
 
 	Ogre::Vector3 position; // Position of the node
 	float distance; // Distance along the path from first node
+	bool visible;
 };
 
 struct SpineProjection {
