@@ -64,13 +64,14 @@ recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 ////////////
 
 class SoundEffect {
-    SndBuf sndbuf => echo;
-    0 => sndbuf.rate;
+    SndBuf sndbuf;
 
     public void load(string path_name) {
+        sndbuf => echo;
         path_name => sndbuf.read;
 
         0 => sndbuf.rate;
+        0 => sndbuf.gain;
     }
 
     public void play(float gain) {
@@ -79,19 +80,23 @@ class SoundEffect {
         0 => sndbuf.pos;
         1 => sndbuf.rate;
     }
+
+    public void kill() {
+        sndbuf =< echo;
+        0 => sndbuf.rate;
+    }
+
 }
 
 class BeatLoop {
-    SndBuf @ sndbuf;
+    SndBuf sndbuf;
     int bpm;
-    1 => float gain;
     int n_beats;
     0 => int is_playing;
 
     Shred @ loop_s;
 
     public void load(string path_name, int _bpm_, int _n_beats_) {
-        new SndBuf @=> sndbuf;
         path_name => sndbuf.read;
         _bpm_ => bpm;
         _n_beats_ => n_beats;
@@ -99,6 +104,7 @@ class BeatLoop {
 
         sndbuf => master_gain;
         0 => sndbuf.rate;
+        0 => sndbuf.gain;
     }
 
     public void start(float gain) {
@@ -114,9 +120,7 @@ class BeatLoop {
     public void kill() {
         if (!is_playing) return;
 
-        /* deallocate */
         sndbuf =< master_gain;
-        NULL @=> sndbuf;
         0 => is_playing;
         loop_s.exit();
     }
@@ -295,16 +299,15 @@ class BeatServer {
             stop_server_e.nextMsg();
             // give other processes a chance to finish:
             // me.yield();
-            kill_loops();
+            kill_sound();
             metronome.stop();
         }
     }
 
-    private void kill_loops() {
+    private void kill_sound() {
         for(0 => int i; i < 20; i++) {
-            if(loops[i] != NULL) {
-                loops[i].kill();
-            }
+            loops[i].kill();
+            sfx[i].kill();
         }
     }
 }
