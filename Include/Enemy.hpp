@@ -25,6 +25,7 @@ private:
 	void loadScriptCallbacks();
 	virtual void collide(Object* other) { other->onCollision(this); }
 	virtual void onCollision(Projectile* p);
+	virtual void onCollision(Player* p);
 
 	Ogre::BillboardSet* billboards_;
 	int spineNodeIndex_;

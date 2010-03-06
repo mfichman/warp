@@ -33,6 +33,7 @@ private:
     Player& operator=(const Player&);
 
 	virtual void collide(Object* other) { other->onCollision(this); }
+	virtual void onCollision(Enemy* enemy) { callMethod("onEnemyHit"); }
 
 	// Bullet callbacks
 	virtual void setWorldTransform(const btTransform& transform);

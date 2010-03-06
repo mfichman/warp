@@ -20,3 +20,7 @@ end
 -- C++ peer class connected to this Lua class
 function Player:onTimeStep()
 end
+
+function Player:onEnemyHit()
+    --self:explode();
+end

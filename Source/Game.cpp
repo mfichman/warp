@@ -113,8 +113,8 @@ void Game::loadGraphics() {
 
 	// Create scene manager
 	sceneManager_ = root_->createSceneManager(ST_EXTERIOR_CLOSE, "Default");
-    //sceneManager_->setShadowTechnique(SHADOWTYPE_STENCIL_MODULATIVE);
-    //sceneManager_->setShadowFarDistance(10.0f);
+    sceneManager_->setShadowTechnique(SHADOWTYPE_STENCIL_MODULATIVE);
+    sceneManager_->setShadowFarDistance(100.0f);
 
 	// Create the main camera
 	camera_ = sceneManager_->createCamera("Camera");
