@@ -69,8 +69,6 @@ Object::~Object() {
 	for_each(trackers_.begin(), trackers_.end(), mem_fun(&Object::onTargetDelete));
 	if (target_) target_->removeTracker(this);
 
-	cout << name_ << " deallocated" << endl;
-
 	// Clean up physics
 	game_->getWorld()->removeCollisionObject(body_.get());
 

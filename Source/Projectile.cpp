@@ -57,7 +57,6 @@ void Projectile::onTimeStep() {
 void Projectile::onCollision(Enemy* enemy) {
 	if (static_cast<Object*>(enemy) == target_) {
 		hit_ = true;
-		cout << "collision hit" << endl;
 		game_->getWorld()->removeCollisionObject(body_.get());
 	}
 }

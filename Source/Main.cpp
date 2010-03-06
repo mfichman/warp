@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
         game->getCamera()->setPosition(0, 0, -20);
         game->getCamera()->lookAt(0, -10, 100);
-		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.0, 0.0, 0.0));
+		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.0, 0.0, 1.0));
 		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.0, 0.0, 0.0), 0.0, 0, 150);
 		game->getSceneManager()->setAmbientLight(ColourValue(0.0, 0.0, 0.0));
 

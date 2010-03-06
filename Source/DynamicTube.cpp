@@ -22,10 +22,11 @@ DynamicTube::DynamicTube(Game* game, const string& name) :
     v_(0),
     name_(name),
     manual_(game->getSceneManager()->createManualObject(name)),
-	game_(game) {
+	game_(game),
+	tubeVisible_(true) {
 
     // Generate the mesh data
-    manual_->begin("Road", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
+    manual_->begin("Road", Ogre::RenderOperation::OT_TRIANGLE_LIST);
     readInputFile();
     generateIndices();
     manual_->end();
@@ -94,9 +95,12 @@ void DynamicTube::readInputFile() {
             in >> ringRadius_;
         } else if (type == "divisions") {
             in >> ringDivisions_;
+			ringDivisions_++;
         } else if (type == "step") {
             in >> curveStep_;
-        }   
+		} else if (type == "visible") {
+			in >> tubeVisible_;
+		}
 
         if (in.fail()) break;
     }
@@ -108,6 +112,7 @@ void DynamicTube::generateRing() {
     // Generate the spine node
 	SpineNode node;
 	node.position = transform_ * Vector3::ZERO;
+	node.visible = tubeVisible_;
 	
     if (nodes_.size() != 0) {
         v_ += lastSpinePosition_.distance(node.position);
@@ -169,9 +174,16 @@ void DynamicTube::generateIndices() {
     for (size_t i = 0; i < nodes_.size()-1; i++) {
 	    for (int j = 0; j <= ringDivisions_; j++) {
 
-            // Add index to the visible mesh
-	        manual_->index(j % ringDivisions_ + i * ringDivisions_);
-	        manual_->index(j % ringDivisions_ + (i+1) * ringDivisions_);
+			if (nodes_[i].visible) {
+				// Add index to the visible mesh
+				manual_->index(j % ringDivisions_ + i * ringDivisions_);
+				manual_->index(j % ringDivisions_ + (i+1) * ringDivisions_);
+				manual_->index((j+1) % ringDivisions_ + (i+1) * ringDivisions_);
+
+				manual_->index(j % ringDivisions_ + i * ringDivisions_);
+				manual_->index((j+1) % ringDivisions_ + (i+1) * ringDivisions_);
+				manual_->index((j+1) % ringDivisions_ + i * ringDivisions_);
+			}
 
 
             // j == ring division num

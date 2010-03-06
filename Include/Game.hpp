@@ -121,5 +121,7 @@ private:
 
 	// Current level
 	std::auto_ptr<Level> level_;
+
+	bool resetEvent_;
 };
 }

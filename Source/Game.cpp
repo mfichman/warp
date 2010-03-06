@@ -48,7 +48,8 @@ Game::Game() :
     solver_(0),
     world_(0),
     physicsAccumulator_(0.0f),
-    root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")) {
+    root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")),
+	resetEvent_(false) {
 
     loadScripting();
     loadResources();
@@ -235,6 +236,15 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 		world_->stepSimulation(evt.timeSinceLastFrame / 4.0, 3);
 	} else {
 		world_->stepSimulation(evt.timeSinceLastFrame, 3);
+	}
+
+	// Hack hack hack
+	if (getKeyboard()->isKeyDown(OIS::KC_R) && !resetEvent_) {
+		resetEvent_ = true;
+		std::cout << "RESET" << endl;
+		setLevel("Tube1");
+	} else {
+		resetEvent_ = false;
 	}
 
 	return true;
