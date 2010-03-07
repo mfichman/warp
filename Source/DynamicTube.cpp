@@ -25,6 +25,8 @@ DynamicTube::DynamicTube(Game* game, const string& name) :
 	game_(game),
 	tubeVisible_(true) {
 
+	transform_ = transform_.concatenate(Matrix4::getTrans(0, 50, 0));
+
     // Generate the mesh data
     manual_->begin("Road", Ogre::RenderOperation::OT_TRIANGLE_LIST);
     readInputFile();

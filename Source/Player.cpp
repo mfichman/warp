@@ -26,7 +26,7 @@ using namespace std;
 Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id) {
 
-	setPosition(Vector3(0, -5, 5));
+	setPosition(Vector3(0, 45, 5));
 }
 
 Player::~Player() {

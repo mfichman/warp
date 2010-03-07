@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
         game->getCamera()->setPosition(0, 0, -20);
         game->getCamera()->lookAt(0, -10, 100);
-		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.0, 0.0, 0.0));
+		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.2, 0.2, 0.2));
 		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.0, 0.0, 0.0), 0.0, 0, 150);
 		game->getSceneManager()->setAmbientLight(ColourValue(0.0, 0.0, 0.0));
 
@@ -54,10 +54,6 @@ int main(int argc, char** argv) {
         cerr << "Exception: " << ex.what() << endl;
     } 
 
-	OscSender sender = game->getOscSender();
-	sender.beginMsg("/kill");
-	sender.addInt(1);
-	sender.sendMsg();
 #ifdef WIN32   
 	//system("taskkill /IM chuck.exe");
 #endif
