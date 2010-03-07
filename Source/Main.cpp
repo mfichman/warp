@@ -33,11 +33,6 @@ int main(int argc, char** argv) {
 		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
 		light->setDirection(Vector3(0, -1, 1)); 
 		light->setPosition(Vector3(0, -1, 1));
-
-
-
-	
-
         
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
         //Warp::PickingRay ray(game.get());
@@ -57,9 +52,14 @@ int main(int argc, char** argv) {
         cerr << "Exception: " << ex.getFullDescription() << endl;
     } catch (std::exception& ex) {
         cerr << "Exception: " << ex.what() << endl;
-    }   
+    } 
+
+	OscSender sender = game->getOscSender();
+	sender.beginMsg("/kill");
+	sender.addInt(1);
+	sender.sendMsg();
 #ifdef WIN32   
-	system("taskkill /IM chuck.exe");
+	//system("taskkill /IM chuck.exe");
 #endif
 
     return 0;
