@@ -21,7 +21,7 @@ public:
 	void setSelected(bool selected);
 
 	/** Called if the object is finished */
-	bool isHitCountMaxed() { return hitCount_ >= numHits_; }
+	bool isHitCountMaxed() { return hitCount_ >= hitPoints_; }
 
 	/** Increase hit count */
 	void incHitCount() { hitCount_++; }
@@ -29,6 +29,8 @@ public:
 private:
 	static int luaTarget(lua_State* env);
 	void loadScriptCallbacks();
+	virtual void setWorldTransform(const btTransform& transform);
+
 	virtual void collide(Object* other) { other->onCollision(this); }
 	virtual void onCollision(Projectile* p);
 	virtual void onCollision(Player* p);
@@ -36,7 +38,7 @@ private:
 	Ogre::BillboardSet* billboards_;
 	int spineNodeIndex_;
 	bool selected_;
-	int numHits_;
+	int hitPoints_;
 	int hitCount_;
 };
 

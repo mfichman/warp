@@ -14,6 +14,7 @@ function Banshee:init()
     self:addEntity{name="Wing", mesh="BansheeWings.mesh"}
     self:addEntity{name="Pylon", mesh="BansheePylon.mesh"}
     self.destroyed = false
+    self.hitPoints = 2
 end
 
 -- This function gets called once per timestep by the

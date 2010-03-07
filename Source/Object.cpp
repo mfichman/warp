@@ -65,7 +65,11 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 Object::~Object() {
 
 	// Notify projectiles that the object is toast
-	for_each(trackers_.begin(), trackers_.end(), mem_fun(&Object::onTargetDelete));
+	for (list<Object*>::iterator i = trackers_.begin(); i != trackers_.end(); i++) {
+		(*i)->onTargetDelete(this);
+	}
+
+
 	if (target_) target_->removeTracker(this);
 
 	// Clean up physics
@@ -143,6 +147,10 @@ void Object::onTimeStep() {
 		velocity *= speed_;
 		body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
 	}
+
+	for (list<shared_ptr<SubObject>>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
+		(*i)->onTimeStep();
+	}
 }
 
 void Object::getWorldTransform(btTransform& transform) const {
@@ -159,8 +167,6 @@ void Object::setWorldTransform(const btTransform& transform) {
     node_->setPosition(origin.x(), origin.y(), origin.z());
     // Set local info
     transform_ = transform;
-
-	Vector3 position(origin.x(), origin.y(), origin.z());
 }
 
 void Object::setTarget(Object* target) {
@@ -190,7 +196,7 @@ void Object::setPosition(const Ogre::Vector3& p) {
 	body_->setCenterOfMassTransform(transform);
 }
 
-void Object::onTargetDelete() {
+void Object::onTargetDelete(Object* target) {
 	target_ = 0;
 	alive_ = false;
 }
@@ -417,7 +423,9 @@ int Object::luaExplode(lua_State* env) {
 	self->game_->getWorld()->removeCollisionObject(self->body_.get());
 
 	// Deactive projectiles
-	for_each(self->trackers_.begin(), self->trackers_.end(), mem_fun(&Object::onTargetDelete));
+	for (list<Object*>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
+		(*i)->onTargetDelete(self);
+	}
 	self->trackers_.clear();
 
 	return 0;
@@ -452,7 +460,7 @@ void Object::callMethod(const std::string& method) {
 	lua_getref(env, table_);
 	lua_getfield(env, -1, method.c_str());
 	if (!lua_isfunction(env, -1)) {
-		lua_pop(env, -1);
+		lua_pop(env, 1);
 		assert(lua_gettop(env) == 0);
 		return;
 	}

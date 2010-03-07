@@ -49,7 +49,8 @@ Game::Game() :
     world_(0),
     physicsAccumulator_(0.0f),
     root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")),
-	resetEvent_(false) {
+	resetEvent_(false),
+	gravity_(-4.0f) {
 
     loadScripting();
     loadResources();

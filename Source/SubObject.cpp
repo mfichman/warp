@@ -51,6 +51,12 @@ SubObject::~SubObject() {
 	}
 }
 
+void SubObject::onTimeStep() {
+	if (body_.get()) {
+		body_->applyCentralForce(btVector3(0.0, game_->getGravity(), 0.0));
+	}
+}
+
 void SubObject::getWorldTransform(btTransform& transform) const {
 	transform = transform_;
 }

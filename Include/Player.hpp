@@ -38,8 +38,11 @@ private:
 	// Bullet callbacks
 	virtual void setWorldTransform(const btTransform& transform);
 
+	virtual void onTargetDelete(Object* object);
+
 	void computeForces();
 	void updateRay();
+	void fireMissiles();
 
 	SpineProjection spawnProjection_;
 	SpineProjection playerProjection_;
@@ -47,8 +50,8 @@ private:
 	Ogre::Vector3 right_;
 	Ogre::Vector3 up_;
 	Ogre::Vector3 forward_;
-	std::set<Enemy*> enemies_;
-
+	std::set<Enemy*> targets_;
+	float cooldown_;
 };
 
 }

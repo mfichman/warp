@@ -73,6 +73,12 @@ particle_system Flames
         green -2.0
         blue -2.0
     }
+    
+    affector Rotator
+    {
+        rotation_range_start 0
+        rotation_range_end 360
+    }
 }
 
 particle_system Explosion

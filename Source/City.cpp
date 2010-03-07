@@ -14,7 +14,7 @@
 
 #define BUILDING_MAX_HEIGHT 100.0f
 #define BUILDING_MIN_HEIGHT 30.0f
-#define BUILDING_FOOTPRINT 8.0f
+#define BUILDING_FOOTPRINT 12.0f
 #define CITY_RADIUS 100.0f
 
 using namespace Ogre;

@@ -13,7 +13,7 @@ material Flare
 
 			texture_unit
 			{
-				texture Halo.png
+				texture GoldFire.png
 			}
 		}
 	}

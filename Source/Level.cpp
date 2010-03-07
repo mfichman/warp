@@ -160,7 +160,46 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaCreateTask, 1);
     lua_setfield(env, -2, "createTask");
 
+	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaSetGravity, 1);
+    lua_setfield(env, -2, "setGravity");
+
+	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaSetCompositor, 1);
+    lua_setfield(env, -2, "setCompositor");
+
 	lua_pop(env, 1); // Pop the Level table
+}
+
+int Level::luaSetGravity(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	level->game_->setGravity(lua_tonumber(env, -1));
+	return 0;
+}
+
+int Level::luaSetCompositor(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	string compositor;
+	if (lua_isstring(env, -1)) {
+		env >> compositor;
+	}
+
+	if (compositor == level->compositor_) {
+		return 0;
+	}
+
+	Game* game = level->game_;
+	if (!level->compositor_.empty()) {
+		CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), level->compositor_, false);
+		CompositorManager::getSingleton().removeCompositor(game->getWindow()->getViewport(0), level->compositor_);
+	}
+	level->compositor_ = compositor;
+	if (!level->compositor_.empty()) {
+		CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), level->compositor_);
+		CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), level->compositor_, true);
+	}
+	
+	return 0;
 }
 
 /** Creates an Object */

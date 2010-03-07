@@ -56,6 +56,8 @@ private:
 	static int luaCreateCity(lua_State* env);
 	static int luaCreateEnemy(lua_State* env);
 	static int luaCreateTask(lua_State* env);
+	static int luaSetGravity(lua_State* env);
+	static int luaSetCompositor(lua_State* env);
 
 	Game* game_;
 	std::list<boost::shared_ptr<Object>> objects_;
@@ -64,6 +66,7 @@ private:
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Player> player_;
 	size_t objectsCreated_;
+	std::string compositor_;
 };
 
 

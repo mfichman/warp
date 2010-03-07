@@ -70,7 +70,7 @@ public:
 	virtual void onTimeStep();
 
 	/** Called when the target is deleted */
-	void onTargetDelete();
+	void onTargetDelete(Object* target);
 
 protected:
 	void callMethod(const std::string& method);

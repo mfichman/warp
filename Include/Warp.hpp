@@ -12,7 +12,7 @@
 #include <Ogre.h>
 #include <string>
 
-
+#define TIME_STEP 1.0f/60.0f
 #define WARP_BT_FLAG 0x01000000 
 
 // Forward declarations to increase compilation speed
