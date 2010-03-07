@@ -132,20 +132,38 @@ void Player::computeForces() {
 	}
 
     // Apply user control forces
+	if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
+		body_->applyCentralForce(50*btVector3(forward.x, forward.y, forward.z));
+	}
+	if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
+		body_->applyCentralForce(-30*btVector3(forward.x, forward.y, forward.z));
+	}
+
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
-		body_->applyCentralForce(-20*btVector3(right.x, right.y, right.z));
+		body_->applyCentralForce(-50*btVector3(right.x, right.y, right.z));
     }                               
 	
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
-		body_->applyCentralForce(20*btVector3(right.x, right.y, right.z));
+		body_->applyCentralForce(50*btVector3(right.x, right.y, right.z));
 	}
     
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
-		body_->applyCentralForce(20*btVector3(forward.x, forward.y, forward.z));
-	}
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
-		body_->applyCentralForce(-20*btVector3(forward.x, forward.y, forward.z));
-	}
+
+    // there's always a force pushing forward
+    body_->applyCentralForce(40*btVector3(forward.x, forward.y, forward.z));
+
+    // and a drag force proportional to the velocity
+    float forward_vel = forward.dotProduct(velocity);
+    float forward_drag = .03 * forward_vel * forward_vel;
+    if (forward_vel > 0) forward_drag *= -1; // make sure force is opposite
+
+    body_->applyCentralForce(btVector3(forward_drag * forward.x,
+                                       forward_drag * forward.y,
+                                       forward_drag * forward.z));
+    float side_vel = right.dotProduct(velocity);
+    float side_drag = -4 * side_vel;
+    body_->applyCentralForce(btVector3(side_drag * right.x,
+                                       side_drag * right.y,
+                                       side_drag * right.z));
 
 	forward_ = forward.normalisedCopy();
 	right_ = right.normalisedCopy();
