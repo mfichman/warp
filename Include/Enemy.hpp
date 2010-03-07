@@ -20,6 +20,12 @@ public:
 	/** Called when the object is selected */
 	void setSelected(bool selected);
 
+	/** Called if the object is finished */
+	bool isHitCountMaxed() { return hitCount_ >= numHits_; }
+
+	/** Increase hit count */
+	void incHitCount() { hitCount_++; }
+
 private:
 	static int luaTarget(lua_State* env);
 	void loadScriptCallbacks();
@@ -30,6 +36,8 @@ private:
 	Ogre::BillboardSet* billboards_;
 	int spineNodeIndex_;
 	bool selected_;
+	int numHits_;
+	int hitCount_;
 };
 
 }

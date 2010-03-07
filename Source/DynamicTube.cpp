@@ -25,7 +25,7 @@ DynamicTube::DynamicTube(Game* game, const string& name) :
 	game_(game),
 	tubeVisible_(true) {
 
-	transform_ = transform_.concatenate(Matrix4::getTrans(0, 50, 0));
+	transform_ = transform_.concatenate(Matrix4::getTrans(0, 300, 0));
 
     // Generate the mesh data
     manual_->begin("Road", Ogre::RenderOperation::OT_TRIANGLE_LIST);
@@ -185,7 +185,7 @@ void DynamicTube::generateIndices() {
 				manual_->index(j % ringDivisions_ + i * ringDivisions_);
 				manual_->index((j+1) % ringDivisions_ + (i+1) * ringDivisions_);
 				manual_->index((j+1) % ringDivisions_ + i * ringDivisions_);
-			}
+			
 
 
             // j == ring division num
@@ -193,13 +193,14 @@ void DynamicTube::generateIndices() {
 
             // Add indices to the physical mesh    
 
-            indices_.push_back(j % ringDivisions_ + i * ringDivisions_);
-            indices_.push_back(j % ringDivisions_ + (i+1) * ringDivisions_);
-            indices_.push_back((j+1) % ringDivisions_ + i * ringDivisions_);
+				indices_.push_back(j % ringDivisions_ + i * ringDivisions_);
+				indices_.push_back(j % ringDivisions_ + (i+1) * ringDivisions_);
+				indices_.push_back((j+1) % ringDivisions_ + i * ringDivisions_);
 
-            indices_.push_back((j+1) % ringDivisions_ + i * ringDivisions_);
-            indices_.push_back(j % ringDivisions_ + (i+1) * ringDivisions_);
-            indices_.push_back((j+1) % ringDivisions_ + (i+1) * ringDivisions_);
+				indices_.push_back((j+1) % ringDivisions_ + i * ringDivisions_);
+				indices_.push_back(j % ringDivisions_ + (i+1) * ringDivisions_);
+				indices_.push_back((j+1) % ringDivisions_ + (i+1) * ringDivisions_);
+			}
 	    }
     }
 }

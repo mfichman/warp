@@ -72,6 +72,7 @@ class GameListener;
 class SubObject;
 class Projectile;
 class Targetable;
+class City;
 
 
 inline int mod(int num, int divisor) {

@@ -17,6 +17,20 @@ material Circle
 	}
 }
 
+material City
+{
+    technique
+    {
+	    pass
+		{
+		    ambient 0.400000 0.400000 0.400000 1.000000
+			diffuse 0.60000 0.600000 0.60000 1.000000
+		
+		}
+	
+	}
+}
+
 material PhotonBlue
 {
 	technique

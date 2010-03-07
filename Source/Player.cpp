@@ -20,13 +20,13 @@ using namespace std;
 #define POSITION_SMOOTHNESS 0.60f
 #define ROTATION_SMOOTHNESS 0.05f
 
-#define SPAWN_DISTANCE 150.0f
+#define SPAWN_DISTANCE 500.0f
 
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
 Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id) {
 
-	setPosition(Vector3(0, 45, 5));
+	setPosition(Vector3(0, 295, 5));
 }
 
 Player::~Player() {
@@ -83,6 +83,7 @@ void Player::onTimeStep() {
 	computeForces();
 	updateRay();
 }
+
 
 void Player::computeForces() {
 	btVector3 btposition = body_->getCenterOfMassPosition();
@@ -175,11 +176,15 @@ void Player::updateRay() {
 			if (body) {
 				Object* o = static_cast<Object*>(body->getUserPointer());
 				Enemy* e = dynamic_cast<Enemy*>(o);
-				if (e && e->getTrackerCount() == 0) {
+				if (e && !e->isHitCountMaxed()) {
+					
 					Projectile* p = level_->createProjectile("Photon");
 					p->setTarget(e);
 					p->setPosition(forward_ + getPosition());
+					//queueProjectile(e);
+					//e->addTracker(this);
 					e->setSelected(true);
+					e->incHitCount();
 				}
 			}
 		}

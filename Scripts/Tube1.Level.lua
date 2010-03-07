@@ -3,6 +3,7 @@
 
 local distance = 0
 while (true) do
+    Level:createCity()
     Level:waitForDistance(distance)
     Level:createEnemy("Banshee")
     Level:createEnemy("Banshee")

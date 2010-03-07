@@ -5,6 +5,7 @@
 #include <FreeCamera.hpp>
 #include <Overlays.hpp>
 #include <ScriptTask.hpp>
+#include <City.hpp>
 #include <sstream>
 #include <boost/thread.hpp>
 
@@ -21,28 +22,25 @@ int main(int argc, char** argv) {
 		
 		Ogre::LogManager::getSingleton().setLogDetail(LL_LOW);
 
-        game->getCamera()->setPosition(0, 0, -20);
-        game->getCamera()->lookAt(0, -10, 100);
+        game->getCamera()->setPosition(400, 100, 800);
+        game->getCamera()->lookAt(0, 0, 0);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.2, 0.2, 0.2));
-		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.0, 0.0, 0.0), 0.0, 0, 150);
-		game->getSceneManager()->setAmbientLight(ColourValue(0.0, 0.0, 0.0));
+		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.2, 0.2, 0.2), 0.0, 0, 500);
+		game->getSceneManager()->setAmbientLight(ColourValue(0.2, 0.2, 0.2));
 
 		Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
 		light->setDiffuseColour(ColourValue(0.4, 0.4, 0.4));
 		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
-		light->setDirection(Vector3(0, -1, 1)); 
-		light->setPosition(Vector3(0, -1, 1));
+		light->setDirection(Vector3(0.5, -1, 1)); 
+		light->setPosition(Vector3(0.5, -1, 1));
         
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
-        //Warp::PickingRay ray(game.get());
-        //Warp::StaticTube tube(game.get(), "Test");
-        //Warp::DynamicTube tube(game.get(), "Tube1");
-        Warp::FreeCamera camera(game.get());
+        //Warp::FreeCamera camera(game.get());
         Warp::Overlays overlays(game.get());
 
-        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Bloom");
-        //Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Bloom", true);
+        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
+        //Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
 
 		game->setLevel("Tube1");
 		game->getRoot()->startRendering();

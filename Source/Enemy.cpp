@@ -23,12 +23,13 @@ Enemy::Enemy(Game* game, Level* level, const string& type, int id) :
 	Object(game, level, type, id),
 	selected_(false),
 	spineNodeIndex_(0),
-	billboards_(0) {
+	billboards_(0),
+	hitCount_(0), 
+	numHits_(1) {
 
 	// Find the spawn position
 	const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection();
 
-	
 
 	// TODO: Align the object so it's facing down the tube
 	setPosition(spawn.position + Vector3(Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0)));
