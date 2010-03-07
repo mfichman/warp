@@ -59,6 +59,8 @@ Level::~Level() {
 /** Called once for each game loop */
 void Level::onTimeStep() {
 
+	cout << "Objects: " << objects_.size() << endl;
+
 	for (list<shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end();) {
 		(*i)->onTimeStep();
 		if (!(*i)->isAlive()) {

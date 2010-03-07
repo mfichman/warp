@@ -40,6 +40,7 @@ private:
 	bool selected_;
 	int hitPoints_;
 	int hitCount_;
+	int finalHitCount_;
 };
 
 }

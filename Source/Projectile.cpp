@@ -11,7 +11,6 @@ Projectile::Projectile(Game* game, Level* level, const string& name, int id) :
 	hit_(false),
 	time_(0.0f) {
 
-
 	billboards_ = game_->getSceneManager()->createBillboardSet(name_ + ".Billboard", 1);
 	billboards_->setBillboardRotationType(BBR_VERTEX);
 	billboards_->setMaterialName("PhotonBlue");
@@ -24,7 +23,7 @@ Projectile::Projectile(Game* game, Level* level, const string& name, int id) :
 	body_->setCollisionShape(shape_.get());
 	body_->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-	setSpeed(100);
+	setSpeed(200);
 }
 
 /** Destructor */
