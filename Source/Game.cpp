@@ -226,9 +226,6 @@ void Game::windowClosed(RenderWindow* rw) {
 
 /** Called when a frame begins */
 bool Game::frameRenderingQueued(const FrameEvent& evt) { 
-	keyboard_->capture();
-	mouse_->capture();
-
 
 	physicsAccumulator_ += evt.timeSinceLastFrame;
 
@@ -254,6 +251,8 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 }
 
 void Game::onTick(btDynamicsWorld* world, btScalar step) {
+	
+
 	world->clearForces();
 
 	// Check for collisions
@@ -274,6 +273,10 @@ void Game::onTick(btDynamicsWorld* world, btScalar step) {
 	}
 
 	Game* game = static_cast<Game*>(world->getWorldUserInfo());
+
+	game->keyboard_->capture();
+	game->mouse_->capture();
+
 	list<GameListener*>::iterator i = game->listeners_.begin();
 	while (i != game->listeners_.end()) {
 		GameListener* listener = *i;

@@ -47,6 +47,7 @@ private:
 	Ogre::Vector3 right_;
 	Ogre::Vector3 up_;
 	Ogre::Vector3 forward_;
+	std::set<Enemy*> enemies_;
 
 };
 

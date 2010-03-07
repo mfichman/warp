@@ -53,12 +53,14 @@ private:
 	static int luaLoadSFX(lua_State* env);
 	static int luaPlaySFX(lua_State* env);
 	static int luaCreateObject(lua_State* env);
+	static int luaCreateCity(lua_State* env);
 	static int luaCreateEnemy(lua_State* env);
 	static int luaCreateTask(lua_State* env);
 
 	Game* game_;
 	std::list<boost::shared_ptr<Object>> objects_;
 	std::list<boost::shared_ptr<ScriptTask>> tasks_;
+	std::list<boost::shared_ptr<City>> cities_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Player> player_;
 	size_t objectsCreated_;

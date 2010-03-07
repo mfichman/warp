@@ -13,6 +13,7 @@
 #include "Projectile.hpp"
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
+#include "City.hpp"
 
 #include <string>
 #include <algorithm>
@@ -35,6 +36,7 @@ Level::Level(Game* game, const std::string& name) :
 
 	loadScriptCallbacks();
 	player_.reset(new Player(game, this, "Player", 0));
+	game_->getSceneManager()->setWorldGeometry("terrain.cfg");
     game_->addListener(this);
 	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Beat.lua")));
 	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Level.lua")));
@@ -61,6 +63,15 @@ void Level::onTimeStep() {
 		(*i)->onTimeStep();
 		if (!(*i)->isAlive()) {
 			i = objects_.erase(i);
+		} else {
+			i++;
+		}
+	}
+
+	for (list<shared_ptr<City>>::iterator i = cities_.begin(); i != cities_.end();) {
+		(*i)->onTimeStep();
+		if (!(*i)->isAlive()) {
+			i = cities_.erase(i);
 		} else {
 			i++;
 		}
@@ -138,6 +149,10 @@ void Level::loadScriptCallbacks() {
     lua_setfield(env, -2, "createObject");
 
 	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaCreateCity, 1);
+    lua_setfield(env, -2, "createCity");
+
+	lua_pushlightuserdata(env, this);
     lua_pushcclosure(env, &Level::luaCreateEnemy, 1);
     lua_setfield(env, -2, "createEnemy");
 
@@ -164,6 +179,17 @@ int Level::luaCreateObject(lua_State* env) {
 	env >> *object;
 
 	return 1;
+}
+
+/** Creates an Object */
+int Level::luaCreateCity(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+
+	// Create a new City and add it to the list
+	shared_ptr<City> city(new City(level->game_, level, level->objectsCreated_++));
+	level->cities_.push_back(city);
+
+	return 0;
 }
 
 /** Creates an Enemy */
