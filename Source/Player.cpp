@@ -28,7 +28,15 @@ Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
 	cooldown_(0.0f) {
 
-	setPosition(Vector3(0, 245, 5));
+    Vector3 position(0, 245, 5);
+	setPosition(position);
+
+    playerProjection_ = level_->getTube()->getSpineProjection(position, playerProjection_.index);
+    // set the camera behind the player
+    Vector3 forward = playerProjection_.forward;
+    Vector3 up = Vector3::UNIT_Y;
+    game->getCamera()->setPosition(position - forward*5.0 + up*1);
+    game->getCamera()->setDirection(forward);
 }
 
 Player::~Player() {
@@ -40,8 +48,8 @@ void Player::setWorldTransform(const btTransform& transform) {
 	// BEGIN TODO
 	const btVector3& btposition = transform.getOrigin();
 	const btVector3& btvelocity = body_->getLinearVelocity();
-	Vector3 position(btposition.x(), btposition.y(), btposition.z());
-	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());    
+	const Vector3 position(btposition.x(), btposition.y(), btposition.z());
+	const Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());    
 
 	// Get the player location
     playerProjection_ = level_->getTube()->getSpineProjection(position, playerProjection_.index);
@@ -62,24 +70,39 @@ void Player::setWorldTransform(const btTransform& transform) {
 	
     // Project the gravity vector into the plane with "forward" as the
     // normal vector.  This forces the ball to the outside of the ring, and
-    // removes and component that would make the ball move forward/backward
+    // removes any component that would make the ball move forward/backward
     up = up - (up.dotProduct(projection.forward)) * projection.forward;
     assert(up != Vector3::ZERO);
     up.normalise();
-    Vector3 right = up.crossProduct(forward);
+    Vector3 left = up.crossProduct(forward);
 	// END TODO
 	
-	right.normalise();
+	left.normalise();
     up.normalise();
     forward.normalise(); 
 	
-	node_->setOrientation(Quaternion(-right, up, -forward));
-	node_->setPosition(btposition.x(), btposition.y(), btposition.z());
-	game_->getCamera()->setPosition(position - forward*8.0 + up*1.7);
-	game_->getCamera()->setOrientation(Quaternion(-right, up, -forward));
+	node_->setOrientation(Quaternion(-left, up, -forward));
+	node_->setPosition(position);
+
+    Vector3 target_position = (position - forward*5.0 + up*1);
+    //Quaternion target_orientation = Quaternion(-left, up, -forward);
+    Camera* camera = game_->getCamera();
+
+    // interpolate the camera component-wise because interpolating the quaternion
+    //  will do it based on angles rather than axes.
+    Vector3 cam_right = camera->getDerivedRight();
+    Vector3 cam_up = camera->getDerivedUp();
+    Vector3 cam_forward = camera->getDerivedDirection();
+#define CAM_ALPHA .8    
+    camera->setPosition((1.0 - CAM_ALPHA) * target_position + CAM_ALPHA * camera->getPosition());
+    Vector3 new_right = (1.0 - CAM_ALPHA) * -left + CAM_ALPHA * cam_right;
+    Vector3 new_up = (1.0 - CAM_ALPHA) * up + CAM_ALPHA * cam_up;
+    Vector3 new_forward = (1.0 - CAM_ALPHA) * forward + CAM_ALPHA * cam_forward;
+    camera->setOrientation(Quaternion(new_right, new_up, -new_forward));
+    cout << velocity.dotProduct(forward);
 }
 
-/** Called when a new frame is detected */
+/** Called on each physics time step */
 void Player::onTimeStep() {
 	Object::onTimeStep();
 	computeForces();
