@@ -3,8 +3,9 @@
 
 Level = Object:new()
 
--- Waits for the given amount of timesteps before returning
+-- Waits given number of seconds before returning
 function Level:sleep(time)
+    time = time * 60 -- convert from seconds to frames
     if (time <= 0) then return end
     coroutine.yield(function()
         time = time - 1

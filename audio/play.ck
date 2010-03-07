@@ -59,6 +59,7 @@ recv.event( "/effects/crackle f" ) @=>OscEvent @ crackle_effect_e;
 recv.event( "/server/start, i" ) @=> OscEvent @ start_server_e;
 recv.event( "/server/stop, i" ) @=> OscEvent @ stop_server_e;
 
+recv.event( "/kill, i" ) @=> OscEvent @ kill_e;
 ////////////
 // CLASSES
 ////////////
@@ -312,6 +313,14 @@ class BeatServer {
     }
 }
 
+////////////
+// METHODS
+///////////
+
+fun void kill_listener() {
+    
+}
+
 //////////////
 // INSTANCES
 //////////////
@@ -324,4 +333,4 @@ beat_server.addListeners();
 
 <<< "servers ready", "" >>>;
 
-1::day => now;
+kill_e => now;

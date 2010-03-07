@@ -90,6 +90,10 @@ xmit.startMsg("/server/start", "i");
 
 3::second => now;
 
+xmit.startMsg("/kill", "i");
+1 => xmit.addInt;
+<<< "test: sent kill signal", "" >>>;
+
 /*
 xmit.startMsg("/server/stop", "i");
 1 => xmit.addInt;
