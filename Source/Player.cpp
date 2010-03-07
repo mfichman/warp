@@ -28,7 +28,7 @@ Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
 	cooldown_(0.0f) {
 
-	setPosition(Vector3(0, 295, 5));
+	setPosition(Vector3(0, 245, 5));
 }
 
 Player::~Player() {
@@ -89,7 +89,7 @@ void Player::onTimeStep() {
 
 void Player::fireMissiles() {
 	if (cooldown_ <= 0.0f && targets_.size() > 0) {
-		set<Enemy*>::iterator i = targets_.begin();
+		list<Enemy*>::iterator i = targets_.begin();
 		Projectile* p = level_->createProjectile("Photon");
 		p->setTarget(*i);
 		p->setPosition(forward_ + getPosition());
@@ -210,12 +210,13 @@ void Player::updateRay() {
 			if (body) {
 				Object* o = static_cast<Object*>(body->getUserPointer());
 				Enemy* e = dynamic_cast<Enemy*>(o);
+
 				if (e && !e->isHitCountMaxed()) {
 					
 					e->addTracker(this);
 					e->setSelected(true);
 					e->incHitCount();
-					targets_.insert(e);
+					targets_.push_back(e);
 				}
 			}
 		}
@@ -223,7 +224,15 @@ void Player::updateRay() {
 }
 
 void Player::onTargetDelete(Object* object) {
-	targets_.erase(static_cast<Enemy*>(object));
+	//targets_.erase(static_cast<Enemy*>(object));
+
+	for (list<Enemy*>::iterator i = targets_.begin(); i != targets_.end();) {
+		if ((*i) == static_cast<Enemy*>(object)) {
+			i = targets_.erase(i);
+		} else {
+			i++;
+		}
+	}
 }
 
 const SpineProjection& Player::getPlayerProjection() const {

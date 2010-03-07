@@ -25,7 +25,8 @@ Enemy::Enemy(Game* game, Level* level, const string& type, int id) :
 	spineNodeIndex_(0),
 	billboards_(0),
 	hitCount_(0), 
-	hitPoints_(1) {
+	hitPoints_(1),
+	finalHitCount_(0) {
 
 	// Find the spawn position
 	const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection();
@@ -65,6 +66,10 @@ void Enemy::setSelected(bool selected) {
 void Enemy::onCollision(Projectile* p) {
 	callMethod("onProjectileHit");
 
+	finalHitCount_++;
+	if (finalHitCount_ == hitPoints_) {
+		callMethod("onDestroy");
+	}
 	if (billboards_) {
 		node_->detachObject(billboards_);
 		game_->getSceneManager()->destroyBillboardSet(billboards_);

@@ -30,6 +30,10 @@ end
 
 -- This function is called when a projectile hits the object
 function Banshee:onProjectileHit()
+
+end
+
+function Banshee:onDestroy()
     if (self.destroyed) then return end
     self.destroyed = true
     Level:createTask(function()
