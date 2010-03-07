@@ -63,6 +63,10 @@ Game::Game() :
 Game::~Game() {
 	level_.reset();
 
+	oscSender_->beginMsg("/kill");
+	oscSender_->addInt(1);
+	oscSender_->sendMsg();
+
 	// Destroy the level before tearing down the physics and graphics
 	// engines
 	if (guiRenderer_) { delete guiRenderer_;	}

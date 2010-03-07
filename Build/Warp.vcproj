@@ -113,6 +113,10 @@
 				RelativePath="..\Source\SubObject.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\Source\Terrain.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -169,6 +173,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\SubObject.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Terrain.hpp"
 				>
 			</File>
 			<File
