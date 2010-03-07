@@ -32,8 +32,9 @@ function Banshee:onProjectileHit()
     if (self.destroyed) then return end
     self.destroyed = true
     Level:createTask(function()
-        Level:sleep(.3);
-        Level:playSFX{sync="fraction", id=0, gain=2} -- queue chuck sound effect
+        Level:playSFX{id=1, gain=2} -- queue chuck sound effect
+        Level:sleep(.5); -- grow animation happens here
+        Level:playSFX{id=2, gain=2} -- queue chuck sound effect
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}
         self:explode()

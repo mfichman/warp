@@ -2,9 +2,9 @@
 -- Matt Fichman & Francesco Georg
 
 -- NOTE: my_function{val="blah"} is a shortcut for my_function({val="blah"})
-Level:loadSFX{id=0, path="sfx/Tape Rewinding 02_C.wav"} -- banshee explosion sound
-Level:loadSFX{id=1, path="sfx/dance_hihat_02.wav"} -- banshee explosion sound
---Level:loadSFX{id=0, path="sfx/hiphop_snare_01.wav"} -- banshee explosion sound
+Level:loadSFX{id=0, path="sfx/dance_hihat_02.wav"} -- on fire
+Level:loadSFX{id=1, path="sfx/dance_clap_01.wav"} -- on hit
+Level:loadSFX{id=2, path="sfx/Tape Rewinding 02_C.wav"} -- on banshee explosion sound
 
 Level:loadLoop{id=1, path="beats/Club Dance Beat 023 125_16.wav", bpm=125, n_beats=16}
 Level:loadLoop{id=0, path="loops/Dance Floor Pattern 05.wav", bpm=120, n_beats=4}
