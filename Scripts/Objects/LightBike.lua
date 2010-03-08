@@ -16,7 +16,7 @@ function LightBike:init()
     self:addEntity{name="TopEngine", mesh="LightBikeTopEngine.mesh"}
     self:addEntity{name="BottomEngine", mesh="LightBikeBottomEngine.mesh"}
     self.destroyed = false
-    self.hitPoints = 3
+    self.hitPoints = 2
 end
 
 -- This function gets called once per timestep by the
