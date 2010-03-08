@@ -11,8 +11,8 @@ function StarBlazer:init()
     -- added to its own scene node (this will be important
     -- later for explosions)
     self:addEntity{name="Body", mesh="StarBlazerBody.mesh"}
-    self:addEntity{name="LeftWing", mesh="StarBlazerLeftWing.mesh"}
-    self:addEntity{name="RightWing", mesh="StarBlazerRightWing.mesh"}
+    self:addEntity{name="LeftWing", mesh="StarBlazerLWing.mesh"}
+    self:addEntity{name="RightWing", mesh="StarBlazerRWing.mesh"}
     self:addEntity{name="TopWing", mesh="StarBlazerTopWing.mesh"}
     self:addEntity{name="Ring", mesh="StarBlazerRing.mesh"}
     self.destroyed = false

@@ -10,7 +10,7 @@ while (true) do
     --Level:createEnemy("Banshee")
     --Level:createEnemy("Banshee")
     Level:createEnemy("StarBlazer")
-    distance = distance + 25
+    distance = distance + 70
     --Level:createEnemy("LightBike")
     --distance = distance + 150
 end
