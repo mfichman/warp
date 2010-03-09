@@ -14,4 +14,5 @@ while (true) do
     distance = distance + 70
     --Level:createEnemy("LightBike")
     --distance = distance + 150
+    print(Level:getPlayerPosition():length()))
 end

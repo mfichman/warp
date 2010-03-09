@@ -46,7 +46,7 @@ Enemy::~Enemy() {
 	lua_State* env = game_->getScriptState();
 	lua_getref(env, table_);
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
-	lua_setfield(env, -2, "addEntity");
+	lua_setfield(env, -2, "target");
 	lua_pop(env, 1);
 }
 

@@ -99,7 +99,7 @@ void Player::setWorldTransform(const btTransform& transform) {
     Vector3 new_up = (1.0 - CAM_ALPHA) * up + CAM_ALPHA * cam_up;
     Vector3 new_forward = (1.0 - CAM_ALPHA) * forward + CAM_ALPHA * cam_forward;
     camera->setOrientation(Quaternion(new_right, new_up, -new_forward));
-    cout << velocity.dotProduct(forward);
+    //cout << velocity.dotProduct(forward);
 }
 
 /** Called on each physics time step */

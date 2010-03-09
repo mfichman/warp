@@ -145,6 +145,9 @@ void ScriptTask::onTimeStep() {
 
 /** Methods for sending Ogre values to a script */
 lua_State* Warp::operator<<(lua_State* env, const Ogre::Vector3& v) {
+	lua_getglobal(env, "Vector");
+	lua_getfield(env, -1, "new");
+	lua_getglobal(env, "Vector");
     lua_newtable(env);
     lua_pushnumber(env, v.x);
     lua_rawseti(env, -2, 1);
@@ -152,21 +155,29 @@ lua_State* Warp::operator<<(lua_State* env, const Ogre::Vector3& v) {
     lua_rawseti(env, -2, 2);
     lua_pushnumber(env, v.z);
     lua_rawseti(env, -2, 3);
+
+	lua_call(env, 2, 1);
+	
     return env;
 }
 
 lua_State* Warp::operator<<(lua_State* env, const Ogre::Quaternion& q) {
-     lua_newtable(env);
+	lua_getglobal(env, "Quaternion");
+	lua_getfield(env, -1, "new");
+	lua_getglobal(env, "Quaternion");
+    lua_newtable(env);
+    lua_pushnumber(env, q.x);
+    lua_rawseti(env, -2, 1);
+    lua_pushnumber(env, q.y);
+    lua_rawseti(env, -2, 2);
+    lua_pushnumber(env, q.z);
+    lua_rawseti(env, -2, 3);
+    lua_pushnumber(env, q.w);
+    lua_rawseti(env, -2, 4);
 
-     lua_pushnumber(env, q.x);
-     lua_rawseti(env, -2, 1);
-     lua_pushnumber(env, q.y);
-     lua_rawseti(env, -2, 2);
-     lua_pushnumber(env, q.z);
-     lua_rawseti(env, -2, 3);
-     lua_pushnumber(env, q.w);
-     lua_rawseti(env, -2, 4);
-     return env;
+	lua_call(env, 2, 1);
+
+    return env;
 }
 
 lua_State* Warp::operator<<(lua_State* env, const Ogre::SceneNode& n) {

@@ -59,7 +59,7 @@ Level::~Level() {
 /** Called once for each game loop */
 void Level::onTimeStep() {
 
-	cout << "Objects: " << objects_.size() << endl;
+	//cout << "Objects: " << objects_.size() << endl;
 
 	for (list<shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end();) {
 		(*i)->onTimeStep();
@@ -96,6 +96,8 @@ void Level::loadScriptCallbacks() {
 	lua_State* env = game_->getScriptState();
 
 	loadScript(env, "Scripts/Object.lua");
+	loadScript(env, "Scripts/Vector.lua");
+	loadScript(env, "Scripts/Quaternion.lua");
 	loadScript(env, "Scripts/Level.lua");
 
 	loadScriptFolder(env, "Scripts/Objects/");

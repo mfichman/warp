@@ -48,9 +48,16 @@ Game::Game() :
     solver_(0),
     world_(0),
     physicsAccumulator_(0.0f),
-    root_(new Root("plugins.cfg", "ogre.cfg", "ogre.log")),
 	resetEvent_(false),
 	gravity_(-4.0f) {
+
+#ifdef DEBUG
+#pragma message("Using debug build") 
+	cout << "Loading debug plugins" << endl;
+	root_ = new Root("plugins.debug.cfg", "ogre.cfg", "ogre.log");
+#else
+	root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
+#endif
 
     loadScripting();
     loadResources();

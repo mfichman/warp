@@ -10,12 +10,6 @@ set(LIBRARY_OUTPUT_PATH ${Criterium_SOURCE_DIR}\\...\\Binary)
 
 
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-add_definitions(/MDd)
-else()
-add_definitions(/MD)
-endif()
-
 include_directories(${Criterium_SOURCE_DIR}\\..\\Include)
 
 include_directories("C:\\Include")
