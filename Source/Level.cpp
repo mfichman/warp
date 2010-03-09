@@ -170,6 +170,10 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaSetCompositor, 1);
     lua_setfield(env, -2, "setCompositor");
 
+	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaGetPlayerPosition, 1);
+    lua_setfield(env, -2, "getPlayerPosition");
+
 	lua_pop(env, 1); // Pop the Level table
 }
 
@@ -306,6 +310,14 @@ int Level::luaSetLight(lua_State* env) {
 int Level::luaGetSpineNodeDistance(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	lua_pushinteger(env, level->player_->getPlayerProjection().distance);
+    return 1;
+}
+
+/** Lua callback.  Returns the current spine node ID. */
+int Level::luaGetPlayerPosition(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	env << level->player_->getPosition();
+
     return 1;
 }
 

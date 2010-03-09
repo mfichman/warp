@@ -58,6 +58,7 @@ private:
 	static int luaCreateTask(lua_State* env);
 	static int luaSetGravity(lua_State* env);
 	static int luaSetCompositor(lua_State* env);
+	static int luaGetPlayerPosition(lua_State* env);
 
 	Game* game_;
 	std::list<boost::shared_ptr<Object>> objects_;

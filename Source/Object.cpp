@@ -116,7 +116,13 @@ Object::~Object() {
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "target");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "setPosition");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "getPosition");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "setVelocity");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "getVelocity");
 	lua_pop(env, 1);
 	lua_unref(env, table_);
 }
@@ -201,6 +207,16 @@ void Object::onTargetDelete(Object* target) {
 	alive_ = false;
 }
 
+Vector3 Object::getVelocity() {
+	const btVector3& vel = body_->getLinearVelocity();
+	return Vector3(vel.x(), vel.y(), vel.z());
+}
+
+void Object::setVelocity(const Vector3& velocity) {
+	body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+}
+
+
 lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {
 	lua_getref(env, e.table_);
 	return env;
@@ -248,6 +264,18 @@ void Object::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaGetPosition, 1);
 	lua_setfield(env, -2, "getPosition");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaSetPosition, 1);
+	lua_setfield(env, -2, "setPosition");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaGetVelocity, 1);
+	lua_setfield(env, -2, "getVelocity");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaSetVelocity, 1);
+	lua_setfield(env, -2, "setVelocity");
 
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
@@ -448,10 +476,31 @@ int Object::luaWarningDestroyed(lua_State* env) {
 /** Return position */
 int Object::luaGetPosition(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	env << self->node_->getPosition();
+	env << self->getPosition();
 	return 1;
 }
 
+int Object::luaSetPosition(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	Vector3 position;
+	env >> position;
+	self->setPosition(position);
+	return 0;
+}
+
+int Object::luaGetVelocity(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	env << self->getVelocity();
+	return 1;
+}
+
+int Object::luaSetVelocity(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	Vector3 velocity;
+	env >> velocity;
+	self->setVelocity(velocity);
+	return 0;
+}
 
 /** Calls a method on the peer Lua object */
 void Object::callMethod(const std::string& method) {

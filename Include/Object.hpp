@@ -30,6 +30,9 @@ public:
 	/** Sets the speed of the object */
 	void setSpeed(float speed) { speed_ = speed; }
 
+	/** Sets the velocity */
+	void setVelocity(const Ogre::Vector3& velocity);
+
 	/** Returns true if the object is alive */
 	bool isAlive() const { return alive_; }
 
@@ -38,6 +41,9 @@ public:
 
 	/** Returns the position of this object */
 	Ogre::Vector3 getPosition() { return node_->getPosition(); }
+
+	/** Returns the velocity of the object */
+	Ogre::Vector3 getVelocity();
 
 	/** Returns the transform */
 	const btTransform& getTransform() const { return transform_; }
@@ -117,6 +123,9 @@ private:
 	static int luaExplode(lua_State* env);
 	static int luaDestroy(lua_State* env);
 	static int luaGetPosition(lua_State* env);
+	static int luaSetPosition(lua_State* env);
+	static int luaGetVelocity(lua_State* env);
+	static int luaSetVelocity(lua_State* env);
 
 	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
 
