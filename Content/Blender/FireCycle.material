@@ -1,4 +1,29 @@
-material Material
+material FireCycleMetalTire
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.500000 0.500000 0.500000 1.000000
+			diffuse 0.088640 0.082692 0.082692 1.000000
+			specular 0.279213 0.279213 0.279213 1.000000 12.500000
+			emissive 0.000000 0.000000 0.000000 1.000000
+			texture_unit {}
+			texture_unit
+			{
+				texture MetalTire.png
+				tex_address_mode wrap
+			}
+			vertex_program_ref WarpBasic {}
+			fragment_program_ref WarpGlow
+			{
+				param_named_auto time time 0
+			}
+		}
+	}
+}
+material FireCycleBody
 {
 	receive_shadows on
 	technique
@@ -9,27 +34,17 @@ material Material
 			diffuse 0.640000 0.640000 0.640000 1.000000
 			specular 0.500000 0.500000 0.500000 1.000000 12.500000
 			emissive 0.000000 0.000000 0.000000 1.000000
+			texture_unit {}
 			texture_unit
 			{
 				texture FireCycleBody.png
-				tex_address_mode wrap
-				filtering trilinear
 				colour_op alpha_blend
 			}
-		}
-	}
-}
-material FireCycleMetal
-{
-	receive_shadows on
-	technique
-	{
-		pass
-		{
-			ambient 0.500000 0.500000 0.500000 1.000000
-			diffuse 0.554512 0.599763 0.619397 1.000000
-			specular 0.500000 0.500000 0.499950 1.000000 12.500000
-			emissive 0.000000 0.000000 0.000000 1.000000
+			vertex_program_ref WarpBasic {}
+			fragment_program_ref WarpGlow
+			{
+				param_named_auto time time 0
+			}
 		}
 	}
 }
