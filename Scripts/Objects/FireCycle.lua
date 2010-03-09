@@ -16,7 +16,7 @@ function FireCycle:init()
     self:addEntity{name="LWheel", mesh="FireCycleLWheel.mesh"}
     self:addEntity{name="RWheel", mesh="FireCycleRWheel.mesh"}
     self.destroyed = false
-    self.hitPoints = 3
+    self.hitPoints = 2
 end
 
 -- This function gets called once per timestep by the
@@ -39,8 +39,8 @@ function FireCycle:onDestroy()
     if (self.destroyed) then return end
     self.destroyed = true
     Level:createTask(function()
-        Level:playSFX{id=1, gain=2} -- queue chuck sound effect
-        Level:sleep(.5); -- grow animation happens here
+        --Level:playSFX{id=1, gain=2} -- queue chuck sound effect
+        --Level:sleep(.5); -- grow animation happens here
         Level:playSFX{id=2, gain=2} -- queue chuck sound effect
         local explosion = Level:createObject("Explosion")  
         explosion:set{position=self:getPosition()}
