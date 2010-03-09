@@ -84,7 +84,7 @@ void Player::setWorldTransform(const btTransform& transform) {
 	node_->setOrientation(Quaternion(-left, up, -forward));
 	node_->setPosition(position);
 
-    Vector3 target_position = (position - forward*5.0 + up*1);
+    Vector3 target_position = (position - forward*3.0 + up*1.0);
     //Quaternion target_orientation = Quaternion(-left, up, -forward);
     Camera* camera = game_->getCamera();
 

@@ -7,8 +7,8 @@ local distance = 0
 while (true) do
     Level:createCity()
     Level:waitForDistance(distance)
-    --Level:createEnemy("Banshee")
-    --Level:createEnemy("Banshee")
+    Level:createEnemy("Banshee")
+    Level:createEnemy("Banshee")
     Level:createEnemy("StarBlazer")
     distance = distance + 70
     --Level:createEnemy("LightBike")
