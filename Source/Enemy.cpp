@@ -28,18 +28,18 @@ Enemy::Enemy(Game* game, Level* level, const string& type, int id) :
 	hitPoints_(1),
 	finalHitCount_(0) {
 
+    // default behavior is to stick it at the spawn position, but lua may override this
+
 	// Find the spawn position
 	const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection();
-
-
 	// TODO: Align the object so it's facing down the tube
 	setPosition(spawn.position + Vector3(Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0)));
-	setSpeed(40);
-	setTarget(level_->getPlayer());
+
+    // Position/velocity information is set in lua
+	//setSpeed(40);
+	//setTarget(level_->getPlayer());
 
 	loadScriptCallbacks();
-
-	
 }
 
 Enemy::~Enemy() {
@@ -92,12 +92,17 @@ void Enemy::setWorldTransform(const btTransform& transform) {
     // Set local info
     transform_ = transform;
 
+
+    /* lua script should take care of this
+
+    // set enemy to look in direction of motion
 	btVector3 btvelocity = body_->getLinearVelocity();
 	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
 	velocity.normalise();
 	Vector3 right = velocity.crossProduct(Vector3::UNIT_Y);
 	Vector3 forward = right.crossProduct(Vector3::UNIT_Y);
 	node_->setOrientation(Quaternion(right, Vector3::UNIT_Y, forward));
+    */
 }
 
 void Enemy::loadScriptCallbacks() {

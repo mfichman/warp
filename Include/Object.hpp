@@ -27,6 +27,9 @@ public:
 	/** Sets the position of this object */
 	void setPosition(const Ogre::Vector3& p);
 
+	/** Sets the quaternion for this object */
+	void setOrientation(const Ogre::Quaternion& q);
+
 	/** Sets the speed of the object */
 	void setSpeed(float speed) { speed_ = speed; }
 
@@ -41,6 +44,9 @@ public:
 
 	/** Returns the position of this object */
 	Ogre::Vector3 getPosition() { return node_->getPosition(); }
+
+	/** Returns the quaternion for this object */
+	Ogre::Quaternion getOrientation() { return node_->getOrientation(); }
 
 	/** Returns the velocity of the object */
 	Ogre::Vector3 getVelocity();
@@ -126,6 +132,8 @@ private:
 	static int luaSetPosition(lua_State* env);
 	static int luaGetVelocity(lua_State* env);
 	static int luaSetVelocity(lua_State* env);
+	static int luaGetOrientation(lua_State* env);
+	static int luaSetOrientation(lua_State* env);
 
 	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
 

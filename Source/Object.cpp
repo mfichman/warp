@@ -123,6 +123,10 @@ Object::~Object() {
 	lua_setfield(env, -2, "setVelocity");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "getVelocity");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "setOrientation");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "getOrientation");
 	lua_pop(env, 1);
 	lua_unref(env, table_);
 }
@@ -133,8 +137,9 @@ void Object::onTimeStep() {
 		(*i)->addTime(0.01);
 	}
 
-	callMethod("onTimeStep");
+	callMethod("onTimeStep"); // destruction also handled in lua
 
+    /*
 	const SpineProjection proj = level_->getPlayer()->getPlayerProjection();
 	Vector3 to = proj.position - node_->getPosition();
 
@@ -145,6 +150,7 @@ void Object::onTimeStep() {
 	if (to.dotProduct(proj.forward) > 0 && to.squaredLength() > 120) {
 		alive_ = false;
 	}
+    */
 
 	// Track target by setting the vector towards the target
 	if (target_) {
@@ -153,6 +159,7 @@ void Object::onTimeStep() {
 		velocity *= speed_;
 		body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
 	}
+    
 
 	for (list<shared_ptr<SubObject>>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
 		(*i)->onTimeStep();
@@ -199,6 +206,14 @@ void Object::removeTracker(Object* p) {
 void Object::setPosition(const Ogre::Vector3& p) {
 	btTransform transform = body_->getCenterOfMassTransform();
 	transform.setOrigin(btVector3(p.x, p.y, p.z));
+	body_->setCenterOfMassTransform(transform);
+}
+
+void Object::setOrientation(const Ogre::Quaternion& q) {
+	btTransform transform = body_->getCenterOfMassTransform();
+    transform.setRotation(btQuaternion(q.getYaw().valueRadians(),
+                                       q.getPitch().valueRadians(),
+                                       q.getRoll().valueRadians()));
 	body_->setCenterOfMassTransform(transform);
 }
 
@@ -276,6 +291,14 @@ void Object::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaSetVelocity, 1);
 	lua_setfield(env, -2, "setVelocity");
+
+    lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaGetOrientation, 1);
+	lua_setfield(env, -2, "getOrientation");
+
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaSetOrientation, 1);
+	lua_setfield(env, -2, "setOrientation");
 
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
@@ -499,6 +522,21 @@ int Object::luaSetVelocity(lua_State* env) {
 	Vector3 velocity;
 	env >> velocity;
 	self->setVelocity(velocity);
+	return 0;
+}
+
+/** Return quaternion corresponding to the rotation */
+int Object::luaGetOrientation(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	env << self->getOrientation();
+	return 1;
+}
+
+int Object::luaSetOrientation(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+    Quaternion orientation;
+	env >> orientation;
+	self->setOrientation(orientation);
 	return 0;
 }
 

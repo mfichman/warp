@@ -15,11 +15,19 @@ function Seeker:init()
     self:addEntity{name="Ring", mesh="SeekerRing.mesh"}
     self.destroyed = false
     self.hitPoints = 1
+    local position = Level:getPlayerPosition()
+    local orientation = Level:getPlayerOrientation()
+    --self:setPosition(position + {0,1,1})
+    self:setOrientation(orientation)
+    print "check3"
 end
 
 -- This function gets called once per timestep by the
 -- C++ peer class connected to this Lua class
 function Seeker:onTimeStep()
+--    position = getPlayerPosition()
+--    print(position[1], position[2], position[3])
+
 end
 
 -- This function is called when the object is selected by

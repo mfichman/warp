@@ -176,6 +176,10 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaGetPlayerPosition, 1);
     lua_setfield(env, -2, "getPlayerPosition");
 
+	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaGetPlayerOrientation, 1);
+    lua_setfield(env, -2, "getPlayerOrientation");
+
 	lua_pop(env, 1); // Pop the Level table
 }
 
@@ -315,11 +319,17 @@ int Level::luaGetSpineNodeDistance(lua_State* env) {
     return 1;
 }
 
-/** Lua callback.  Returns the current spine node ID. */
+/** Lua callback.  Returns the player's position vector. */
 int Level::luaGetPlayerPosition(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	env << level->player_->getPosition();
+    return 1;
+}
 
+/** Lua callback.  Returns the player's quaternion. */
+int Level::luaGetPlayerOrientation(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	env << level->player_->getOrientation();
     return 1;
 }
 
