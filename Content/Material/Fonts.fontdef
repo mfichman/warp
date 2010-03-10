@@ -1,0 +1,6 @@
+Neuropol
+{
+    type truetype
+    source Neuropol.ttf
+    size 24
+}
