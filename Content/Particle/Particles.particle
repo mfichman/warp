@@ -64,8 +64,8 @@ particle_system Flames
         direction 0 1 0
         velocity_min 1
         velocity_max 2
-        colour_range_start 1 0.6 0.1
-        colour_range_end 0.8 0.6 0.1
+        colour_range_start 1 0.4 0.1
+        colour_range_end 0.8 0.4 0.1
     }
 
     // Fader
