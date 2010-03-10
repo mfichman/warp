@@ -51,9 +51,10 @@ Game::Game() :
 	resetEvent_(false),
 	gravity_(-4.0f) {
 
-#ifdef RELEASE
+#ifdef WARP_RELEASE
 	root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
-#else
+#endif
+#ifdef WARP_DEBUG
 #pragma message("Using debug build") 
 	cout << "Loading debug plugins" << endl;
 	root_ = new Root("plugins.debug.cfg", "ogre.cfg", "ogre.log");
