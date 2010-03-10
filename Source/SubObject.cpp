@@ -66,6 +66,12 @@ void SubObject::setWorldTransform(const btTransform& transform) {
     transform_ = transform;
 }
 
+void SubObject::onTimeStep() {
+	if (body_.get()) {
+		body_->applyCentralForce(btVector3(0.0, -4.0, 0.0));
+	}
+}
+
 void SubObject::separateFromParent() {
 	if (separated_) {
 		return;

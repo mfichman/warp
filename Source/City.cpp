@@ -37,9 +37,9 @@ City::City(Game* game, Level* level, int id) :
 	spawn.position.y = 0;
 
 	if (Math::RangeRandom(-1, 1) < 0) {
-		spawn.position += Math::RangeRandom(50, 100)*right;
+		spawn.position += Math::RangeRandom(80, 100)*right;
 	} else {
-		spawn.position -= Math::RangeRandom(50, 100)*right;
+		spawn.position -= Math::RangeRandom(80, 100)*right;
 	}
 
 	

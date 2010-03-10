@@ -158,6 +158,10 @@ void Object::onTimeStep() {
 		velocity *= speed_;
 		body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
 	}
+
+	for (list<shared_ptr<SubObject>>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
+		(*i)->onTimeStep();
+	}
 }
 
 void Object::getWorldTransform(btTransform& transform) const {
@@ -359,10 +363,18 @@ int Object::luaAddParticleSystem(lua_State* env) {
 		env >> name;
 		lua_getfield(env, -1, "template");
 		env >> templ;
+		lua_getfield(env, -1, "position");
+		Vector3 position;
+		if (!lua_isnil(env, -1)) {
+			env >> position;
+		} else {
+			lua_pop(env, 1);
+		}
 
 		name = self->name_ + "." + name;
 
 		SceneNode* node = self->node_->createChildSceneNode(name);
+		node->setPosition(position);
 		ParticleSystem* system = self->game_->getSceneManager()->createParticleSystem(name, templ);
 		node->attachObject(system);
 

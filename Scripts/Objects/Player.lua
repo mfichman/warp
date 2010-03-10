@@ -19,6 +19,9 @@ function Player:init()
     self:addEntity{name="MainEngine", mesh="SharkMainEngine.mesh"}
     self:addEntity{name="LeftEngine", mesh="SharkLeftEngine.mesh"}
     self:addEntity{name="RightEngine", mesh="SharkRightEngine.mesh"}
+    self:addParticleSystem{name="Jet", template="Jet", position={0.0, 0.15, 0.481}}
+    self:addParticleSystem{name="JetLeft", template="SmallJet", position={-0.3, 0.08, 0.461}}
+    self:addParticleSystem{name="JetRight", template="SmallJet", position={0.3, 0.08, 0.461}}
 --    self:addEntity{name="Hull", mesh="DaggerHull.mesh"}
 --    self:addEntity{name="LeftWing", mesh="DaggerLeftWing.mesh"}
 --    self:addEntity{name="RightWing", mesh="DaggerRightWing.mesh"}

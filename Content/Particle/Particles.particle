@@ -44,8 +44,8 @@ particle_system Fountain
 particle_system Flames
 {
     material Flare
-    particle_width 1.3
-    particle_height 1.3
+    particle_width 2.0
+    particle_height 2.0
     cull_each false
     quota 40
     billboard_type point
@@ -54,18 +54,19 @@ particle_system Flames
     // Area emitter
     emitter Box
     {
-        duration 1.5
+        
+        duration 2
         angle 15
         width 0.5
         height 0
         depth 0.5
-        emission_rate 60
+        emission_rate 30
         time_to_live 0.5
         direction 0 1 0
-        velocity_min 1
-        velocity_max 2
-        colour_range_start 1 0.4 0.1
-        colour_range_end 0.8 0.4 0.1
+        velocity_min 1.0
+        velocity_max 2.0
+        colour_range_start 1 0 0
+        colour_range_end 0.5 0.6 0
     }
 
     // Fader
@@ -76,20 +77,20 @@ particle_system Flames
         blue -2.0
     }
     
-    //affector Rotator
-    //{
-    //    rotation_range_start 0
-    //    rotation_range_end 360
-    //}
+    affector Rotator
+    {
+        rotation_range_start 0
+        rotation_range_end 360
+    }
 }
 
 particle_system Explosion
 {
     material GoldFire
-    particle_width 5
-    particle_height 5
+    particle_width 6
+    particle_height 6
     cull_each false
-    quota 15
+    quota 30
     billboard_type point
     billboard_rotation_type vertex
 
@@ -105,7 +106,7 @@ particle_system Explosion
         depth 6
         
 
-        time_to_live 0.5
+        time_to_live 1.0
         
         colour_range_start 1 0.6 0.1
         colour_range_end 0.8 0.6 0.1
@@ -186,3 +187,89 @@ particle_system Smoke
     }
         
 }
+
+// A sparkly purple fountain
+particle_system Jet
+{
+    local_space true
+    material Spark
+    particle_width 0.3
+    particle_height 0.3
+    cull_each false
+    quota 500
+    billboard_type point
+    
+
+    // Area emitter
+    emitter Box
+    {
+    
+        angle 0
+        width 0.02
+        height 0
+        depth 0.0
+        emission_rate 40
+        time_to_live 0.5
+        direction 0 0 -1
+        velocity_min -4.0
+        velocity_max -5.0
+    }
+
+    // Fader
+    affector ColourFader
+    {
+        red -4.0
+        green -4.0
+        blue -4.0
+    }
+    
+    affector Scaler
+    {
+        rate -0.5
+    }
+    
+}
+
+
+// A sparkly purple fountain
+particle_system SmallJet
+{
+    local_space true
+    material Spark
+    particle_width 0.2
+    particle_height 0.2
+    cull_each false
+    quota 500
+    billboard_type point
+    
+
+    // Area emitter
+    emitter Box
+    {
+    
+        angle 0
+        width 0.01
+        height 0
+        depth 0.0
+        emission_rate 30
+        time_to_live 0.5
+        direction 0 0 -1
+        velocity_min -2.0
+        velocity_max -3.0
+    }
+
+    // Fader
+    affector ColourFader
+    {
+        red -5.0
+        green -5.0
+        blue -5.0
+    }
+    
+    affector Scaler
+    {
+        rate -0.2
+    }
+    
+}
+

@@ -21,4 +21,5 @@ void main() {
 
     // This is the final color of the pixel
     gl_FragColor = vec4(glow.a*glow.xyz + (1.0-glow.a)*color.xyz, 1.0);
+    //gl_FragColor = vec4(glow.xyz * color.xyz, 1.0);
 }

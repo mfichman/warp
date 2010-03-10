@@ -87,7 +87,7 @@ void Player::setWorldTransform(const btTransform& transform) {
 	node_->setOrientation(Quaternion(-left, up, -forward));
 	node_->setPosition(position);
 
-    Vector3 target_position = (position - forward*3.0 + up*1.0);
+    Vector3 target_position = (position - forward*2.0 + up*1.0);
     //Quaternion target_orientation = Quaternion(-left, up, -forward);
     Camera* camera = game_->getCamera();
 
@@ -96,7 +96,7 @@ void Player::setWorldTransform(const btTransform& transform) {
     Vector3 cam_right = camera->getDerivedRight();
     Vector3 cam_up = camera->getDerivedUp();
     Vector3 cam_forward = camera->getDerivedDirection();
-#define CAM_ALPHA .8    
+#define CAM_ALPHA .9    
     camera->setPosition((1.0 - CAM_ALPHA) * target_position + CAM_ALPHA * camera->getPosition());
     Vector3 new_right = (1.0 - CAM_ALPHA) * -left + CAM_ALPHA * cam_right;
     Vector3 new_up = (1.0 - CAM_ALPHA) * up + CAM_ALPHA * cam_up;

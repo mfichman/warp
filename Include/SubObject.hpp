@@ -30,6 +30,8 @@ public:
 	/** Explodes the subobject from is parent */
 	void separateFromParent();
 
+	void onTimeStep();
+
 private:
 	// Bullet callbacks
 	virtual void getWorldTransform(btTransform& transform) const;

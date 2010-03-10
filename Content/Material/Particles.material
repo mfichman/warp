@@ -13,7 +13,26 @@ material Flare
 
 			texture_unit
 			{
-				texture Photon.png
+				texture Halo.png
+			}
+		}
+	}
+}
+
+material Spark
+{
+	technique
+	{
+		pass
+		{
+            fog_override true
+			lighting off
+			scene_blend add
+			depth_write off
+
+			texture_unit
+			{
+				texture Incandescent.png
 			}
 		}
 	}

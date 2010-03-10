@@ -5,14 +5,14 @@ material SharkEngine
 	{
 		pass
 		{
-			ambient 0.500000 0.500000 0.500000 1.000000
-			diffuse 0.640000 0.640000 0.640000 1.000000
+			ambient 0.200000 0.200000 0.200000 1.000000
+			diffuse 0.40000 0.40000 0.40000 1.000000
 			specular 0.500000 0.500000 0.500000 1.000000 12.500000
 			emissive 0.000000 0.000000 0.000000 1.000000
 		}
 	}
 }
-material SharkHull
+material SharkHull/TEXFACE/SharkHullGlow.Png
 {
 	receive_shadows on
 	technique
@@ -20,9 +20,27 @@ material SharkHull
 		pass
 		{
 			ambient 0.500000 0.500000 0.500000 1.000000
-			diffuse 0.640000 0.640000 0.640000 1.000000
-			specular 0.500000 0.500000 0.500000 1.000000 12.500000
+			diffuse 0.800000 0.800000 0.800000 1.000000
 			emissive 0.000000 0.000000 0.000000 1.000000
+			texture_unit {}
+			texture_unit
+			{
+				texture SharkHullGlow.png
+				tex_address_mode wrap
+				filtering trilinear
+			}
+		    vertex_program_ref WarpBasic {}
+			fragment_program_ref WarpGlow
+			{
+				param_named_auto time time 0
+			}
+		}
+		pass
+		{
+			ambient 0.0 0.0 0.0
+			diffuse 0.0 0.0 0.0
+			specular 0.500000 0.500000 0.500000 1.000000 12.500000
+			scene_blend add
 		}
 	}
 }

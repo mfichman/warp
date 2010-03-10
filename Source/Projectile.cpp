@@ -23,7 +23,7 @@ Projectile::Projectile(Game* game, Level* level, const string& name, int id) :
 	body_->setCollisionShape(shape_.get());
 	body_->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-	setSpeed(200);
+	setSpeed(100);
 }
 
 /** Destructor */
@@ -45,8 +45,8 @@ void Projectile::onTimeStep() {
 
 	if (hit_) {
 		if (target_) node_->setPosition(target_->getPosition());
-		width = min(5.0, width + 0.2); // Grow the projectile
-		height = min(5.0, height + 0.2);
+		width = min(2.0, width + 0.2); // Grow the projectile
+		height = min(2.0, height + 0.2);
 	} else {
 		width = 0.2 * sinf(time_) + 1; // Make the projectile oscillate in size
 		height = 0.2 * sinf(time_) + 1;
