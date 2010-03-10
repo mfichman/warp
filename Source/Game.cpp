@@ -51,12 +51,12 @@ Game::Game() :
 	resetEvent_(false),
 	gravity_(-4.0f) {
 
-#ifdef DEBUG
+#ifdef RELEASE
+	root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
+#else
 #pragma message("Using debug build") 
 	cout << "Loading debug plugins" << endl;
 	root_ = new Root("plugins.debug.cfg", "ogre.cfg", "ogre.log");
-#else
-	root_ = new Root("plugins.cfg", "ogre.cfg", "ogre.log");
 #endif
 
     loadScripting();
