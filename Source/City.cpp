@@ -27,7 +27,7 @@ City::City(Game* game, Level* level, int id) :
 	numVertices_(0),
 	alive_(true) {
 
-	SpineProjection spawn = level_->getPlayer()->getSpawnProjection();
+	SpineProjection spawn = level_->getPlayer()->getSpawnProjection(1000);
 
 	ostringstream os;
 	os << "City" << id;
@@ -93,6 +93,47 @@ void City::generateBuilding(float x, float z) {
 	float edge = -Math::RangeRandom(min, max);
 	float topedge = edge;// + 2.0f;
 
+	float v = 1.0f; //height/(2*edge);
+	float u = (2*edge)/height;
+
+	typedef float texcoord_t[2];
+	texcoord_t texcoords[30] = {
+		{ 0, 0 },
+		{ 0, v },
+		{ u, 0 },
+		{ 0, v },
+		{ u, v },
+		{ u, 0 },
+
+		{ 0, 0 },
+		{ u, 0 },
+		{ 0, v },
+		{ 0, v },
+		{ u, 0 },
+		{ u, v },
+
+		{ 0, 0 },
+		{ 0, v },
+		{ u, 0 },
+		{ 0, v },
+		{ u, v },
+		{ u, 0 },
+
+		{ 0, 0 },
+		{ u, 0 },
+		{ 0, v },
+		{ 0, v },
+		{ u, 0 },
+		{ u, v },
+
+		{ 0, 0 },
+		{ 1, 1 },
+		{ 1, 0 },
+		{ 0, 1 },
+		{ 1, 1 },
+		{ 0, 0 }
+	};
+
 	Vector3 positions[30] = { 
 		Vector3(x-edge, 0, z-edge),
 		Vector3(x-edge, height, z-topedge),
@@ -156,6 +197,7 @@ void City::generateBuilding(float x, float z) {
 
 	for (int i = 0; i < 30; i++) {
 		manual_->position(positions[i] + Vector3(0, heightOffset, 0));
+		manual_->textureCoord(texcoords[i][0], texcoords[i][1]);
 		manual_->normal(normals[i/6]);
 	}
 	for (int i = 0; i < 30; i++) {

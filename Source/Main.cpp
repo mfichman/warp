@@ -25,15 +25,15 @@ int main(int argc, char** argv) {
         game->getCamera()->setPosition(400, 100, 800);
         game->getCamera()->lookAt(0, 0, 0);
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.2, 0.2, 0.2));
-		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.2, 0.2, 0.2), 0.0, 0, 500);
-		game->getSceneManager()->setAmbientLight(ColourValue(0.2, 0.2, 0.2));
+		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.2, 0.2, 0.2), 0.0, 0, 450);
+		//game->getSceneManager()->setFog(FOG_EXP, ColourValue(0.4, 0.4, 0.8), 0.007, 0.005);
+		game->getSceneManager()->setAmbientLight(ColourValue(0.4, 0.4, 0.4));
 
 		Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
-		light->setDiffuseColour(ColourValue(0.4, 0.4, 0.4));
+		light->setDiffuseColour(ColourValue(0.6, 0.6, 0.6));
 		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
-		light->setDirection(Vector3(0.5, -1, 1)); 
-		light->setPosition(Vector3(0.5, -1, 1));
+		light->setDirection(Vector3(0.5, -1, 0.8)); 
         
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
         //Warp::FreeCamera camera(game.get());

@@ -16,11 +16,11 @@ Level:startBeatServer{bpm=120} -- this should always be 120 for the loops to be 
 while (true) do
 
 Level:waitForBeat()
-Level:setLight{name="Light", diffuse={0.4, 0.3, 0.0}}
+--Level:setLight{name="Light", diffuse={0.4, 0.3, 0.0}}
 print "beat"
 
 Level:waitForBeat()
-Level:setLight{name="Light", diffuse={0.0, 0.0, 0.6}}
+--Level:setLight{name="Light", diffuse={0.0, 0.0, 0.6}}
 print "beat"
 
 end

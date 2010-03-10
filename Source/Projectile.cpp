@@ -55,11 +55,11 @@ void Projectile::onTimeStep() {
 	billboard->setDimensions(width, height);
 
 	if (target_) {
-		float speed = getVelocity().length();
-		if (getPosition().distance(target_->getPosition()) < speed) {
+		/*float speed = getVelocity().length();
+		if (getPosition().distance(target_->getPosition()) < speed * 1.5) {
 			// Projectile is close enough, so fake a collision
 			collide(target_);
-		}
+		}*/
 	}
 }
 

@@ -141,6 +141,8 @@ void Player::computeForces() {
 	// Get the spawn location
 	spawnProjection_ = level_->getTube()->getSpineProjection(playerProjection_.distance + SPAWN_DISTANCE, spawnProjection_.index);
 
+
+	// Get the spawn location
 	const SpineProjection& projection = playerProjection_;
     assert(projection.forward != Vector3::ZERO);
     assert(projection.position - position != Vector3::ZERO);
@@ -267,8 +269,9 @@ const SpineProjection& Player::getPlayerProjection() const {
     return playerProjection_;
 }
 
-const SpineProjection& Player::getSpawnProjection() const {
-	return spawnProjection_;
+const SpineProjection& Player::getSpawnProjection(float distance) const {
+	return spawnProjection_;//level_->getTube()->getSpineProjection(playerProjection_.distance + distance, playerProjection_.index);
+
 }
 
 

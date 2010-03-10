@@ -65,12 +65,6 @@ public:
 
 	/** Sets the current level by name */
 	void setLevel(const std::string& name);
-
-	/** Returns gravity */ 
-	float getGravity() { return gravity_; }
-
-	/** Sets gravity */
-	void setGravity(float g) { gravity_ = g; }
     
 private:
 	Game(const Game&);

@@ -139,7 +139,6 @@ void Object::onTimeStep() {
 
 	callMethod("onTimeStep"); // destruction also handled in lua
 
-    /*
 	const SpineProjection proj = level_->getPlayer()->getPlayerProjection();
 	Vector3 to = proj.position - node_->getPosition();
 
@@ -150,7 +149,7 @@ void Object::onTimeStep() {
 	if (to.dotProduct(proj.forward) > 0 && to.squaredLength() > 120) {
 		alive_ = false;
 	}
-    */
+    
 
 	// Track target by setting the vector towards the target
 	if (target_) {
@@ -158,11 +157,6 @@ void Object::onTimeStep() {
 		velocity.normalise();
 		velocity *= speed_;
 		body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
-	}
-    
-
-	for (list<shared_ptr<SubObject>>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
-		(*i)->onTimeStep();
 	}
 }
 
@@ -195,7 +189,11 @@ void Object::setTarget(Object* target) {
 }
 
 void Object::addTracker(Object* p) {
-	trackers_.push_back(p);
+	if (!alive_ || exploded_) {
+		p->onTargetDelete(this);
+	} else {
+		trackers_.push_back(p);
+	}
 }
 
 void Object::removeTracker(Object* p) {

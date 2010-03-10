@@ -185,7 +185,9 @@ void Level::loadScriptCallbacks() {
 
 int Level::luaSetGravity(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	level->game_->setGravity(lua_tonumber(env, -1));
+	Vector3 gravity;
+	env >> gravity;
+	level->game_->getWorld()->setGravity(btVector3(gravity.x, gravity.y, gravity.z));
 	return 0;
 }
 

@@ -236,16 +236,18 @@ void Game::windowClosed(RenderWindow* rw) {
 /** Called when a frame begins */
 bool Game::frameRenderingQueued(const FrameEvent& evt) { 
 
-	keyboard_->capture();
-	mouse_->capture();
+
 
 	if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 		root_->queueEndRendering();
 	}
 
 	physicsAccumulator_ += evt.timeSinceLastFrame;
-	while (physicsAccumulator_ > 1.0f/60.0f) {
-		float delta = 1.0f/60.0f;
+	float delta = 0.01;
+	while (physicsAccumulator_ > delta) {
+		keyboard_->capture();
+		mouse_->capture();
+
 		if (keyboard_->isKeyDown(OIS::KC_S)) {
 			world_->stepSimulation(delta / 4.0, 0);
 		} else {

@@ -23,9 +23,12 @@ material City
     {
 	    pass
 		{
-		    ambient 0.400000 0.400000 0.400000 1.000000
-			diffuse 0.60000 0.600000 0.60000 1.000000
-		
+		    ambient 0.600000 0.600000 0.600000 0.600000
+			diffuse 1.00000 1.000000 1.00000 1.000000
+		    texture_unit
+			{
+				texture Metal.png
+			}
 		}
 	
 	}

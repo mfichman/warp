@@ -23,7 +23,7 @@ public:
 	const SpineProjection& getPlayerProjection() const;
 
 	/** Returns the spine projection where enemies should spawn */
-	const SpineProjection& getSpawnProjection() const;
+	const SpineProjection& getSpawnProjection(float distance) const;
 
 	/** Call to update the player */
 	virtual void onTimeStep();
