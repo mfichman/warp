@@ -28,3 +28,17 @@ fragment_program WarpGlow glsl
     }
 }
 
+fragment_program WarpGlow2 glsl
+{
+    source WarpGlow2.glsl
+    attach WarpPhong
+    
+    default_params
+    {
+        param_named tex_sampler int 0
+        param_named glow_sampler int 1
+        param_named_auto time time 2.0
+        param_named texscale float2 1.0 1.0
+    }
+}
+

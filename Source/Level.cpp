@@ -22,6 +22,7 @@
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
 }
+#include <boost/lexical_cast.hpp>
 
 using namespace Warp;
 using namespace Ogre;
@@ -32,14 +33,22 @@ using namespace boost;
 Level::Level(Game* game, const std::string& name) :
     game_(game),
     tube_(new DynamicTube(game, "Levels/" + name + ".tube")),
-	objectsCreated_(0) {
+	objectsCreated_(0),
+	scriptNumber_(0),
+	name_(name) {
 
 	loadScriptCallbacks();
 	player_.reset(new Player(game, this, "Player", 0));
 	game_->getSceneManager()->setWorldGeometry("terrain.cfg");
     game_->addListener(this);
+
+	// Load beat script
 	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Beat.lua")));
-	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Level.lua")));
+
+	// Load level script
+	string path = "Scripts/" + name + "." + lexical_cast<string>(scriptNumber_) + ".lua";
+	levelScript_.reset(new ScriptTask(game, path));
+	tasks_.push_back(levelScript_);
 
 	player_->onTimeStep(); // Need this to initialize the spine node
 }
@@ -88,6 +97,18 @@ void Level::onTimeStep() {
 		} else {
 			i++;
 		}
+	}
+
+	int newScriptNumber = getPlayer()->getPlayerProjection().script;
+	if (scriptNumber_ != newScriptNumber) {
+		// Switch script
+		cout << "Switching level script: " << scriptNumber_ << " >>> " << newScriptNumber << endl;
+		tasks_.erase(find(tasks_.begin(), tasks_.end(), levelScript_));
+
+		scriptNumber_ = newScriptNumber;
+		string path = "Scripts/" + name_ + "." + lexical_cast<string>(scriptNumber_) + ".lua";
+		levelScript_.reset(new ScriptTask(game_, path));
+		tasks_.push_back(levelScript_);
 	}
 }
 

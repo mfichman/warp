@@ -88,17 +88,20 @@ struct SpineNode {
 	Ogre::Vector3 position; // Position of the node
 	float distance; // Distance along the path from first node
 	bool visible;
+	int script;
 };
 
 struct SpineProjection {
 	SpineProjection() :
 		index(0),
-		distance(0) {}
+		distance(0),
+		script(0) {}
 
     Ogre::Vector3 position;
     Ogre::Vector3 forward;
 	int index;
 	float distance;
+	int script;
 };
 
 struct BeatLoop {

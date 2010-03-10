@@ -44,6 +44,7 @@ private:
     float ringRadius_;
     int ringDivisions_;
 	bool tubeVisible_;
+	int scriptNumber_;
 
     // These variables are for the loaded scene objects
     Game* game_;

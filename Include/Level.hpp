@@ -65,10 +65,13 @@ private:
 	std::list<boost::shared_ptr<Object>> objects_;
 	std::list<boost::shared_ptr<ScriptTask>> tasks_;
 	std::list<boost::shared_ptr<City>> cities_;
+	boost::shared_ptr<ScriptTask> levelScript_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Player> player_;
 	size_t objectsCreated_;
 	std::string compositor_;
+	std::string name_;
+	int scriptNumber_;
 };
 
 

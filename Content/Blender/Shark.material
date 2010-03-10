@@ -1,6 +1,6 @@
 material SharkEngine
 {
-	receive_shadows on
+	receive_shadows off
 	technique
 	{
 		pass
@@ -14,7 +14,7 @@ material SharkEngine
 }
 material SharkHull/TEXFACE/SharkHullGlow.Png
 {
-	receive_shadows on
+	receive_shadows off
 	technique
 	{
 		pass

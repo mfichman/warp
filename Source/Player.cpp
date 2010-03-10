@@ -26,7 +26,9 @@ using namespace std;
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
 Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
-	cooldown_(0.0f) {
+	cooldown_(0.0f),
+	shieldsPct_(100.0f),
+	points_(0) {
 
     Vector3 position(0, 245, 5);
 	setPosition(position);

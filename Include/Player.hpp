@@ -27,6 +27,12 @@ public:
 
 	/** Call to update the player */
 	virtual void onTimeStep();
+
+	float getShieldsPct() const { return shieldsPct_; }
+
+	int getPoints() const { return points_; }
+
+	void addPoints(int points) { points_ += points; }
 		
 private:
 	Player(const Player&);
@@ -52,6 +58,8 @@ private:
 	Ogre::Vector3 forward_;
 	std::list<Enemy*> targets_;
 	float cooldown_;
+	float shieldsPct_;
+	int points_;
 };
 
 }

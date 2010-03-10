@@ -69,6 +69,7 @@ void Enemy::onCollision(Projectile* p) {
 	finalHitCount_++;
 	if (finalHitCount_ == hitPoints_) {
 		callMethod("onDestroy");
+		level_->getPlayer()->addPoints(hitPoints_);
 	}
 	if (billboards_) {
 		node_->detachObject(billboards_);

@@ -65,6 +65,8 @@ public:
 
 	/** Sets the current level by name */
 	void setLevel(const std::string& name);
+
+	Level* getLevel() const { return level_.get(); }
     
 private:
 	Game(const Game&);

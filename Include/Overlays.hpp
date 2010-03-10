@@ -23,7 +23,7 @@ private:
 	void onTimeStep();
 
 	Game* game_;
-	Ogre::Overlay* debug_;
+	float speed_;
 };
 
 }

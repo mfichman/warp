@@ -23,6 +23,7 @@ DynamicTube::DynamicTube(Game* game, const string& name) :
     name_(name),
     manual_(game->getSceneManager()->createManualObject(name)),
 	game_(game),
+	scriptNumber_(0),
 	tubeVisible_(true) {
 
 	transform_ = transform_.concatenate(Matrix4::getTrans(0, 250, 0));
@@ -102,6 +103,8 @@ void DynamicTube::readInputFile() {
             in >> curveStep_;
 		} else if (type == "visible") {
 			in >> tubeVisible_;
+		} else if (type == "script") {
+			in >> scriptNumber_;
 		}
 
         if (in.fail()) break;
@@ -115,6 +118,7 @@ void DynamicTube::generateRing() {
 	SpineNode node;
 	node.position = transform_ * Vector3::ZERO;
 	node.visible = tubeVisible_;
+	node.script = scriptNumber_;
 	
     if (nodes_.size() != 0) {
         v_ += lastSpinePosition_.distance(node.position);
@@ -250,6 +254,7 @@ SpineProjection DynamicTube::getSpineProjection(float distance, int node_i) cons
     result.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
     result.forward.normalise();
 	result.index = prev_i;
+	result.script = prev.script;
 	result.distance = (1 - alpha)*prev.distance + (alpha)*next.distance;
 
 	return result;
@@ -312,6 +317,7 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) co
     result.forward = (1 - alpha)*prevForward + (alpha)*nextForward;
     result.forward.normalise();
 	result.index = prev_i;
+	result.script = prev.script;
 	result.distance = (1 - alpha)*prev.distance + (alpha)*next.distance;
 
 	return result;
