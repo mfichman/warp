@@ -53,7 +53,16 @@ void Projectile::onTimeStep() {
 	}
 
 	billboard->setDimensions(width, height);
+
+	if (target_) {
+		float speed = getVelocity().length();
+		if (getPosition().distance(target_->getPosition()) < speed) {
+			// Projectile is close enough, so fake a collision
+			collide(target_);
+		}
+	}
 }
+
 
 void Projectile::onCollision(Enemy* enemy) {
 	if (static_cast<Object*>(enemy) == target_) {

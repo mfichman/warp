@@ -13,7 +13,7 @@ material Flare
 
 			texture_unit
 			{
-				texture GoldFire.png
+				texture Photon.png
 			}
 		}
 	}
@@ -84,6 +84,7 @@ material Smoke
 	{
 		pass
 		{
+		    fog_override true
 			lighting off
 			//scene_blend src_colour one_minus_src_colour
             scene_blend add

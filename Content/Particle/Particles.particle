@@ -44,26 +44,28 @@ particle_system Fountain
 particle_system Flames
 {
     material Flare
-    particle_width 2.2
-    particle_height 2.2
+    particle_width 1.3
+    particle_height 1.3
     cull_each false
     quota 40
     billboard_type point
+    
 
     // Area emitter
     emitter Box
     {
+        duration 1.5
         angle 15
-        width 0.9
+        width 0.5
         height 0
-        depth 0.9
-        emission_rate 50
+        depth 0.5
+        emission_rate 60
         time_to_live 0.5
         direction 0 1 0
-        velocity_min 4.0
-        velocity_max 6.0
-        colour_range_start 1 0 0
-        colour_range_end 0.5 0.6 0
+        velocity_min 1
+        velocity_max 2
+        colour_range_start 1 0.6 0.1
+        colour_range_end 0.8 0.6 0.1
     }
 
     // Fader
@@ -74,11 +76,11 @@ particle_system Flames
         blue -2.0
     }
     
-    affector Rotator
-    {
-        rotation_range_start 0
-        rotation_range_end 360
-    }
+    //affector Rotator
+    //{
+    //    rotation_range_start 0
+    //    rotation_range_end 360
+    //}
 }
 
 particle_system Explosion
@@ -105,8 +107,8 @@ particle_system Explosion
 
         time_to_live 0.5
         
-        colour_range_start 1 1 0.1
-        colour_range_end 1 0.6 0.1
+        colour_range_start 1 0.6 0.1
+        colour_range_end 0.8 0.6 0.1
         
         direction 0 0 1
         duration 0.5

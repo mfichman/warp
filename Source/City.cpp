@@ -15,7 +15,7 @@
 #define BUILDING_MAX_HEIGHT 100.0f
 #define BUILDING_MIN_HEIGHT 30.0f
 #define BUILDING_FOOTPRINT 12.0f
-#define CITY_RADIUS 100.0f
+#define CITY_RADIUS 70.0f
 
 using namespace Ogre;
 using namespace Warp;
@@ -35,7 +35,14 @@ City::City(Game* game, Level* level, int id) :
 
 	Vector3 right = spawn.forward.crossProduct(Vector3::UNIT_Y);
 	spawn.position.y = 0;
-	spawn.position += Math::RangeRandom(-100, 100)*right;
+
+	if (Math::RangeRandom(-1, 1) < 0) {
+		spawn.position += Math::RangeRandom(50, 100)*right;
+	} else {
+		spawn.position -= Math::RangeRandom(50, 100)*right;
+	}
+
+	
 	cout << "Created city at " << spawn.position << endl;
 
 	node_ = game_->getSceneManager()->getRootSceneNode()->createChildSceneNode(name_);
@@ -65,60 +72,62 @@ void City::generateBuildings() {
 	//	}
 	//}
 
-	for (int i = 0; i < 25; i++) {
+	for (int i = 0; i < 15; i++) {
 		float theta = Math::RangeRandom(0, 2*Math::PI);
 		float radius = Math::RangeRandom(0, CITY_RADIUS);
 		float x = radius*cosf(theta);
 		float z = radius*sinf(theta);
 		//float x = Math::RangeRandom(-width/2.0, width/2.0);
 		//float z = Math::RangeRandom(-depth/2.0, depth/2.0);
-		float height = 10 * Math::RangeRandom(BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT)/sqrt(x*x + z*z);
-		height = min(height, BUILDING_MAX_HEIGHT);
-		generateBuilding(x, z, height);
+		generateBuilding(x, z);
 
 	}
 }
 
-void City::generateBuilding(float x, float z, float height) {
-	//float height = Math::RangeRandom(BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT);
-	//float edge = -BUILDING_FOOTPRINT/2.0f;
-	float edge = -Math::RangeRandom(BUILDING_FOOTPRINT/4.0, BUILDING_FOOTPRINT/2.0);
+void City::generateBuilding(float x, float z) {
+	float height = 2* Math::RangeRandom(BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT)/pow(x*x + z*z, 0.12f);
+	height = min(height, BUILDING_MAX_HEIGHT);
+
+	float min = BUILDING_FOOTPRINT/3.0;
+	float max = BUILDING_FOOTPRINT/2.0;
+	float edge = -Math::RangeRandom(min, max);
+	float topedge = edge;// + 2.0f;
 
 	Vector3 positions[30] = { 
 		Vector3(x-edge, 0, z-edge),
-		Vector3(x-edge, height, z-edge),
+		Vector3(x-edge, height, z-topedge),
 		Vector3(x+edge, 0, z-edge),
-		Vector3(x-edge, height, z-edge),
-		Vector3(x+edge, height, z-edge),
+		Vector3(x-edge, height, z-topedge),
+		Vector3(x+edge, height, z-topedge),
 		Vector3(x+edge, 0, z-edge),
 
 		Vector3(x-edge, 0, z+edge),
 		Vector3(x+edge, 0, z+edge),
-		Vector3(x-edge, height, z+edge),
-		Vector3(x-edge, height, z+edge),
+		Vector3(x-edge, height, z+topedge),
+		Vector3(x-edge, height, z+topedge),
 		Vector3(x+edge, 0, z+edge),
-		Vector3(x+edge, height, z+edge),
+		Vector3(x+edge, height, z+topedge),
 
 		Vector3(x+edge, 0, z-edge),
-		Vector3(x+edge, height, z-edge),
+		Vector3(x+edge, height, z-topedge),
 		Vector3(x+edge, 0, z+edge),
-		Vector3(x+edge, height, z-edge),
-		Vector3(x+edge, height, z+edge),
+		Vector3(x+edge, height, z-topedge),
+		Vector3(x+edge, height, z+topedge),
 		Vector3(x+edge, 0, z+edge),
 
 		Vector3(x-edge, 0, z-edge),
 		Vector3(x-edge, 0, z+edge),
-		Vector3(x-edge, height, z-edge),
-		Vector3(x-edge, height, z-edge),
+		Vector3(x-edge, height, z-topedge),
+		Vector3(x-edge, height, z-topedge),
 		Vector3(x-edge, 0, z+edge),
-		Vector3(x-edge, height, z+edge),
+		Vector3(x-edge, height, z+topedge),
 
-		Vector3(x-edge, height, z-edge),
-		Vector3(x+edge, height, z+edge),
-		Vector3(x+edge, height, z-edge),
-		Vector3(x-edge, height, z+edge),
-		Vector3(x+edge, height, z+edge),
-		Vector3(x-edge, height, z-edge)
+		Vector3(x-topedge, height, z-topedge),
+		Vector3(x+topedge, height, z+topedge),
+		Vector3(x+topedge, height, z-topedge),
+		Vector3(x-topedge, height, z+topedge),
+		Vector3(x+topedge, height, z+topedge),
+		Vector3(x-topedge, height, z-topedge)
 	};
 
 	Vector3 normals[5] = {

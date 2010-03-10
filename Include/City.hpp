@@ -25,7 +25,7 @@ public:
 
 private:
 	void generateBuildings();
-	void generateBuilding(float x, float y, float height);
+	void generateBuilding(float x, float y);
 	void generateIndices();
 
 	Game* game_;
