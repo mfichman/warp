@@ -45,11 +45,14 @@ Player::~Player() {
 /** Called by Bullet to update the scene node */
 void Player::setWorldTransform(const btTransform& transform) {
 	
+    // Set local info
+    transform_ = transform;
+
 	// BEGIN TODO
 	const btVector3& btposition = transform.getOrigin();
 	const btVector3& btvelocity = body_->getLinearVelocity();
 	const Vector3 position(btposition.x(), btposition.y(), btposition.z());
-	const Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());    
+	const Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());  
 
 	// Get the player location
     playerProjection_ = level_->getTube()->getSpineProjection(position, playerProjection_.index);
@@ -80,7 +83,7 @@ void Player::setWorldTransform(const btTransform& transform) {
 	left.normalise();
     up.normalise();
     forward.normalise(); 
-	
+
 	node_->setOrientation(Quaternion(-left, up, -forward));
 	node_->setPosition(position);
 
@@ -99,6 +102,8 @@ void Player::setWorldTransform(const btTransform& transform) {
     Vector3 new_up = (1.0 - CAM_ALPHA) * up + CAM_ALPHA * cam_up;
     Vector3 new_forward = (1.0 - CAM_ALPHA) * forward + CAM_ALPHA * cam_forward;
     camera->setOrientation(Quaternion(new_right, new_up, -new_forward));
+	//camera->setOrientation(Quaternion(-left, up, -forward));
+	//camera->setPosition(target_position);
     //cout << velocity.dotProduct(forward);
 }
 

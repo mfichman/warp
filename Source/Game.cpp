@@ -199,7 +199,7 @@ void Game::loadPhysics() {
     //world_->getSolverInfo().m_erp = 1.00f;
     //world_->getSolverInfo().m_erp2 = 1.00f;
     world_->setGravity(btVector3(0, -2, 0));
-	world_->setInternalTickCallback(&Game::onTick, this, true);
+	//world_->setInternalTickCallback(&Game::onTick, this, true);
 	world_->setWorldUserInfo(this);
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher_);
 
@@ -236,15 +236,46 @@ void Game::windowClosed(RenderWindow* rw) {
 /** Called when a frame begins */
 bool Game::frameRenderingQueued(const FrameEvent& evt) { 
 
-	physicsAccumulator_ += evt.timeSinceLastFrame;
+	keyboard_->capture();
+	mouse_->capture();
 
 	if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
 		root_->queueEndRendering();
 	}
-	if (keyboard_->isKeyDown(OIS::KC_S)) {
-		world_->stepSimulation(evt.timeSinceLastFrame / 4.0, 3);
-	} else {
-		world_->stepSimulation(evt.timeSinceLastFrame, 3);
+
+	physicsAccumulator_ += evt.timeSinceLastFrame;
+	while (physicsAccumulator_ > 1.0f/60.0f) {
+		float delta = 1.0f/60.0f;
+		if (keyboard_->isKeyDown(OIS::KC_S)) {
+			world_->stepSimulation(delta / 4.0, 0);
+		} else {
+			world_->stepSimulation(delta, 0);
+		}
+
+		// Check for collisions
+		int nmanifolds = world_->getDispatcher()->getNumManifolds();
+		for (int i = 0; i < nmanifolds; i++) {
+			btPersistentManifold* manifold = world_->getDispatcher()->getManifoldByIndexInternal(i);
+			btCollisionObject* a = static_cast<btCollisionObject*>(manifold->getBody0());
+			btCollisionObject* b = static_cast<btCollisionObject*>(manifold->getBody1());
+
+			Object* ca = static_cast<Object*>(a->getUserPointer());
+			Object* cb = static_cast<Object*>(b->getUserPointer());
+
+			// Perform double dynamic dispatch
+			if (ca && cb) {
+				ca->collide(cb);
+				cb->collide(ca);
+			}
+		}
+
+		list<GameListener*>::iterator i = listeners_.begin();
+		while (i != listeners_.end()) {
+			GameListener* listener = *i;
+			i++;
+			listener->onTimeStep();
+		}
+		physicsAccumulator_ -= delta;
 	}
 
 	// Hack hack hack
@@ -257,41 +288,6 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 	}
 
 	return true;
-}
-
-void Game::onTick(btDynamicsWorld* world, btScalar step) {
-	
-
-	world->clearForces();
-
-	// Check for collisions
-	int nmanifolds = world->getDispatcher()->getNumManifolds();
-	for (int i = 0; i < nmanifolds; i++) {
-		btPersistentManifold* manifold = world->getDispatcher()->getManifoldByIndexInternal(i);
-		btCollisionObject* a = static_cast<btCollisionObject*>(manifold->getBody0());
-		btCollisionObject* b = static_cast<btCollisionObject*>(manifold->getBody1());
-
-		Object* ca = static_cast<Object*>(a->getUserPointer());
-		Object* cb = static_cast<Object*>(b->getUserPointer());
-
-		// Perform double dynamic dispatch
-		if (ca && cb) {
-			ca->collide(cb);
-			cb->collide(ca);
-		}
-	}
-
-	Game* game = static_cast<Game*>(world->getWorldUserInfo());
-
-	game->keyboard_->capture();
-	game->mouse_->capture();
-
-	list<GameListener*>::iterator i = game->listeners_.begin();
-	while (i != game->listeners_.end()) {
-		GameListener* listener = *i;
-		i++;
-		listener->onTimeStep();
-	}
 }
 
 OIS::Keyboard* Game::getKeyboard() const { 

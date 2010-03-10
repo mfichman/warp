@@ -60,6 +60,8 @@ Level::~Level() {
 void Level::onTimeStep() {
 
 	//cout << "Objects: " << objects_.size() << endl;
+	
+	player_->onTimeStep();
 
 	for (list<shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end();) {
 		(*i)->onTimeStep();
@@ -87,8 +89,6 @@ void Level::onTimeStep() {
 			i++;
 		}
 	}
-
-	player_->onTimeStep();
 }
 
 /** Loads Lua script functions for this level */

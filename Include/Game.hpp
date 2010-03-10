@@ -84,9 +84,6 @@ private:
     void loadOsc();
 	void loadScript(const std::string& name);
 
-	// Bullet callbacks
-	static void onTick(btDynamicsWorld* world, btScalar step);
-
 	// Ogre callbacks
 	virtual void windowClosed(Ogre::RenderWindow* rw);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);

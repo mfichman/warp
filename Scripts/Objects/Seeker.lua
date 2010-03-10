@@ -15,11 +15,7 @@ function Seeker:init()
     self:addEntity{name="Ring", mesh="SeekerRing.mesh"}
     self.destroyed = false
     self.hitPoints = 1
-    local position = Level:getPlayerPosition()
-    local orientation = Level:getPlayerOrientation()
-    --self:setPosition(position + {0,1,1})
-    self:setOrientation(orientation)
-    print "check3"
+    --self:setOrientation(orientation)
 end
 
 -- This function gets called once per timestep by the
@@ -27,6 +23,9 @@ end
 function Seeker:onTimeStep()
 --    position = getPlayerPosition()
 --    print(position[1], position[2], position[3])
+    local direction = Level:getPlayerOrientation():getDirection()
+    local position = Level:getPlayerPosition()
+    self:setPosition(position + (direction * 3))
 
 end
 
