@@ -254,7 +254,7 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
 		lua_pop(env, 1);
 		lua_rawgeti(env, -1, 1);
 		q.x = lua_tonumber(env, -1);
-		//lua_pop(env, 1);
+		lua_pop(env, 1);
 		lua_rawgeti(env, -1, 2);
 		q.y = lua_tonumber(env, -1);
 		lua_pop(env, 1);
@@ -264,7 +264,7 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
 		lua_rawgeti(env, -1, 4);
 		q.w = lua_tonumber(env, -1);
 		lua_pop(env, 1);
-		lua_pop(env, 1);
+		//lua_pop(env, 1);
 	} else {
 		Vector3 axis;
 		float angle = lua_tonumber(env, -1);
@@ -275,7 +275,6 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
     
 
     return env;
-
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {

@@ -207,14 +207,14 @@ void Object::setPosition(const Ogre::Vector3& p) {
 	btTransform transform = body_->getCenterOfMassTransform();
 	transform.setOrigin(btVector3(p.x, p.y, p.z));
 	body_->setCenterOfMassTransform(transform);
+    setWorldTransform(transform);
 }
 
 void Object::setOrientation(const Ogre::Quaternion& q) {
 	btTransform transform = body_->getCenterOfMassTransform();
-    transform.setRotation(btQuaternion(q.getYaw().valueRadians(),
-                                       q.getPitch().valueRadians(),
-                                       q.getRoll().valueRadians()));
+    transform.setRotation(btQuaternion(q.x, q.y, q.z, q.w));
 	body_->setCenterOfMassTransform(transform);
+    setWorldTransform(transform);
 }
 
 void Object::onTargetDelete(Object* target) {
