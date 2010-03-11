@@ -280,7 +280,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 	// Hack hack hack
 	if (getKeyboard()->isKeyDown(OIS::KC_R) && !resetEvent_) {
 		resetEvent_ = true;
-		std::cout << "RESET" << endl;
+		std::cout << "Reset" << endl;
 		setLevel("Tube1");
 	} else {
 		resetEvent_ = false;
