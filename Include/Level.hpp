@@ -74,6 +74,7 @@ private:
 	std::string compositor_;
 	std::string name_;
 	int scriptNumber_;
+	int oldObjectCount_;
 };
 
 

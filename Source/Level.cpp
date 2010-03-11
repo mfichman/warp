@@ -36,7 +36,8 @@ Level::Level(Game* game, const std::string& name) :
     tube_(new DynamicTube(game, "Levels/" + name + ".tube")),
 	objectsCreated_(0),
 	scriptNumber_(0),
-	name_(name) {
+	name_(name),
+	oldObjectCount_(0) {
 
 	loadScriptCallbacks();
 	player_.reset(new Player(game, this, "Player", 0));
@@ -71,7 +72,10 @@ Level::~Level() {
 /** Called once for each game loop */
 void Level::onTimeStep() {
 
-	//cout << "Objects: " << objects_.size() << endl;
+	if (oldObjectCount_ != objects_.size()) {
+		oldObjectCount_ = objects_.size();
+		cout << "Object count: " << objects_.size() << endl;
+	}
 	
 	player_->onTimeStep();
 

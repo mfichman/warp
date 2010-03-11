@@ -17,10 +17,8 @@ while (true) do
 
 Level:waitForBeat()
 --Level:setLight{name="Light", diffuse={0.4, 0.3, 0.0}}
-print "beat"
 
 Level:waitForBeat()
 --Level:setLight{name="Light", diffuse={0.0, 0.0, 0.6}}
-print "beat"
 
 end

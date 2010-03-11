@@ -28,7 +28,6 @@ private:
     std::auto_ptr<boost::thread> thrd_;
 
     void beatEvent(int beat) { // we could callback to a method in the main program here...
-        //std::cout << "BEAT:" << beat << std::endl;
         cur_beat = beat;
     }
 
@@ -39,12 +38,12 @@ public:
 				IpEndpointName( IpEndpointName::ANY_ADDRESS, port ),
 				(osc::OscPacketListener*) this );
 
-		std::cout << "listening for input on port " << port << "...\n";
-		std::cout << "press ctrl-c to end\n";
+		//std::cout << "listening for input on port " << port << "...\n";
+		//std::cout << "press ctrl-c to end\n";
 
 		s.RunUntilSigInt();
 
-		std::cout << "finishing.\n";
+		//std::cout << "finishing.\n";
 		exit(0);
 	}
 

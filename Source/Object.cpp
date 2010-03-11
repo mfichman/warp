@@ -154,6 +154,7 @@ void Object::onTimeStep() {
 	// spine node path.
 	if (to.dotProduct(proj.forward) > 0 && to.length() > 100) {
 		alive_ = false;
+		cout << "Killing " << name_ << endl;
 	}
 
 	for (list<SubObjectPtr>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
@@ -352,7 +353,6 @@ int Object::luaAddEntity(lua_State* env) {
 		if (!lua_isnil(env, -1)) {
 			string animation;
 			env >> animation;
-			cout << "Enabling animation " << animation << endl;
 			AnimationState* state = subobj->getEntity()->getAnimationState(animation);
 			state->setEnabled(true);
 			state->setLoop(true);
@@ -461,7 +461,6 @@ int Object::luaSetEntity(lua_State* env) {
 		if (!lua_isnil(env, -1)) {
 			string animation;
 			env >> animation;
-			cout << "Enabling animation " << animation << endl;
 			AnimationState* state = entity->getAnimationState(animation);
 			state->setEnabled(true);
 			state->setLoop(true);

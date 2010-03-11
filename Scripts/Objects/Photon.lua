@@ -18,7 +18,6 @@ function Photon:onTimeStep()
 
     local target = self:getTarget()
     if (target ~= nil) then
-        print("STEPTRACK")
         local dir = target:getPosition() - self:getPosition()
         dir:normalize()
         self:setVelocity(dir * 100)
