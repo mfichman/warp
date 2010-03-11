@@ -9,6 +9,7 @@ material Circle
             lighting off
             scene_blend alpha_blend
             depth_write off
+			depth_func always_pass
 			texture_unit
 			{
 				texture Circle.png

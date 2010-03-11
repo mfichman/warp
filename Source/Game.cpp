@@ -236,12 +236,6 @@ void Game::windowClosed(RenderWindow* rw) {
 /** Called when a frame begins */
 bool Game::frameRenderingQueued(const FrameEvent& evt) { 
 
-
-
-	if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
-		root_->queueEndRendering();
-	}
-
 	physicsAccumulator_ += evt.timeSinceLastFrame;
 	float delta = 0.01;
 	physicsAccumulator_ = min(physicsAccumulator_, 0.1f);
@@ -288,6 +282,10 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 		setLevel("Tube1");
 	} else {
 		resetEvent_ = false;
+	}
+
+	if (keyboard_->isKeyDown(OIS::KC_ESCAPE)) {
+		root_->queueEndRendering();
 	}
 
 	return true;

@@ -31,9 +31,9 @@ Enemy::Enemy(Game* game, Level* level, const string& type, int id) :
     // default behavior is to stick it at the spawn position, but lua may override this
 
 	// Find the spawn position
-	const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection(10);
+	//const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection(10);
 	// TODO: Align the object so it's facing down the tube
-	setPosition(spawn.position + Vector3(Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0)));
+	//setPosition(spawn.position + Vector3(Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0)));
 
     // Position/velocity information is set in lua
 	//setSpeed(40);
