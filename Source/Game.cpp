@@ -245,7 +245,8 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 		keyboard_->capture();
 		mouse_->capture();
 
-		if (keyboard_->isKeyDown(OIS::KC_S)) {
+        // slow motion hack/easter egg
+		if (keyboard_->isKeyDown(OIS::KC_T)) {
 			world_->stepSimulation(delta / 4.0, 0);
 		} else {
 			world_->stepSimulation(delta, 0);
