@@ -14,15 +14,6 @@ function AI:spiral(enemy, distance, diameter)
     enemy:setVelocity(proj.forward * 60)
 
     Level:createTask(function()
---        enemy.onTimeStep = function(self)
---            local proj = Level:getSpineProjection(40)
---            local alpha = 0.99
---            local dir = proj.position - enemy:getPosition()
---            dir:normalize()
---            local cur_vel = enemy:getVelocity()
---            local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
---            enemy:setVelocity(vel)
---        end 
         Level:sleep(1)
         enemy.onTimeStep = function(self)
             local proj = Level:getSpineProjection(distance)
