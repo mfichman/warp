@@ -201,11 +201,11 @@ void Player::computeForces() {
 	}
 
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
-		body_->applyCentralForce(-50*btVector3(right.x, right.y, right.z));
+		body_->applyCentralForce(-40*btVector3(right.x, right.y, right.z));
     }                               
 	
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
-		body_->applyCentralForce(50*btVector3(right.x, right.y, right.z));
+		body_->applyCentralForce(40*btVector3(right.x, right.y, right.z));
 	}
     
 
@@ -221,7 +221,7 @@ void Player::computeForces() {
                                        forward_drag * forward.y,
                                        forward_drag * forward.z));
     float side_vel = right.dotProduct(velocity);
-    float side_drag = -4 * side_vel;
+    float side_drag = -2 * side_vel;
     body_->applyCentralForce(btVector3(side_drag * right.x,
                                        side_drag * right.y,
                                        side_drag * right.z));

@@ -26,9 +26,9 @@ end
 -- AI STUFF --
 --------------
 
-function Level:createAIEnemy(type, ai_func)
+function Level:createAIEnemy(type, ai_func, ...)
     enemy = Level:createEnemy(type)
-    ai_func(AI, enemy)
+    ai_func(AI, enemy, ...)
 end
 
 

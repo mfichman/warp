@@ -3,34 +3,41 @@
 
 AI = Object:new()
 
-function AI:trackFromSide(enemy)
-    local proj = Level:getSpineProjection(100)
-    local right = proj.forward:cross{0,1,0}
-    enemy:setPosition(proj.position + right * 20)
-    enemy:setVelocity{30,0,0}
-    enemy:setOrientation(proj.forward)
+function AI:spiral(enemy, distance, diameter)
+    distance = distance or 50 
+    diameter = diameter or 6 
 
-    enemy.onTimeStep = function(self)
-        local target_direction = Level:getPlayerPosition() - enemy:getPosition()
-        target_direction:normalize()
-        local cur_orientation = enemy:getOrientation()
-        local normal = target_direction:cross(cur_orientation:getDirection())
-        -- cross product is ab*sin(theta)n = sin(theta)n
-        if (normal:squaredLength() > .1) then
-            rotation = Quaternion:new()
-            rotation:fromAngleAxis(normal, 4) -- adjust the angle between it and the player by .1 radians
-            cur_orientation = rotation * cur_orientation
-            enemy:setOrientation(cur_orientation)
-            print (cur_orientation[1])
-            print (cur_orientation[2])
-            print (cur_orientation[3])
-            print (cur_orientation[4])
-            enemy:setVelocity(cur_orientation:getDirection() * 40)
-        end
-        
-    end
+    enemy.timeElapsed = 0
+
+    local proj = Level:getSpineProjection(-10)
+    enemy:setPosition(proj.position)
+    enemy:setVelocity(proj.forward * 60)
+
+    Level:createTask(function()
+--        enemy.onTimeStep = function(self)
+--            local proj = Level:getSpineProjection(40)
+--            local alpha = 0.99
+--            local dir = proj.position - enemy:getPosition()
+--            dir:normalize()
+--            local cur_vel = enemy:getVelocity()
+--            local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
+--            enemy:setVelocity(vel)
+--        end 
+        Level:sleep(1)
+        enemy.onTimeStep = function(self)
+            local proj = Level:getSpineProjection(distance)
+            enemy.timeElapsed = enemy.timeElapsed + .02
+            local target_position = proj.position + Level:getPlayerOrientation() * {diameter * math.sin(enemy.timeElapsed), diameter * math.cos(enemy.timeElapsed), 0}
+  
+            local alpha = 0.6
+            local dir = target_position - enemy:getPosition()
+            dir:normalize()
+            local cur_vel = enemy:getVelocity()
+            local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
+            enemy:setVelocity(vel)
+        end 
+    end)
 end
-
 
 function AI:flyFromBehind(enemy)
     local proj = Level:getSpineProjection(-10)
