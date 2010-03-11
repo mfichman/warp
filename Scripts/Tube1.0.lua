@@ -5,6 +5,7 @@
 Level:setGravity{0, 0, 0}
 local distance = Level:getSpineNodeDistance()
 --Level:createEnemy("Seeker")
+    Level:createAIEnemy("Seeker", AI.trackFromSide)
 while (true) do
     Level:createCity()
     Level:waitForDistance(distance)
@@ -15,7 +16,6 @@ while (true) do
     --Level:createEnemy("Banshee")
     --Level:createEnemy("Shark")
     --Level:createEnemy("Shark")
-    Level:createEnemy("SnakeCrab")
     --Level:createEnemy("Banshee")
     --Level:createEnemy("StarBlazer")
     --Level:createEnemy("LightBike")
@@ -26,3 +26,4 @@ while (true) do
     distance = distance + 70
     --print(Level:getPlayerPosition():length())
 end
+                                                 

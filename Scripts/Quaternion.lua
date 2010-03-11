@@ -8,6 +8,9 @@ Quaternion = Object:new()
 -- rotates a vector
 -- adapted from wikipedia pseudo-code http://en.wikipedia.org/wiki/Quaternion_rotation
 function Quaternion:__mul(v)
+    if (v[4]) then
+        self:quat_mult(v)
+    end
     local t2  =  self[4] * self[1]
     local t3  =  self[4] * self[2]
     local t4  =  self[4] * self[3]
@@ -21,6 +24,20 @@ function Quaternion:__mul(v)
     result[1] = 2*( (t8 + t10) * v[1] + (t6 -  t4) * v[2] + (t3 + t7) * v[3]) + v[1]
     result[2] = 2*( (t4 +  t6) * v[1] + (t5 + t10) * v[2] + (t9 - t2) * v[3]) + v[2]
     result[3] = 2*( (t7 -  t3) * v[1] + (t2 +  t9) * v[2] + (t5 + t8) * v[3]) + v[3]
+    return result
+end
+
+-- rotate another quaternion by this one and return the result
+function Quaternion:quat_mult(other)
+    result = Quaternion.new()
+--   w * rkQ.w - x * rkQ.x - y * rkQ.y - z * rkQ.z,
+--   w * rkQ.x + x * rkQ.w + y * rkQ.z - z * rkQ.y,
+--   w * rkQ.y + y * rkQ.w + z * rkQ.x - x * rkQ.z,
+--   w * rkQ.z + z * rkQ.w + x * rkQ.y - y * rkQ.x
+    result[4] = self[4] * other[4] - self[1] * other[1] - self[2] * other[2] - self[3] * other[3]
+    result[1] = self[4] * other[1] + self[1] * other[4] + self[2] * other[3] - self[3] * other[2]
+    result[2] = self[4] * other[2] + self[2] * other[4] + self[3] * other[1] - self[1] * other[3]
+    result[3] = self[4] * other[3] + self[3] * other[4] + self[1] * other[2] - self[2] * other[1]
     return result
 end
 
@@ -47,5 +64,10 @@ function Quaternion:getDirection()
 end
 
 function Quaternion:fromAngleAxis(vector, angle)
-    
+    local half_angle = 0.5*angle
+    local f_sin = math.sin(half_angle)
+    self[4] = math.cos(half_angle);
+    self[1] = f_sin*vector[1];
+    self[2] = f_sin*vector[2];
+    self[3] = f_sin*vector[3];
 end

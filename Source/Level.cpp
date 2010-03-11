@@ -120,6 +120,7 @@ void Level::loadScriptCallbacks() {
 	loadScript(env, "Scripts/Vector.lua");
 	loadScript(env, "Scripts/Quaternion.lua");
 	loadScript(env, "Scripts/Level.lua");
+	loadScript(env, "Scripts/AI.lua");
 
 	loadScriptFolder(env, "Scripts/Objects/");
 

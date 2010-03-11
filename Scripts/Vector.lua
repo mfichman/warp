@@ -51,6 +51,10 @@ function Vector:dot(other)
     return self[1] * other[1] + self[2] * other[2] + self[3] * other[3]
 end
 
+function Vector:squaredLength()
+    return self[1]*self[1] + self[2]*self[2] + self[3]*self[3]
+end
+
 function Vector:length()
     return math.sqrt(self[1]*self[1] + self[2]*self[2] + self[3]*self[3])
 end
