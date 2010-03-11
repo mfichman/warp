@@ -7,12 +7,14 @@ local distance = Level:getSpineNodeDistance()
 Level:waitForDistance(60)
 
 while (true) do
-    Level:createCity()
+    --Level:createCity()
     Level:waitForDistance(distance)
-    Level:createAIEnemy("Banshee", AI.flyFromBehind)
+    --Level:createAIEnemy("FireCycle", AI.flyFromBehind)
+    --Level:createAIEnemy("FireCycle", AI.flyFromBehind)
+
     --Level:createAIEnemy("Banshee", AI.flyFromBehind)
     --Level:createEnemy("Seeker")
-    --Level:createEnemy("Banshee")
+    Level:createEnemy("Banshee")
     --Level:createEnemy("Banshee")
     --Level:createEnemy("Banshee")
     --Level:createEnemy("Banshee")

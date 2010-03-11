@@ -24,6 +24,8 @@ using namespace boost;
 #define SPAWN_DISTANCE 500.0f
 #define MAX_COOLDOWN 0.125f;
 
+#define IS_KEY_DOWN(key) game_->getKeyboard()->isKeyDown(key)
+
 /** Initializes the OGRE scene nodes, and the attached rigid bodies */
 Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
@@ -182,13 +184,13 @@ void Player::computeForces() {
 	}
 
     // Apply user control forces
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
+	if (IS_KEY_DOWN(OIS::KC_UP) || IS_KEY_DOWN(OIS::KC_W)) {
 		if (throttle_ != TH_UP) {
 			callMethod("onThrottleUp");
 			throttle_ = TH_UP;
 		}
 		body_->applyCentralForce(50*btVector3(forward.x, forward.y, forward.z));
-	} else if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
+	} else if (IS_KEY_DOWN(OIS::KC_DOWN) || IS_KEY_DOWN(OIS::KC_S)) {
 		if (throttle_ != TH_DOWN) {
 			callMethod("onThrottleDown");
 			throttle_ = TH_DOWN;
@@ -201,11 +203,11 @@ void Player::computeForces() {
 		}
 	}
 
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
+	if (IS_KEY_DOWN(OIS::KC_RIGHT) || IS_KEY_DOWN(OIS::KC_D)) {
 		body_->applyCentralForce(-40*btVector3(right.x, right.y, right.z));
     }                               
 	
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_LEFT)) {
+	if (IS_KEY_DOWN(OIS::KC_LEFT) || IS_KEY_DOWN(OIS::KC_A)) {
 		body_->applyCentralForce(40*btVector3(right.x, right.y, right.z));
 	}
     

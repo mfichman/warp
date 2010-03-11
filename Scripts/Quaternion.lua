@@ -73,6 +73,12 @@ function Quaternion:fromAngleAxis(vector, angle)
     self[3] = f_sin*vector[3];
 end
 
+function Quaternion:fromForwardUp(forward, up)
+    forward = Vector:new(forward)
+    left = forward:cross(up)
+    -- unfinished
+end
+
 function Vector:__tostring()
     return self[1]..", "..self[2]..", "..self[3]..", "..self[4]
 end
