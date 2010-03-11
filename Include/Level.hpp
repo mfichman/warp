@@ -44,6 +44,7 @@ private:
 	static int luaGetLight(lua_State* env);
 	static int luaSetLight(lua_State* env);
 	static int luaGetSpineNodeDistance(lua_State* env);
+	static int luaGetSpineProjection(lua_State* env);
 	static int luaGetBeat(lua_State* env);
 	static int luaLoadLoop(lua_State* env);
 	static int luaStartLoop(lua_State* env);

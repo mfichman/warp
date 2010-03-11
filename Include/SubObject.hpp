@@ -27,6 +27,8 @@ public:
 	/** Returns scene node */
 	Ogre::SceneNode* getSceneNode() const { return node_; }
 
+	Ogre::Entity* getEntity() const { return entity_; }
+
 	/** Explodes the subobject from is parent */
 	void separateFromParent();
 

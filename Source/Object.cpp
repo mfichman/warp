@@ -332,6 +332,7 @@ int Object::luaAddEntity(lua_State* env) {
 		env >> mesh;
 		lua_getfield(env, -1, "mass");
 		float mass = lua_tonumber(env, -1);
+		lua_pop(env, 1);
 
 		// Create the subobject and add it to this object
 		name = self->name_ + "." + name;
@@ -339,6 +340,19 @@ int Object::luaAddEntity(lua_State* env) {
 		self->subObjects_.push_back(subobj);
 		self->shape_->addChildShape(btTransform::getIdentity(), subobj->getShape());
 		self->body_->updateInertiaTensor();
+
+		lua_getfield(env, -1, "animation");
+		if (!lua_isnil(env, -1)) {
+			string animation;
+			env >> animation;
+			cout << "Enabling animation " << animation << endl;
+			AnimationState* state = subobj->getEntity()->getAnimationState(animation);
+			state->setEnabled(true);
+			state->setLoop(true);
+			self->activeAnimations_.push_back(state);
+		} else {
+			lua_pop(env, 1);
+		}
 
 		assert(self->node_ == subobj->getSceneNode()->getParent());
 
@@ -397,8 +411,6 @@ int Object::luaSetEntity(lua_State* env) {
 		string name;
 		lua_getfield(env, -1, "name");
 		env >> name;
-
-		lua_pushvalue(env, -1);
 		name = self->name_ + "." + name;
 
 		SceneNode* node = self->game_->getSceneManager()->getSceneNode(name);
@@ -409,6 +421,7 @@ int Object::luaSetEntity(lua_State* env) {
 		if (!lua_isnil(env, -1)) {
 			string animation;
 			env >> animation;
+			cout << "Enabling animation " << animation << endl;
 			AnimationState* state = entity->getAnimationState(animation);
 			state->setEnabled(true);
 			state->setLoop(true);

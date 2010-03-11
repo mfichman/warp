@@ -201,7 +201,27 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaGetPlayerOrientation, 1);
     lua_setfield(env, -2, "getPlayerOrientation");
 
+	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaGetSpineProjection, 1);
+    lua_setfield(env, -2, "getSpineProjection");
+
 	lua_pop(env, 1); // Pop the Level table
+}
+
+int Level::luaGetSpineProjection(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	float distance = lua_tonumber(env, -1);
+
+	const SpineProjection& player = level->player_->getPlayerProjection();
+	const SpineProjection& proj = level->tube_->getSpineProjection(distance + player.distance, player.index);
+
+	lua_newtable(env);
+	env << proj.position;
+	lua_setfield(env, -2, "position");
+	env << proj.forward;
+	lua_setfield(env, -2, "forward");
+
+	return 1;
 }
 
 int Level::luaSetGravity(lua_State* env) {

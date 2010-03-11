@@ -39,8 +39,10 @@ int main(int argc, char** argv) {
         //Warp::FreeCamera camera(game.get());
         Warp::Overlays overlays(game.get());
 
-        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Glass");
-        //Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Glass", true);
+		// Glass
+		// Radial Blur
+        //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Motion Blur");
+        //Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Motion Blur", true);
 
 		game->setLevel("Tube1");
 		game->getRoot()->startRendering();

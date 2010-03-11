@@ -244,6 +244,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 
 	physicsAccumulator_ += evt.timeSinceLastFrame;
 	float delta = 0.01;
+	physicsAccumulator_ = min(physicsAccumulator_, 0.1f);
 	while (physicsAccumulator_ > delta) {
 		keyboard_->capture();
 		mouse_->capture();
