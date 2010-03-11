@@ -10,6 +10,7 @@
 #include "Level.hpp"
 #include "Player.hpp"
 #include "Projectile.hpp"
+#include "ScriptTask.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -31,8 +32,7 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 	exploded_(false),
 	alive_(true),
 	level_(level),
-	target_(0),
-	speed_(0)
+	target_(0)
 {
 	ostringstream os;
 	os << type << id;
@@ -65,13 +65,13 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 Object::~Object() {
 
 	// Notify projectiles that the object is toast
-	for (list<Object*>::iterator i = trackers_.begin(); i != trackers_.end(); i++) {
+	for (set<TrackerPtr>::iterator i = trackers_.begin(); i != trackers_.end(); i++) {
 		(*i)->onTargetDelete(this);
 	}
 
 	cout << "Collecting " << name_ << endl;
 
-
+	// Un-track
 	if (target_) target_->removeTracker(this);
 
 	// Clean up physics
@@ -131,6 +131,8 @@ Object::~Object() {
 	lua_setfield(env, -2, "getOrientation");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "fireMissile");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "getTarget");
 	lua_pop(env, 1);
 	lua_unref(env, table_);
 }
@@ -153,17 +155,8 @@ void Object::onTimeStep() {
 	if (to.dotProduct(proj.forward) > 0 && to.length() > 100) {
 		alive_ = false;
 	}
-    
 
-	// Track target by setting the vector towards the target
-	if (target_) {
-		Vector3 velocity = target_->getPosition() - node_->getPosition();
-		velocity.normalise();
-		velocity *= speed_;
-		body_->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
-	}
-
-	for (list<shared_ptr<SubObject>>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
+	for (list<SubObjectPtr>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
 		(*i)->onTimeStep();
 	}
 }
@@ -184,7 +177,7 @@ void Object::setWorldTransform(const btTransform& transform) {
     transform_ = transform;
 }
 
-void Object::setTarget(Object* target) {
+void Object::setTarget(ObjectPtr target) {
 	if (target_ == target) return;
 
 	if (target_) {
@@ -196,17 +189,18 @@ void Object::setTarget(Object* target) {
 	}
 }
 
-void Object::addTracker(Object* p) {
+void Object::addTracker(TrackerPtr p) {
 	if (!alive_ || exploded_) {
 		p->onTargetDelete(this);
+	} else if (p) {
+		trackers_.insert(p);
 	} else {
-		trackers_.push_back(p);
+		cout << "WARNING NULL TRACKER" << endl;
 	}
 }
 
-void Object::removeTracker(Object* p) {
-	list<Object*>::iterator i = find(trackers_.begin(), trackers_.end(), p);
-	if (i != trackers_.end()) trackers_.erase(i);
+void Object::removeTracker(TrackerPtr p) {
+	trackers_.erase(p);
 }
 
 void Object::setPosition(const Ogre::Vector3& p) {
@@ -223,9 +217,10 @@ void Object::setOrientation(const Ogre::Quaternion& q) {
     setWorldTransform(transform);
 }
 
-void Object::onTargetDelete(Object* target) {
+void Object::onTargetDelete(ObjectPtr target) {
 	target_ = 0;
 	alive_ = false;
+	callMethod("onTargetDelete");
 }
 
 Vector3 Object::getVelocity() {
@@ -238,8 +233,8 @@ void Object::setVelocity(const Vector3& velocity) {
 }
 
 
-lua_State* Warp::operator>>(lua_State* env, Warp::Object& e) {
-	lua_getref(env, e.table_);
+lua_State* Warp::operator<<(lua_State* env, Warp::ObjectPtr e) {
+	lua_getref(env, e->table_);
 	return env;
 }
 
@@ -310,6 +305,10 @@ void Object::loadScriptCallbacks() {
 	lua_pushcclosure(env, &Object::luaFireMissile, 1);
 	lua_setfield(env, -2, "fireMissile");
 
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaGetTarget, 1);
+	lua_setfield(env, -2, "getTarget");
+
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
 		string message(lua_tostring(env, -1));
@@ -344,7 +343,7 @@ int Object::luaAddEntity(lua_State* env) {
 
 		// Create the subobject and add it to this object
 		name = self->name_ + "." + name;
-		shared_ptr<SubObject> subobj(new SubObject(self->game_, self, name, mesh));
+		SubObjectPtr subobj(new SubObject(self->game_, self, name, mesh));
 		self->subObjects_.push_back(subobj);
 		self->shape_->addChildShape(btTransform::getIdentity(), subobj->getShape());
 		self->body_->updateInertiaTensor();
@@ -420,10 +419,8 @@ int Object::luaFireMissile(lua_State* env) {
 		env >> type;
 
 
-
-		Projectile* p = self->level_->createProjectile(type);
+		ProjectilePtr p = self->level_->createProjectile(type);
 		p->setPosition(self->getPosition());
-
 
 		lua_getfield(env, -1, "velocity");
 		if (lua_istable(env, -1)) {
@@ -434,7 +431,7 @@ int Object::luaFireMissile(lua_State* env) {
 			lua_pop(env, 1);
 		}
 
-        env >> *p;
+        env << p;
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
 		lua_error(env);
@@ -552,7 +549,7 @@ int Object::luaExplode(lua_State* env) {
 	self->exploded_ = true;
 
 	// Separate the subobjects
-	for (list<shared_ptr<SubObject>>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
+	for (list<SubObjectPtr>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
 		(*i)->separateFromParent();
 	}
 
@@ -560,7 +557,7 @@ int Object::luaExplode(lua_State* env) {
 	self->game_->getWorld()->removeCollisionObject(self->body_.get());
 
 	// Deactive projectiles
-	for (list<Object*>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
+	for (set<TrackerPtr>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
 		(*i)->onTargetDelete(self);
 	}
 	self->trackers_.clear();
@@ -568,11 +565,21 @@ int Object::luaExplode(lua_State* env) {
 	return 0;
 }
 
+int Object::luaGetTarget(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	if (self->target_) {
+		env << self->target_;
+	} else {
+		lua_pushnil(env);
+	}
+
+	return 1;
+}
+
 /** Destroys the object */
 int Object::luaDestroy(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 	self->alive_ = false;
-
 	return 0;
 }
 
@@ -629,6 +636,7 @@ int Object::luaSetOrientation(lua_State* env) {
 /** Calls a method on the peer Lua object */
 void Object::callMethod(const std::string& method) {
 	lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
 	lua_getglobal(env, "debug"); // Push the debuggger
     lua_getfield(env, -1, "traceback");
@@ -638,7 +646,6 @@ void Object::callMethod(const std::string& method) {
 	lua_getfield(env, -1, method.c_str());
 	if (!lua_isfunction(env, -1)) {
 		lua_pop(env, 3);
-		assert(lua_gettop(env) == 0);
 		return;
 	}
 
@@ -652,8 +659,6 @@ void Object::callMethod(const std::string& method) {
 	}
 
 	lua_pop(env, 1);
-
-	assert(lua_gettop(env) == 0);
 }
 
 

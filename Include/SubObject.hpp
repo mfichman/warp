@@ -6,6 +6,7 @@
 
 #include "Warp.hpp"
 
+#include "SharedObject.hpp"
 #include <list>
 #include <string>
 #include <memory>
@@ -13,7 +14,7 @@
 
 namespace Warp {
 
-class SubObject : public btMotionState {
+class SubObject : public btMotionState, public SharedObject {
 public:
 	/** Creates a new subobject */
 	SubObject(Game* game, Object* parent, const std::string& name, const std::string& mesh);
@@ -32,6 +33,7 @@ public:
 	/** Explodes the subobject from is parent */
 	void separateFromParent();
 
+	/** Called per-timestep */
 	void onTimeStep();
 
 private:

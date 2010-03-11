@@ -6,16 +6,18 @@
 
 #include "Warp.hpp"
 
+#include "SharedObject.hpp"
+
 namespace Warp {
 
-class City {
+class City : public SharedObject {
 public:
 
 	//! Creates a new city
 	City(Game* game, Level* level, int id);
 
 	//! Destroys the city
-	~City();
+	virtual ~City();
 
 	//! Called each timestep
 	void onTimeStep();

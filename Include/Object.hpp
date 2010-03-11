@@ -6,13 +6,14 @@
 
 #include "Warp.hpp"
 
+#include "Tracker.hpp"
 #include <list>
-#include <boost/shared_ptr.hpp>
+#include <set>
 #include <Bullet/btBulletDynamicsCommon.h>
 
 namespace Warp {
 
-class Object : public btMotionState {
+class Object : public btMotionState, public Tracker {
 public:
 
 	/** Creates a new script and begins executing it inside a coroutine */
@@ -22,16 +23,13 @@ public:
     virtual ~Object();
 
 	/** Sets the object's target */
-	void setTarget(Object* target);
+	void setTarget(ObjectPtr target);
 
 	/** Sets the position of this object */
 	void setPosition(const Ogre::Vector3& p);
 
 	/** Sets the quaternion for this object */
 	void setOrientation(const Ogre::Quaternion& q);
-
-	/** Sets the speed of the object */
-	void setSpeed(float speed) { speed_ = speed; }
 
 	/** Sets the velocity */
 	void setVelocity(const Ogre::Vector3& velocity);
@@ -61,28 +59,28 @@ public:
 	size_t getTrackerCount() { return trackers_.size(); }
 
 	/** Adds a projectile that tracks this object */
-	void addTracker(Object* p);
+	void addTracker(TrackerPtr p);
 
 	/** Removes a projectile from this object */
-	void removeTracker(Object* p);
+	void removeTracker(TrackerPtr p);
 
 	/* Called to collide this object with another */
-	virtual void collide(Object* other) {}
+	virtual void collide(ObjectPtr other) {}
 
 	/* Called when a collision with an object occurs (enemy, or other obstacle) */
-	virtual void onCollision(Enemy* enemy) { }
+	virtual void onCollision(EnemyPtr enemy) {}
 
 	/* Called when a collision with a player occurs */
-	virtual void onCollision(Player* player) { }
+	virtual void onCollision(PlayerPtr player) {}
 
 	/* Called when a collision with a projectile occurs */
-	virtual void onCollision(Projectile* projectile) { }
+	virtual void onCollision(ProjectilePtr projectile) { }
 
 	/** Called every timestep by Level */
 	virtual void onTimeStep();
 
 	/** Called when the target is deleted */
-	void onTargetDelete(Object* target);
+	void onTargetDelete(ObjectPtr target);
 
 protected:
 	void callMethod(const std::string& method);
@@ -103,13 +101,13 @@ protected:
 	// Ogre scene data
 	Ogre::SceneNode* node_;
 	std::list<Ogre::AnimationState*> activeAnimations_;
-	std::list<boost::shared_ptr<SubObject>> subObjects_;
+	std::list<SubObjectPtr> subObjects_;
 
 	
 	// Reference to the Lua class
 	int table_; 
 		
-	Object* target_;
+	ObjectPtr target_;
 
 private:
     Object(const Object&);
@@ -135,16 +133,16 @@ private:
 	static int luaGetOrientation(lua_State* env);
 	static int luaSetOrientation(lua_State* env);
 	static int luaFireMissile(lua_State* env);
+	static int luaGetTarget(lua_State* env);
+	static int luaSetTarget(lua_State* env);
 
-	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
+	friend lua_State* Warp::operator<<(lua_State* env, ObjectPtr e);
 
 	bool exploded_;
 	bool alive_;
 
 	// Projectiles tracking this object
-	std::list<Object*> trackers_;
-
-	float speed_;
+	std::set<TrackerPtr> trackers_;
 };
 
 }

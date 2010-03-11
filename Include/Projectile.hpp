@@ -19,9 +19,9 @@ public:
 
 
 private:
-	virtual void collide(Object* other) { if (immunity_ <= 0.0f) other->onCollision(this); }
-	virtual void onCollision(Enemy* enemy);
-	virtual void onCollision(Player* player);
+	virtual void collide(ObjectPtr other) { if (immunity_ <= 0.0f) other->onCollision(this); }
+	virtual void onCollision(EnemyPtr enemy);
+	virtual void onCollision(PlayerPtr player);
 
 	virtual void onTimeStep();
 

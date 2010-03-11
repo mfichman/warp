@@ -11,6 +11,7 @@
 
 #include <Ogre.h>
 #include <string>
+#include <boost/intrusive_ptr.hpp>
 
 #define TIME_STEP 1.0f/60.0f
 #define WARP_BT_FLAG 0x01000000 
@@ -74,7 +75,16 @@ class Projectile;
 class Targetable;
 class City;
 class Screen;
+class Tracker;
 
+typedef boost::intrusive_ptr<Object> ObjectPtr;
+typedef boost::intrusive_ptr<Tracker> TrackerPtr;
+typedef boost::intrusive_ptr<Enemy> EnemyPtr;
+typedef boost::intrusive_ptr<Projectile> ProjectilePtr;
+typedef boost::intrusive_ptr<Player> PlayerPtr;
+typedef boost::intrusive_ptr<City> CityPtr;
+typedef boost::intrusive_ptr<SubObject> SubObjectPtr;
+typedef boost::intrusive_ptr<ScriptTask> ScriptTaskPtr;
 
 inline int mod(int num, int divisor) {
     int remainder = num % divisor;
@@ -133,6 +143,7 @@ lua_State* operator<<(lua_State* env, const Ogre::Quaternion& q);
 lua_State* operator<<(lua_State* env, const Ogre::SceneNode& n);
 lua_State* operator<<(lua_State* env, const Ogre::Light& l);
 lua_State* operator<<(lua_State* env, const Ogre::ColourValue& c);
+lua_State* operator<<(lua_State* env, Warp::ObjectPtr e);
 
 
 /** Methods for reading Ogre and ODE values from a script */
@@ -143,7 +154,6 @@ lua_State* operator>>(lua_State* env, Ogre::Light& l);
 lua_State* operator>>(lua_State* env, Ogre::ColourValue& c);
 lua_State* operator>>(lua_State* env, std::string& s);
 lua_State* operator>>(lua_State* env, Warp::BeatLoop& bl);
-lua_State* operator>>(lua_State* env, Warp::Object& e);
 lua_State* operator>>(lua_State* env, Ogre::Entity& e);
 lua_State* operator>>(lua_State* env, btRigidBody& n);
 

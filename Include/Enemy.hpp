@@ -6,7 +6,7 @@
 
 #include "Warp.hpp"
 #include "Object.hpp"
-
+#include "SharedObject.hpp"
 
 namespace Warp {
 
@@ -31,9 +31,9 @@ private:
 	void loadScriptCallbacks();
 	virtual void setWorldTransform(const btTransform& transform);
 
-	virtual void collide(Object* other) { other->onCollision(this); }
-	virtual void onCollision(Projectile* p);
-	virtual void onCollision(Player* p);
+	virtual void collide(ObjectPtr other) { other->onCollision(this); }
+	virtual void onCollision(ProjectilePtr p);
+	virtual void onCollision(PlayerPtr p);
 
 	Ogre::BillboardSet* billboards_;
 	int spineNodeIndex_;

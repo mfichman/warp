@@ -14,4 +14,18 @@ end
 -- This function gets called once per timestep by the
 -- C++ peer class connected to this Lua class
 function Photon:onTimeStep()
+
+
+    local target = self:getTarget()
+    if (target ~= nil) then
+        print("STEPTRACK")
+        local dir = target:getPosition() - self:getPosition()
+        dir:normalize()
+        self:setVelocity(dir * 100)
+    
+    end
+end
+
+function Photon:onTargetDestroyed()
+    self:destroy()
 end

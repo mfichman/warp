@@ -25,7 +25,7 @@ function Banshee:onTimeStep()
     if (self.cooldown <= 0) then
         p = self:fireMissile{type="TrackingPhoton"}
         p:realInit(self)
-        self.cooldown = 0.5
+        self.cooldown = 0.3
     end
 
 end

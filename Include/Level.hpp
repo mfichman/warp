@@ -7,7 +7,6 @@
 #include "Warp.hpp"
 
 #include <memory>
-#include <boost/shared_ptr.hpp>
 
 namespace Warp {
 
@@ -20,8 +19,8 @@ public:
     ~Level();
 
 	/** Returns the player object */
-	inline Player* getPlayer() const {
-		return player_.get();
+	inline PlayerPtr getPlayer() const {
+		return player_;
 	}
 
 	/** Returns the tube for this level */
@@ -29,7 +28,7 @@ public:
 		return tube_.get();
 	}
 
-	Projectile* createProjectile(const std::string& type);
+	ProjectilePtr createProjectile(const std::string& type);
 
 private:
     Level(const Level&);
@@ -64,12 +63,12 @@ private:
 	static int luaGetPlayerOrientation(lua_State* env);
 
 	Game* game_;
-	std::list<boost::shared_ptr<Object>> objects_;
-	std::list<boost::shared_ptr<ScriptTask>> tasks_;
-	std::list<boost::shared_ptr<City>> cities_;
-	boost::shared_ptr<ScriptTask> levelScript_;
+	std::list<ObjectPtr> objects_;
+	std::list<ScriptTaskPtr> tasks_;
+	std::list<CityPtr> cities_;
+	ScriptTaskPtr levelScript_;
+	PlayerPtr player_;
 	std::auto_ptr<DynamicTube> tube_;
-	std::auto_ptr<Player> player_;
 	std::auto_ptr<Warp::Overlays> overlays_;
 	size_t objectsCreated_;
 	std::string compositor_;

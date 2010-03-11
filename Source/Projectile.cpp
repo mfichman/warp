@@ -5,12 +5,13 @@
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
+using namespace boost;
 
 Projectile::Projectile(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
 	hit_(false),
 	time_(0.0f),
-	immunity_(0.3f) {
+	immunity_(0.6f) {
 
 	billboards_ = game_->getSceneManager()->createBillboardSet(name_ + ".Billboard", 1);
 	billboards_->setBillboardRotationType(BBR_VERTEX);
@@ -20,11 +21,9 @@ Projectile::Projectile(Game* game, Level* level, const string& name, int id) :
 	billboards_->createBillboard(0.0f, 0.0f, 0.0f);
 	node_->attachObject(billboards_);
 
-	shape_.reset(new btSphereShape(0.5));
+	shape_.reset(new btSphereShape(1.5));
 	body_->setCollisionShape(shape_.get());
 	body_->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-
-	setSpeed(100);
 }
 
 /** Destructor */
@@ -69,9 +68,9 @@ void Projectile::onTimeStep() {
 }
 
 
-void Projectile::onCollision(Enemy* enemy) {
+void Projectile::onCollision(EnemyPtr enemy) {
 	if (immunity_ > 0.0f) return;
-	if (static_cast<Object*>(enemy) == target_) {
+	if (static_pointer_cast<Object>(enemy) == target_) {
 		hit_ = true;
 		game_->getWorld()->removeCollisionObject(body_.get());
 	} else if (!target_) {
@@ -80,7 +79,7 @@ void Projectile::onCollision(Enemy* enemy) {
 	}
 }
 
-void Projectile::onCollision(Player* player) {
+void Projectile::onCollision(PlayerPtr player) {
 	if (immunity_ > 0.0f) return;
 	if (!target_) {
 		hit_ = true;

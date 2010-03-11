@@ -5,6 +5,7 @@
 
 #include "Screen.hpp"
 #include "Game.hpp"
+#include "ScriptTask.hpp"
 
 extern "C" {
 #include <lua/lua.h> 
@@ -43,6 +44,7 @@ Screen::~Screen() {
 
 void Screen::loadScriptCallbacks() {
 	lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 	loadScript(env, "Scripts/Object.lua");
 	loadScriptFolder(env, "Scripts/Screens/");
 
@@ -72,19 +74,17 @@ void Screen::loadScriptCallbacks() {
 	}
 
 	table_ = lua_ref(env, -1);
-
-	assert(lua_gettop(env) == 0);
 }
 
 /** Calls a method on the peer Lua object */
 void Screen::callMethod(const string& method, const string& arg) {
 	lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
 	lua_getref(env, table_);
 	lua_getfield(env, -1, method.c_str());
 	if (!lua_isfunction(env, -1)) {
 		lua_pop(env, 2);
-		assert(lua_gettop(env) == 0);
 		return;
 	}
 
@@ -97,8 +97,6 @@ void Screen::callMethod(const string& method, const string& arg) {
 		lua_pop(env, 1);
 		throw runtime_error(message);
 	}
-
-	assert(lua_gettop(env) == 0);
 }
 
 int Screen::luaSetScreen(lua_State* env) {
@@ -106,7 +104,6 @@ int Screen::luaSetScreen(lua_State* env) {
 
 	string name;
 	env >> name;
-	lua_settop(env, 0);
 	screen->game_->setScreen(name);
 	return 0;
 }
@@ -115,7 +112,6 @@ int Screen::luaSetLevel(lua_State* env) {
 	Screen* screen = (Screen*)lua_touserdata(env, lua_upvalueindex(1));
 	string name;
 	env >> name;
-	lua_settop(env, 0);
 	screen->game_->setLevel(name);
 	return 0;
 }

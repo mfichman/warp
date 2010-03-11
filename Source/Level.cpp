@@ -44,7 +44,7 @@ Level::Level(Game* game, const std::string& name) :
     game_->addListener(this);
 
 	// Load beat script
-	tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(game, "Scripts/" + name + ".Beat.lua")));
+	tasks_.push_back(ScriptTaskPtr(new ScriptTask(game, "Scripts/" + name + ".Beat.lua")));
 
 	// Load level script
 	string path = "Scripts/" + name + "." + lexical_cast<string>(scriptNumber_) + ".lua";
@@ -75,29 +75,29 @@ void Level::onTimeStep() {
 	
 	player_->onTimeStep();
 
-	for (list<shared_ptr<Object>>::iterator i = objects_.begin(); i != objects_.end();) {
-		(*i)->onTimeStep();
+	for (list<ObjectPtr>::iterator i = objects_.begin(); i != objects_.end();) {
 		if (!(*i)->isAlive()) {
 			i = objects_.erase(i);
 		} else {
+			(*i)->onTimeStep();
 			i++;
 		}
 	}
 
-	for (list<shared_ptr<City>>::iterator i = cities_.begin(); i != cities_.end();) {
-		(*i)->onTimeStep();
+	for (list<CityPtr>::iterator i = cities_.begin(); i != cities_.end();) {
 		if (!(*i)->isAlive()) {
 			i = cities_.erase(i);
 		} else {
+			(*i)->onTimeStep();
 			i++;
 		}
 	}
 
-	for (list<shared_ptr<ScriptTask>>::iterator i = tasks_.begin(); i != tasks_.end();) {
-		(*i)->onTimeStep();
+	for (list<ScriptTaskPtr>::iterator i = tasks_.begin(); i != tasks_.end();) {
 		if (!(*i)->isAlive()) {
 			i = tasks_.erase(i);
 		} else {
+			(*i)->onTimeStep();
 			i++;
 		}
 	}
@@ -275,10 +275,10 @@ int Level::luaCreateObject(lua_State* env) {
 #pragma warning (default:4800)
 
 	// Create a new Object and add it to the list
-	shared_ptr<Object> object(new Object(level->game_, level, type, level->objectsCreated_++));
+	ObjectPtr object(new Object(level->game_, level, type, level->objectsCreated_++));
 	level->objects_.push_back(object);
 
-	env >> *object;
+	env << object;
 
 	return 1;
 }
@@ -288,7 +288,7 @@ int Level::luaCreateCity(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 
 	// Create a new City and add it to the list
-	shared_ptr<City> city(new City(level->game_, level, level->objectsCreated_++));
+	CityPtr city(new City(level->game_, level, level->objectsCreated_++));
 	level->cities_.push_back(city);
 
 	return 0;
@@ -304,10 +304,10 @@ int Level::luaCreateEnemy(lua_State* env) {
 #pragma warning (default:4800)
 
 	// Create a new Object and add it to the list
-	shared_ptr<Object> object(new Enemy(level->game_, level, type, level->objectsCreated_++));
+	ObjectPtr object(new Enemy(level->game_, level, type, level->objectsCreated_++));
 	level->objects_.push_back(object);
 
-	env >> *object;
+	env << object;
 
 	return 1;
 }
@@ -320,7 +320,7 @@ int Level::luaCreateTask(lua_State* env) {
 		lua_error(env);
 	}
 	int functionRef = lua_ref(env, -1);
-	level->tasks_.push_back(shared_ptr<ScriptTask>(new ScriptTask(level->game_, functionRef))); 
+	level->tasks_.push_back(ScriptTaskPtr(new ScriptTask(level->game_, functionRef))); 
 
 	return 0;
 }
@@ -530,8 +530,8 @@ int Level::luaStopBeatServer(lua_State* env) {
 }
 
 
-Projectile* Level::createProjectile(const std::string& type) {
-	shared_ptr<Projectile> p(new Projectile(game_, this, type, objectsCreated_++));
+ProjectilePtr Level::createProjectile(const std::string& type) {
+	ProjectilePtr p(new Projectile(game_, this, type, objectsCreated_++));
 	objects_.push_back(p);
 	return p.get();
 }

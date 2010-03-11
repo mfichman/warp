@@ -30,24 +30,28 @@ public:
 	/** Call to update the player */
 	virtual void onTimeStep();
 
+	/** Return shields */
 	float getShields() const { return shields_; }
 
+	/** Returns number of points */
 	int getPoints() const { return points_; }
 
+	/** Add points */
 	void addPoints(int points) { points_ += points; }
 		
 private:
 	Player(const Player&);
     Player& operator=(const Player&);
 
-	virtual void collide(Object* other) { other->onCollision(this); }
-	virtual void onCollision(Enemy* enemy);
-	virtual void onCollision(Projectile* projectile);
+	virtual void collide(ObjectPtr other) { other->onCollision(this); }
+	virtual void onCollision(EnemyPtr enemy);
+	virtual void onCollision(ProjectilePtr projectile);
 
 	// Bullet callbacks
 	virtual void setWorldTransform(const btTransform& transform);
 
-	virtual void onTargetDelete(Object* object);
+	// Called when a target is delted
+	virtual void onTargetDelete(ObjectPtr object);
 
 	void computeForces();
 	void updateRay();
@@ -59,7 +63,7 @@ private:
 	Ogre::Vector3 right_;
 	Ogre::Vector3 up_;
 	Ogre::Vector3 forward_;
-	std::list<Enemy*> targets_;
+	std::list<EnemyPtr> targets_;
 	float cooldown_;
 	float shields_;
 	int points_;

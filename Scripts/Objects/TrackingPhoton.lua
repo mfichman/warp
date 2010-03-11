@@ -13,8 +13,8 @@ function TrackingPhoton:realInit(parent)
     local position = parent:getPosition() + parent:getOrientation() * {0,0,-1} * 1.5
     local vel = Level:getPlayerPosition() - self:getPosition();
     vel:normalize()
-    vel = vel * 40
-    vel = vel + { math.random(-8, 8), math.random(-8, 8), math.random(-8, 8) }
+    vel = vel * 30
+    vel = vel + { math.random(-6, 6), math.random(-6, 6), math.random(-6, 6) }
     self:setPosition(position)
     self:setVelocity(vel)
 end

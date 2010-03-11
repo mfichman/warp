@@ -118,6 +118,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\SharedObject.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\SubObject.cpp"
 				>
 			</File>
@@ -184,7 +188,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Include\SharedObject.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\SubObject.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Tracker.hpp"
 				>
 			</File>
 			<File

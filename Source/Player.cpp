@@ -16,6 +16,7 @@
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
+using namespace boost;
 
 #define POSITION_SMOOTHNESS 0.60f
 #define ROTATION_SMOOTHNESS 0.05f
@@ -120,8 +121,8 @@ void Player::onTimeStep() {
 
 void Player::fireMissiles() {
 	if (cooldown_ <= 0.0f && targets_.size() > 0) {
-		list<Enemy*>::iterator i = targets_.begin();
-		Projectile* p = level_->createProjectile("Photon");
+		list<EnemyPtr>::iterator i = targets_.begin();
+		ProjectilePtr p = level_->createProjectile("Photon");
 		p->setTarget(*i);
 		p->setPosition(forward_ + getPosition());
 		targets_.erase(i);
@@ -268,11 +269,11 @@ void Player::updateRay() {
 	}
 }
 
-void Player::onTargetDelete(Object* object) {
-	//targets_.erase(static_cast<Enemy*>(object));
+void Player::onTargetDelete(ObjectPtr object) {
 
-	for (list<Enemy*>::iterator i = targets_.begin(); i != targets_.end();) {
-		if ((*i) == static_cast<Enemy*>(object)) {
+	for (list<EnemyPtr>::iterator i = targets_.begin(); i != targets_.end();) {
+		EnemyPtr enemy = dynamic_pointer_cast<Enemy>(object);
+		if ((*i) == enemy) {
 			i = targets_.erase(i);
 		} else {
 			i++;
@@ -289,7 +290,7 @@ const SpineProjection& Player::getSpawnProjection(float distance) const {
 
 }
 
-void Player::onCollision(Enemy* enemy) { 
+void Player::onCollision(EnemyPtr enemy) { 
 	callMethod("onEnemyHit"); 
 	if (shields_ > 0) {
 		shields_ -= 10;
@@ -299,7 +300,7 @@ void Player::onCollision(Enemy* enemy) {
 	}
 }
 
-void Player::onCollision(Projectile* projectile) { 
+void Player::onCollision(ProjectilePtr projectile) { 
 	callMethod("onProjectileHit"); 
 	if (shields_ > 0) {
 		shields_ -= 10;

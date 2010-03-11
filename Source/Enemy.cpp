@@ -63,7 +63,7 @@ void Enemy::setSelected(bool selected) {
 	}
 }
 
-void Enemy::onCollision(Projectile* p) {
+void Enemy::onCollision(ProjectilePtr p) {
 	callMethod("onProjectileHit");
 
 	finalHitCount_++;
@@ -78,7 +78,7 @@ void Enemy::onCollision(Projectile* p) {
 	}
 }
 
-void Enemy::onCollision(Player* p) {
+void Enemy::onCollision(PlayerPtr p) {
 	callMethod("onPlayerHit");
 }
 

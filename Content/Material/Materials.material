@@ -27,7 +27,7 @@ material Splash
 		    fog_override true
 			texture_unit
 			{
-				texture Title.jpg
+				texture TitleScreen.jpg
 			}
 		}
 	}

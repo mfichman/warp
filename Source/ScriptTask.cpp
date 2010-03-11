@@ -104,6 +104,7 @@ void ScriptTask::onTimeStep() {
 	if (!alive_) return;
 
     lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
     // Check trigger
     if (!hasTriggerFired()) return;
@@ -138,9 +139,6 @@ void ScriptTask::onTimeStep() {
         alive_ = false;
         lua_pop(env, 2);
     }
-
-    // Check the stack
-    assert(lua_gettop(env) == 0);
 }
 
 /** Methods for sending Ogre values to a script */
@@ -477,5 +475,13 @@ void Warp::loadScriptFolder(lua_State* env, const std::string& dir) {
 			}
 		}
 	}
+}
 
+StackCheck::StackCheck(lua_State* env) {
+	top_ = lua_gettop(env);
+	env_ = env;
+}
+
+StackCheck::~StackCheck() {
+	assert(top_ == lua_gettop(env_));
 }

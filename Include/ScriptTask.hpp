@@ -6,9 +6,11 @@
 
 #include "Warp.hpp"
 
+#include "SharedObject.hpp"
+
 namespace Warp {
 
-class ScriptTask {
+class ScriptTask : public SharedObject {
 public:
 	/** Creates a new script and begins executing it inside a coroutine */
     ScriptTask(Game* game, const std::string& name);
@@ -39,6 +41,16 @@ private:
     int coroutine_;
     Event waitEvent_;
 	bool alive_;
+};
+
+class StackCheck {
+public:
+	StackCheck(lua_State* env);
+	~StackCheck();
+
+private:
+	int top_;
+	lua_State* env_;
 };
 
 }
