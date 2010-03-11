@@ -424,7 +424,8 @@ int Object::luaFireMissile(lua_State* env) {
 		env >> velocity;
 
 		Projectile* p = self->level_->createProjectile(type);
-		p->setVelocity(velocity + self->getVelocity());
+		p->setVelocity(velocity);
+		p->setPosition(self->getPosition());
 
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
