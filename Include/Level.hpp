@@ -60,6 +60,7 @@ private:
 	static int luaSetGravity(lua_State* env);
 	static int luaSetCompositor(lua_State* env);
 	static int luaGetPlayerPosition(lua_State* env);
+	static int luaGetPlayerVelocity(lua_State* env);
 	static int luaGetPlayerOrientation(lua_State* env);
 
 	Game* game_;

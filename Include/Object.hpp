@@ -43,7 +43,7 @@ public:
 	Ogre::SceneNode* getSceneNode() { return node_; }
 
 	/** Returns the position of this object */
-	Ogre::Vector3 getPosition() { return node_->getPosition(); }
+	Ogre::Vector3 getPosition() const;
 
 	/** Returns the quaternion for this object */
 	Ogre::Quaternion getOrientation() { return node_->getOrientation(); }

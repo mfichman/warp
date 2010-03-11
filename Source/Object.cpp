@@ -655,3 +655,9 @@ void Object::callMethod(const std::string& method) {
 
 	assert(lua_gettop(env) == 0);
 }
+
+
+Ogre::Vector3 Object::getPosition() const {
+	btVector3 pos = body_->getCenterOfMassPosition();
+	return Vector3(pos.x(), pos.y(), pos.z());
+}
