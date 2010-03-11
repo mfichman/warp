@@ -82,8 +82,11 @@ void DynamicTube::readInputFile() {
     while (!in.eof()) {
         std::string type;
         in >> type;
+
         
-        if (type == "straight") {
+		if (type.find("#") == 0) {
+			// comment
+		} else if (type == "straight") {
 			if (first) generateStraight(1);
             float length;
             in >> length;

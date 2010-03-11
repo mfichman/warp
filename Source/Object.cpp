@@ -469,12 +469,10 @@ int Object::luaSetParticleSystem(lua_State* env) {
 
 		ParticleSystem* psys = dynamic_cast<ParticleSystem*>(node->getAttachedObject(0U));
 		if (psys) {
-		
-		} else {
-			cout << "Warning, particle system does not exist" << endl;
 			lua_getfield(env, -1, "width");
 			lua_getfield(env, -2, "height");
 			if (!lua_isnil(env, -1) && !lua_isnil(env, -2)) {
+				cout << "Setting particle dimensions" << endl;
 				float width = lua_tonumber(env, -1);
 				float height = lua_tonumber(env, -1);
 				psys->setDefaultDimensions(width, height);
@@ -487,6 +485,8 @@ int Object::luaSetParticleSystem(lua_State* env) {
 				psys->getEmitter(0U)->setParticleVelocity(velocity);
 			}
 			lua_pop(env, 1);
+		} else {
+			cout << "Warning, particle system does not exist" << endl;
 		}
 
 	} catch (Exception& ex) {

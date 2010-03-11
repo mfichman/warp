@@ -38,12 +38,20 @@ function Player:onEnemyHit()
 end
 
 function Player:onThrottleUp()
-    self:setParticleSystem{name="Jet", width=0.4, height=0.4, velocity=7.0}
+    self:setParticleSystem{name="Jet", width=0.4, height=0.4, velocity=-9.0}
+    self:setParticleSystem{name="JetLeft", width=0.3, height=0.3, velocity=-5.0}
+    self:setParticleSystem{name="JetRight", width=0.3, height=0.3, velocity=-5.0}
     print("Throttling up")
 end
 
 function Player:onThrottleDown()
+    self:setParticleSystem{name="Jet", width=0.2, height=0.2, velocity=-3.0}
+    self:setParticleSystem{name="JetLeft", width=0.1, height=0.13, velocity=-1.3}
+    self:setParticleSystem{name="JetRight", width=0.1, height=0.13, velocity=-1.3}
 end
 
 function Player:onThrottleNormal()
+    self:setParticleSystem{name="Jet", width=0.3, height=0.3, velocity=-5.0}
+    self:setParticleSystem{name="JetLeft", width=0.2, height=0.2, velocity=-3.0}
+    self:setParticleSystem{name="JetRight", width=0.2, height=0.2, velocity=-3.0}
 end
