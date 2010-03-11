@@ -12,6 +12,7 @@ Level:createAIEnemy("Seeker", AI.flyFromBehind)
 while (true) do
     Level:createCity()
     Level:waitForDistance(distance)
+    Level:createAIEnemy("Banshee", AI.flyFromBehind)
     --Level:createEnemy("Seeker")
     --Level:createEnemy("Banshee")
     --Level:createEnemy("Banshee")
@@ -26,7 +27,7 @@ while (true) do
     --Level:createEnemy("Seeker")
     --Level:createEnemy("Seeker")
     --Level:createEnemy("Seeker")
-    distance = distance + 70
+    distance = distance + 150
     --print(Level:getPlayerPosition():length())
 end
                                                  

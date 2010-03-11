@@ -134,6 +134,7 @@ private:
 	static int luaSetVelocity(lua_State* env);
 	static int luaGetOrientation(lua_State* env);
 	static int luaSetOrientation(lua_State* env);
+	static int luaFireMissile(lua_State* env);
 
 	friend lua_State* Warp::operator>>(lua_State* env, Object& e);
 

@@ -81,6 +81,15 @@ function Vector:normalizedCopy()
     result[3] = self[3] / length
     return result
 end
+
+function Vector:__tostring()
+    return self[1]..", "..self[2]..", "..self[3]
+end
+
+Vector.UNIT_Y = Vector:new{0, 1, 0}
+Vector.UNIT_X = Vector:new{1, 0, 0}
+Vector.UNIT_Z = Vector:new{0, 0, 1}
+Vector.ZERO = Vector:new{0, 0, 0}
 --
 ---- algorithm adapted from wikipedia article http://en.wikipedia.org/wiki/Quaternion_rotation
 --function Vector:applyRotation(q)

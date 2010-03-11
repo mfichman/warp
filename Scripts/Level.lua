@@ -5,7 +5,7 @@ Level = Object:new()
 
 -- Waits given number of seconds before returning
 function Level:sleep(time)
-    time = time * 60 -- convert from seconds to frames
+    time = time * 100 -- convert from seconds to frames
     if (time <= 0) then return end
     coroutine.yield(function()
         time = time - 1
@@ -68,3 +68,5 @@ function Level:waitForBeatSet()
         return self:getBeat() == 0
     end)
 end
+
+

@@ -69,6 +69,8 @@ Object::~Object() {
 		(*i)->onTargetDelete(this);
 	}
 
+	cout << "Collecting " << name_ << endl;
+
 
 	if (target_) target_->removeTracker(this);
 
@@ -127,6 +129,8 @@ Object::~Object() {
 	lua_setfield(env, -2, "setOrientation");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "getOrientation");
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "fireMissile");
 	lua_pop(env, 1);
 	lua_unref(env, table_);
 }
@@ -302,6 +306,10 @@ void Object::loadScriptCallbacks() {
 	lua_pushcclosure(env, &Object::luaSetOrientation, 1);
 	lua_setfield(env, -2, "setOrientation");
 
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaFireMissile, 1);
+	lua_setfield(env, -2, "fireMissile");
+
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
 		string message(lua_tostring(env, -1));
@@ -391,6 +399,32 @@ int Object::luaAddParticleSystem(lua_State* env) {
 		node->setPosition(position);
 		ParticleSystem* system = self->game_->getSceneManager()->createParticleSystem(name, templ);
 		node->attachObject(system);
+
+	} catch (Exception& ex) {
+		lua_pushstring(env, ex.getFullDescription().c_str());
+		lua_error(env);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
+
+	return 0;
+}
+
+int Object::luaFireMissile(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+
+	try {
+		string type;
+		lua_getfield(env, -1, "type");
+		env >> type;
+
+		Vector3 velocity;
+		lua_getfield(env, -1, "velocity");
+		env >> velocity;
+
+		Projectile* p = self->level_->createProjectile(type);
+		p->setVelocity(velocity + self->getVelocity());
 
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());

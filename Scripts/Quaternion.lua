@@ -72,3 +72,7 @@ function Quaternion:fromAngleAxis(vector, angle)
     self[2] = f_sin*vector[2];
     self[3] = f_sin*vector[3];
 end
+
+function Vector:__tostring()
+    return self[1]..", "..self[2]..", "..self[3]..", "..self[4]
+end

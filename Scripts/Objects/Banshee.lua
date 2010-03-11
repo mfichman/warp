@@ -15,11 +15,21 @@ function Banshee:init()
     self:addEntity{name="Pylon", mesh="BansheePylon.mesh"}
     self.destroyed = false
     self.hitPoints = 7
+    self.cooldown = 5
 end
 
 -- This function gets called once per timestep by the
 -- C++ peer class connected to this Lua class
 function Banshee:onTimeStep()
+    self.cooldown = self.cooldown - 0.01
+    if (self.cooldown <= 0) then
+        local vel = Level:getPlayerPosition() - self:getPosition()
+        print("FIRE!!")
+        vel:normalize()
+        vel = vel * 100
+        self:fireMissile{type="Photon", velocity=vel}
+        self.cooldown = 1
+    end
 end
 
 -- This function is called when the object is selected by

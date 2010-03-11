@@ -68,5 +68,8 @@ void Projectile::onCollision(Enemy* enemy) {
 	if (static_cast<Object*>(enemy) == target_) {
 		hit_ = true;
 		game_->getWorld()->removeCollisionObject(body_.get());
+	} else if (!target_) {
+		hit_ = true;
+		game_->getWorld()->removeCollisionObject(body_.get());
 	}
 }
