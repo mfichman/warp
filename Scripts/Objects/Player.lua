@@ -38,6 +38,7 @@ function Player:onEnemyHit()
 end
 
 function Player:onThrottleUp()
+   -- Level:setCompositor("Radial Blur")
     self:setParticleSystem{name="Jet", width=0.4, height=0.4, velocity=-9.0}
     self:setParticleSystem{name="JetLeft", width=0.3, height=0.3, velocity=-5.0}
     self:setParticleSystem{name="JetRight", width=0.3, height=0.3, velocity=-5.0}
@@ -45,15 +46,21 @@ function Player:onThrottleUp()
 end
 
 function Player:onThrottleDown()
+    --Level:setCompositor("")
     self:setParticleSystem{name="Jet", width=0.2, height=0.2, velocity=-3.0}
     self:setParticleSystem{name="JetLeft", width=0.1, height=0.13, velocity=-1.3}
     self:setParticleSystem{name="JetRight", width=0.1, height=0.13, velocity=-1.3}
 end
 
 function Player:onThrottleNormal()
+    --Level:setCompositor("")
     self:setParticleSystem{name="Jet", width=0.3, height=0.3, velocity=-5.0}
     self:setParticleSystem{name="JetLeft", width=0.2, height=0.2, velocity=-3.0}
     self:setParticleSystem{name="JetRight", width=0.2, height=0.2, velocity=-3.0}
+end
+
+function Player:onKilled()
+    self:explode()
 end
 
 

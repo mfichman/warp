@@ -30,7 +30,7 @@ public:
 	/** Call to update the player */
 	virtual void onTimeStep();
 
-	float getShieldsPct() const { return shieldsPct_; }
+	float getShields() const { return shields_; }
 
 	int getPoints() const { return points_; }
 
@@ -41,7 +41,8 @@ private:
     Player& operator=(const Player&);
 
 	virtual void collide(Object* other) { other->onCollision(this); }
-	virtual void onCollision(Enemy* enemy) { callMethod("onEnemyHit"); }
+	virtual void onCollision(Enemy* enemy);
+	virtual void onCollision(Projectile* projectile);
 
 	// Bullet callbacks
 	virtual void setWorldTransform(const btTransform& transform);
@@ -60,7 +61,7 @@ private:
 	Ogre::Vector3 forward_;
 	std::list<Enemy*> targets_;
 	float cooldown_;
-	float shieldsPct_;
+	float shields_;
 	int points_;
 	Throttle throttle_;
 };

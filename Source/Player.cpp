@@ -27,7 +27,7 @@ using namespace std;
 Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
 	cooldown_(0.0f),
-	shieldsPct_(100.0f),
+	shields_(100.0f),
 	points_(0),
 	throttle_(TH_NORMAL) {
 
@@ -287,6 +287,26 @@ const SpineProjection& Player::getPlayerProjection() const {
 const SpineProjection& Player::getSpawnProjection(float distance) const {
 	return spawnProjection_;//level_->getTube()->getSpineProjection(playerProjection_.distance + distance, playerProjection_.index);
 
+}
+
+void Player::onCollision(Enemy* enemy) { 
+	callMethod("onEnemyHit"); 
+	if (shields_ > 0) {
+		shields_ -= 10;
+		if (shields_ <= 0) {
+			callMethod("onKilled");
+		} 
+	}
+}
+
+void Player::onCollision(Projectile* projectile) { 
+	callMethod("onProjectileHit"); 
+	if (shields_ > 0) {
+		shields_ -= 10;
+		if (shields_ <= 0) {
+			callMethod("onKilled");
+		} 
+	}
 }
 
 

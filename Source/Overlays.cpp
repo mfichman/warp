@@ -55,7 +55,7 @@ void Overlays::onTimeStep() {
 	OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Warp/NumBatches");
 	guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
 	
-	float shields = game_->getLevel()->getPlayer()->getShieldsPct();
+	float shields = game_->getLevel()->getPlayer()->getShields();
 	float speed = game_->getLevel()->getPlayer()->getVelocity().length();
 	int points = game_->getLevel()->getPlayer()->getPoints();
 	speed_ = 0.6 * speed_ + 0.4 * speed;

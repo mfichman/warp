@@ -39,6 +39,16 @@ function AI:spiral(enemy, distance, diameter)
     end)
 end
 
+function AI:rammingSpeed(enemy)
+    local proj = Level:getSpineProjection(100)
+    enemy:setPosition(proj.position)
+    
+    enemy.onTimeStep = function(self)
+        
+    end
+
+end
+
 function AI:flyFromBehind(enemy)
     local proj = Level:getSpineProjection(-10)
     local right = proj.forward:cross{0, 1, 0}
