@@ -40,6 +40,7 @@ Overlays::Overlays(Game* game) :
 
 /** Destroys the overlays and hides them */
 Overlays::~Overlays() {
+	game_->removeListener(this);
 }
 
 /** Called when a new frame is detected */

@@ -5,7 +5,10 @@
 Level:setGravity{0, 0, 0}
 local distance = Level:getSpineNodeDistance()
 --Level:createEnemy("Seeker")
-    Level:createAIEnemy("Seeker", AI.trackFromSide)
+    --Level:createAIEnemy("Seeker", AI.trackFromSide)
+    
+Level:waitForDistance(100)
+Level:createAIEnemy("Seeker", AI.flyFromBehind)
 while (true) do
     Level:createCity()
     Level:waitForDistance(distance)

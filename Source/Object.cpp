@@ -594,7 +594,7 @@ void Object::callMethod(const std::string& method) {
 	lua_getref(env, table_);
 	lua_getfield(env, -1, method.c_str());
 	if (!lua_isfunction(env, -1)) {
-		lua_pop(env, 2);
+		lua_pop(env, 3);
 		assert(lua_gettop(env) == 0);
 		return;
 	}
@@ -604,9 +604,11 @@ void Object::callMethod(const std::string& method) {
 
 	if (lua_pcall(env, 1, 0, -3)) {
 		string message(lua_tostring(env, -1));
-		lua_pop(env, 1);
+		lua_pop(env, 2);
 		throw runtime_error(message);
 	}
+
+	lua_pop(env, 1);
 
 	assert(lua_gettop(env) == 0);
 }
