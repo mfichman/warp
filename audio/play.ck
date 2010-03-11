@@ -26,6 +26,11 @@ Event downbeat_e;
 Event beat_e;
 Event beat_frac_e;
 
+// quick hack to get intro sound:
+SndBuf intro_track => master_gain;
+"intro_music.wav" => intro_track.read;
+1 => intro_track.loop;
+
 ////////////////
 // BEAT SENDER
 ////////////////
@@ -275,10 +280,12 @@ class BeatServer {
         }
     }
 
+    // also stops background music
     // server start and stop event handlers:
     private void start_f() {
         while(true) {
             start_server_e => now;
+            0 => intro_track.rate;
             start_server_e.nextMsg();
             start_server_e.getInt() => g_bpm;
             <<< "server started at ", g_bpm, " bpm" >>>;
