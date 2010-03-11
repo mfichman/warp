@@ -23,9 +23,11 @@ end
 function Banshee:onTimeStep()
     self.cooldown = self.cooldown - 0.01
     if (self.cooldown <= 0) then
-        self:fireMissile{type="TrackingPhoton"}
+        p = self:fireMissile{type="TrackingPhoton"}
+        p:realInit(self)
         self.cooldown = 1
     end
+
 end
 
 -- This function is called when the object is selected by
