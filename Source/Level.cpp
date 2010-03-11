@@ -14,6 +14,7 @@
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
 #include "City.hpp"
+#include "Overlays.hpp"
 
 #include <string>
 #include <algorithm>
@@ -49,6 +50,8 @@ Level::Level(Game* game, const std::string& name) :
 	string path = "Scripts/" + name + "." + lexical_cast<string>(scriptNumber_) + ".lua";
 	levelScript_.reset(new ScriptTask(game, path));
 	tasks_.push_back(levelScript_);
+
+	overlays_.reset(new Overlays(game_));
 
 	player_->onTimeStep(); // Need this to initialize the spine node
 }

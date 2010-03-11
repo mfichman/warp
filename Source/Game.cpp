@@ -6,6 +6,7 @@
 #include "Game.hpp"
 
 #include "Level.hpp"
+#include "Screen.hpp"
 #include "Player.hpp"
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
@@ -71,6 +72,7 @@ Game::Game() :
 /** Destroys subsystems */
 Game::~Game() {
 	level_.reset();
+	screen_.reset();
 
 	oscSender_->beginMsg("/kill");
 	oscSender_->addInt(1);
@@ -362,6 +364,15 @@ void Game::removeListener(GameListener* listener) {
 
 void Game::setLevel(const string& name) {
 	// Make sure the old level is released first!
+	cout << "Setting level: " << name << endl;
+	screen_.reset();
 	level_.reset();
 	level_.reset(new Level(this, name));
 }	
+
+void Game::setScreen(const string& name) {
+	cout << "Setting screen: " << name << endl;
+	level_.reset();
+	screen_.reset();
+	screen_.reset(new Screen(this, name));
+}

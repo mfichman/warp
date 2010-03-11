@@ -18,6 +18,22 @@ material Circle
 	}
 }
 
+material Splash
+{
+    technique
+    {
+		pass
+		{
+		    fog_override true
+			texture_unit
+			{
+				texture Title.jpg
+			}
+		}
+	}
+}
+
+
 material City
 {
     technique

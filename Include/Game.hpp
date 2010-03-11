@@ -66,6 +66,10 @@ public:
 	/** Sets the current level by name */
 	void setLevel(const std::string& name);
 
+	/** Set screen */
+	void setScreen(const std::string& name);
+
+	/** Returns the current level */
 	Level* getLevel() const { return level_.get(); }
     
 private:
@@ -120,6 +124,7 @@ private:
 
 	// Current level
 	std::auto_ptr<Level> level_;
+	std::auto_ptr<Screen> screen_;
 
 	bool resetEvent_;
 	float gravity_;

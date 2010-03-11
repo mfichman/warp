@@ -55,3 +55,5 @@ function Player:onThrottleNormal()
     self:setParticleSystem{name="JetLeft", width=0.2, height=0.2, velocity=-3.0}
     self:setParticleSystem{name="JetRight", width=0.2, height=0.2, velocity=-3.0}
 end
+
+

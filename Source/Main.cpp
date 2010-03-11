@@ -3,7 +3,6 @@
 #include <Level.hpp>
 #include <DynamicTube.hpp>
 #include <FreeCamera.hpp>
-#include <Overlays.hpp>
 #include <ScriptTask.hpp>
 #include <City.hpp>
 #include <sstream>
@@ -37,14 +36,14 @@ int main(int argc, char** argv) {
         
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
         //Warp::FreeCamera camera(game.get());
-        Warp::Overlays overlays(game.get());
 
 		// Glass
 		// Radial Blur
         //Ogre::CompositorManager::getSingleton().addCompositor(game->getWindow()->getViewport(0), "Motion Blur");
         //Ogre::CompositorManager::getSingleton().setCompositorEnabled(game->getWindow()->getViewport(0), "Motion Blur", true);
 
-		game->setLevel("Tube1");
+		//game->setLevel("Tube1");
+		game->setScreen("LoadScreen");
 		game->getRoot()->startRendering();
 
 

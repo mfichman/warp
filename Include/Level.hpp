@@ -69,6 +69,7 @@ private:
 	boost::shared_ptr<ScriptTask> levelScript_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Player> player_;
+	std::auto_ptr<Warp::Overlays> overlays_;
 	size_t objectsCreated_;
 	std::string compositor_;
 	std::string name_;

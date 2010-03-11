@@ -590,7 +590,7 @@ void Object::callMethod(const std::string& method) {
 	lua_getref(env, table_);
 	lua_getfield(env, -1, method.c_str());
 	if (!lua_isfunction(env, -1)) {
-		lua_pop(env, 1);
+		lua_pop(env, 2);
 		assert(lua_gettop(env) == 0);
 		return;
 	}

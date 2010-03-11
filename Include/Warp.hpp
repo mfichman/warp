@@ -73,6 +73,7 @@ class SubObject;
 class Projectile;
 class Targetable;
 class City;
+class Screen;
 
 
 inline int mod(int num, int divisor) {

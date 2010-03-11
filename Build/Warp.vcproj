@@ -110,6 +110,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Source\Screen.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Source\ScriptTask.cpp"
 				>
 			</File>
@@ -169,6 +173,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\Projectile.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\Screen.hpp"
 				>
 			</File>
 			<File

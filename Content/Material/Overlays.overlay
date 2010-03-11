@@ -1,3 +1,17 @@
+Warp/Splash
+{
+    container BorderPanel(Warp/Splash)
+    {
+        metrics_mode relative
+        left 0
+        top 0
+        width 1
+        height 1
+        material Splash
+    }
+}
+
+
 Warp/HUD
 {
     zorder 500
