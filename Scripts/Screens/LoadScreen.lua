@@ -5,7 +5,7 @@ LoadScreen = Object:new()
 
 
 function LoadScreen:init()
-    self:setSplash("Title.jpg");
+    self:setSplash("TitleScreen.jpg");
 end
 
 function LoadScreen:onDestroy()
