@@ -146,7 +146,7 @@ void Object::onTimeStep() {
 	// out of the field of view so this object should be deleted.  N.B.:
 	// there is probably a better way to do this using the distance along the
 	// spine node path.
-	if (to.dotProduct(proj.forward) > 0 && to.squaredLength() > 120) {
+	if (to.dotProduct(proj.forward) > 0 && to.length() > 100) {
 		alive_ = false;
 	}
     

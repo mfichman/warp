@@ -5,7 +5,7 @@ material Circle
 		pass
 		{
 		    fog_override true
-            transparent
+            //transparent
             lighting off
             scene_blend alpha_blend
             depth_write off
