@@ -42,7 +42,8 @@ function AI:flyFromBehind(enemy)
     local offseth = math.random(-3, 3)
     Level:createTask(function()
         -- Wait 2 seconds
-        Level:sleep(2)
+        Level:sleep(1)
+        local onTimeStep = enemy.onTimeStep;
         enemy.onTimeStep = function(self)
             local alpha = 0.99
             local proj = Level:getSpineProjection(40)
@@ -54,8 +55,9 @@ function AI:flyFromBehind(enemy)
             dir:normalize()
             local cur_vel = enemy:getVelocity()
             
-            local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
+            local vel = (cur_vel*alpha) + (dir*50*(1-alpha))
             enemy:setVelocity(vel)
+            onTimeStep(enemy)
         end
     end)
 end
