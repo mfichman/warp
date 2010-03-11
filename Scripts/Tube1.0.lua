@@ -25,7 +25,7 @@ while (true) do
     --Level:createEnemy("Seeker")
     --Level:createEnemy("Seeker")
     --Level:createEnemy("Seeker")
-    distance = distance + 150
+    distance = distance + 200
     --print(Level:getPlayerPosition():length())
 end
                                                  

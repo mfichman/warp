@@ -14,8 +14,8 @@ function Banshee:init()
     self:addEntity{name="Wing", mesh="BansheeWings.mesh"}
     self:addEntity{name="Pylon", mesh="BansheePylon.mesh"}
     self.destroyed = false
-    self.hitPoints = 7
-    self.cooldown = 10
+    self.hitPoints = 4
+    self.cooldown = 4
 end
 
 -- This function gets called once per timestep by the
@@ -23,9 +23,11 @@ end
 function Banshee:onTimeStep()
     self.cooldown = self.cooldown - 0.01
     if (self.cooldown <= 0) then
-        self:fireMissile{type="TrackingPhoton"}
-        self.cooldown = 1
+        p = self:fireMissile{type="TrackingPhoton"}
+        p:realInit(self)
+        self.cooldown = 0.5
     end
+
 end
 
 -- This function is called when the object is selected by

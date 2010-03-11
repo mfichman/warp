@@ -206,6 +206,10 @@ void Level::loadScriptCallbacks() {
     lua_setfield(env, -2, "getPlayerOrientation");
 
 	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaGetPlayerVelocity, 1);
+    lua_setfield(env, -2, "getPlayerVelocity");
+
+	lua_pushlightuserdata(env, this);
     lua_pushcclosure(env, &Level::luaGetSpineProjection, 1);
     lua_setfield(env, -2, "getSpineProjection");
 
@@ -370,6 +374,12 @@ int Level::luaGetSpineNodeDistance(lua_State* env) {
 int Level::luaGetPlayerPosition(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	env << level->player_->getPosition();
+    return 1;
+}
+
+int Level::luaGetPlayerVelocity(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	env << level->player_->getVelocity();
     return 1;
 }
 

@@ -19,8 +19,9 @@ public:
 
 
 private:
-	virtual void collide(Object* other) { other->onCollision(this); }
+	virtual void collide(Object* other) { if (immunity_ <= 0.0f) other->onCollision(this); }
 	virtual void onCollision(Enemy* enemy);
+	virtual void onCollision(Player* player);
 
 	virtual void onTimeStep();
 
@@ -28,6 +29,7 @@ private:
 	std::auto_ptr<btSphereShape> shape_;
 	bool hit_;
 	float time_;
+	float immunity_;
 };
 
 }

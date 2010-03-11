@@ -434,6 +434,7 @@ int Object::luaFireMissile(lua_State* env) {
 			lua_pop(env, 1);
 		}
 
+        env >> *p;
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
 		lua_error(env);
@@ -442,7 +443,7 @@ int Object::luaFireMissile(lua_State* env) {
 		lua_error(env);
 	}
 
-	return 0;
+	return 1;
 }
 
 /** Sets an entity */
@@ -653,4 +654,10 @@ void Object::callMethod(const std::string& method) {
 	lua_pop(env, 1);
 
 	assert(lua_gettop(env) == 0);
+}
+
+
+Ogre::Vector3 Object::getPosition() const {
+	btVector3 pos = body_->getCenterOfMassPosition();
+	return Vector3(pos.x(), pos.y(), pos.z());
 }
