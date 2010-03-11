@@ -13,7 +13,6 @@ function TrackingPhoton:init()
     self:setPosition(self:getPosition() + vel)
     self:setVelocity(vel)
 
-    self:addParticleSystem{name="Photon", template="Photon"}
 end
 
 -- This function gets called once per timestep by the

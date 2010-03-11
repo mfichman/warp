@@ -21,11 +21,11 @@ end
 -- This function gets called once per timestep by the
 -- C++ peer class connected to this Lua class
 function Banshee:onTimeStep()
-    --self.cooldown = self.cooldown - 0.01
-    --if (self.cooldown <= 0) then
-    --    self:fireMissile{type="TrackingPhoton"}
-    --    self.cooldown = 1
-    --end
+    self.cooldown = self.cooldown - 0.01
+    if (self.cooldown <= 0) then
+        self:fireMissile{type="TrackingPhoton"}
+        self.cooldown = 1
+    end
 end
 
 -- This function is called when the object is selected by

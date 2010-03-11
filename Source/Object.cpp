@@ -419,13 +419,20 @@ int Object::luaFireMissile(lua_State* env) {
 		lua_getfield(env, -1, "type");
 		env >> type;
 
-		Vector3 velocity;
-		lua_getfield(env, -1, "velocity");
-		env >> velocity;
+
 
 		Projectile* p = self->level_->createProjectile(type);
-		p->setVelocity(velocity);
 		p->setPosition(self->getPosition());
+
+
+		lua_getfield(env, -1, "velocity");
+		if (lua_istable(env, -1)) {
+			Vector3 velocity;
+			env >> velocity;
+			p->setVelocity(velocity);
+		} else {
+			lua_pop(env, 1);
+		}
 
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());
