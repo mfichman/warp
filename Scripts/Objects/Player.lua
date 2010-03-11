@@ -36,3 +36,14 @@ end
 function Player:onEnemyHit()
     --self:explode();
 end
+
+function Player:onThrottleUp()
+    self:setParticleSystem{name="Jet", width=0.4, height=0.4, velocity=7.0}
+    print("Throttling up")
+end
+
+function Player:onThrottleDown()
+end
+
+function Player:onThrottleNormal()
+end

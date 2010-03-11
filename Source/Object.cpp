@@ -462,12 +462,32 @@ int Object::luaSetParticleSystem(lua_State* env) {
 		string name;
 		lua_getfield(env, -1, "name");
 		env >> name;
-
-		lua_pushvalue(env, -1);
 		name = self->name_ + "." + name;
 
 		SceneNode* node = self->game_->getSceneManager()->getSceneNode(name);
-		env >> *node;
+		//env >> *node;
+
+		ParticleSystem* psys = dynamic_cast<ParticleSystem*>(node->getAttachedObject(0U));
+		if (psys) {
+		
+		} else {
+			cout << "Warning, particle system does not exist" << endl;
+			lua_getfield(env, -1, "width");
+			lua_getfield(env, -2, "height");
+			if (!lua_isnil(env, -1) && !lua_isnil(env, -2)) {
+				float width = lua_tonumber(env, -1);
+				float height = lua_tonumber(env, -1);
+				psys->setDefaultDimensions(width, height);
+			}
+			lua_pop(env, 2);
+
+			lua_getfield(env, -1, "velocity");
+			if (!lua_isnil(env, -1)) {
+				float velocity = lua_tonumber(env, -1);
+				psys->getEmitter(0U)->setParticleVelocity(velocity);
+			}
+			lua_pop(env, 1);
+		}
 
 	} catch (Exception& ex) {
 		lua_pushstring(env, ex.getFullDescription().c_str());

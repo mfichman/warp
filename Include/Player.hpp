@@ -13,6 +13,8 @@ namespace Warp {
 
 class Player : public Object {
 public:
+	enum Throttle { TH_UP, TH_DOWN, TH_NORMAL };
+
 	/** Creates a new ball */
     Player(Game* game, Level* level, const std::string& name, int id);
 
@@ -60,6 +62,7 @@ private:
 	float cooldown_;
 	float shieldsPct_;
 	int points_;
+	Throttle throttle_;
 };
 
 }

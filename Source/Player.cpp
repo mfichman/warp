@@ -28,7 +28,8 @@ Player::Player(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
 	cooldown_(0.0f),
 	shieldsPct_(100.0f),
-	points_(0) {
+	points_(0),
+	throttle_(TH_NORMAL) {
 
     Vector3 position(0, 245, 5);
 	setPosition(position);
@@ -181,10 +182,22 @@ void Player::computeForces() {
 
     // Apply user control forces
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
+		if (throttle_ != TH_UP) {
+			callMethod("onThrottleUp");
+			throttle_ = TH_UP;
+		}
 		body_->applyCentralForce(50*btVector3(forward.x, forward.y, forward.z));
-	}
-	if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
+	} else if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
+		if (throttle_ != TH_DOWN) {
+			callMethod("onThrottleDown");
+			throttle_ = TH_DOWN;
+		}
 		body_->applyCentralForce(-30*btVector3(forward.x, forward.y, forward.z));
+	} else {
+		if (throttle_ != TH_NORMAL) {
+			callMethod("onThrottleNormal");
+			throttle_ = TH_NORMAL;
+		}
 	}
 
 	if (game_->getKeyboard()->isKeyDown(OIS::KC_RIGHT)) {
