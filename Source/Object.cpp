@@ -350,7 +350,13 @@ int Object::luaAddEntity(lua_State* env) {
 		name = self->name_ + "." + name;
 		SubObjectPtr subobj(new SubObject(self->game_, self, name, mesh));
 		self->subObjects_.push_back(subobj);
-		self->shape_->addChildShape(btTransform::getIdentity(), subobj->getShape());
+
+
+		
+		const Vector3 v = subobj->getOffsets();
+		btTransform transform(btQuaternion::getIdentity(), btVector3(v.x, v.y, v.z));
+
+		self->shape_->addChildShape(transform, subobj->getShape());
 		self->body_->updateInertiaTensor();
 
 		lua_getfield(env, -1, "animation");
@@ -478,7 +484,7 @@ int Object::luaSetEntity(lua_State* env) {
 
 		// Recalculate the physics for collision detection
 		const Quaternion& q = node->getOrientation();
-		const Vector3& v = node->getPosition();
+		const Vector3 v = node->getPosition() + subobj->getOffsets();
 		btTransform transform(btQuaternion(q.x, q.y, q.z, q.w), btVector3(v.x, v.y, v.z));
 
 		self->shape_->removeChildShape(subobj->getShape());

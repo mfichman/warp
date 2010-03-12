@@ -22,11 +22,13 @@ int main(int argc, char** argv) {
 		
 		Ogre::LogManager::getSingleton().setLogDetail(LL_LOW);
 
-        game->getCamera()->setPosition(400, 100, 800);
-        game->getCamera()->lookAt(0, 0, 0);
+
 		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.2, 0.2, 0.2));
+		// TOOD: REENABLE FOG
+#ifndef LEVEL_EDITOR_MODE
 		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.2, 0.2, 0.2), 0.0, 0, 450);
 		//game->getSceneManager()->setFog(FOG_EXP, ColourValue(0.4, 0.4, 0.8), 0.007, 0.005);
+#endif
 		game->getSceneManager()->setAmbientLight(ColourValue(0.4, 0.4, 0.4));
 
 		Light* light = game->getSceneManager()->createLight("Light");
@@ -36,7 +38,11 @@ int main(int argc, char** argv) {
 		light->setDirection(Vector3(0.5, -1, 0.8)); 
         
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
-        //Warp::FreeCamera camera(game.get());
+#ifdef LEVEL_EDITOR_MODE
+		game->getCamera()->setPosition(2500, 10000, 2500);
+        game->getCamera()->lookAt(0, 0, 0);
+        Warp::FreeCamera camera(game.get());
+#endif
 
 		// Glass
 		// Radial Blur

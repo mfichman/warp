@@ -18,7 +18,7 @@ void main() {
     vec4 tex = texture2D(tex_sampler, texcoord);
     vec4 glow = texture2D(glow_sampler, texcoord);
     vec4 color = (ambient + diffuse * tex + specular);
-    glow.a *= (cos(time) + 1.0)/2.0;
+    glow.a *= 0.8 * (cos(time) + 1.0)/2.0 + 0.2;
 
     // This is the final color of the pixel
     gl_FragColor = vec4(glow.a*glow.xyz + (1.0-glow.a)*color.xyz, 1.0);

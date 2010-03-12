@@ -33,10 +33,10 @@ void FreeCamera::onTimeStep() {
 
     if (game_->getKeyboard()->isKeyDown(OIS::KC_RSHIFT)) {
 	    if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {
-		    game_->getCamera()->moveRelative(Vector3(0.0, 0.0, -5));
+		    game_->getCamera()->moveRelative(Vector3(0.0, 0.0, -50));
 	    } 
 		if (game_->getKeyboard()->isKeyDown(OIS::KC_DOWN)) {
-		    game_->getCamera()->moveRelative(Vector3(0.0, 0.0, 5));
+		    game_->getCamera()->moveRelative(Vector3(0.0, 0.0, 50));
 	    }
     } else {
 	    if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {

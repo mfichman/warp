@@ -36,6 +36,8 @@ public:
 	/** Called per-timestep */
 	void onTimeStep();
 
+	Ogre::Vector3 getOffsets() const;
+
 private:
 	// Bullet callbacks
 	virtual void getWorldTransform(btTransform& transform) const;

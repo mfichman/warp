@@ -41,8 +41,10 @@ Player::Player(Game* game, Level* level, const string& name, int id) :
     // set the camera behind the player
     Vector3 forward = playerProjection_.forward;
     Vector3 up = Vector3::UNIT_Y;
+#ifndef LEVEL_EDITOR_MODE
     game->getCamera()->setPosition(position - forward*5.0 + up*1);
     game->getCamera()->setDirection(forward);
+#endif
 }
 
 Player::~Player() {
@@ -95,14 +97,18 @@ void Player::setWorldTransform(const btTransform& transform) {
     Vector3 cam_right = camera->getDerivedRight();
     Vector3 cam_up = camera->getDerivedUp();
     Vector3 cam_forward = camera->getDerivedDirection();
-#define CAM_ALPHA .9    
+#define CAM_ALPHA .9   
+	// TODO: REENABLE CAMERA
+#ifndef LEVEL_EDITOR_MODE
     camera->setPosition((1.0 - CAM_ALPHA) * target_position + CAM_ALPHA * camera->getPosition());
+#endif
     Vector3 new_right = (1.0 - CAM_ALPHA) * -left + CAM_ALPHA * cam_right;
     Vector3 new_up = (1.0 - CAM_ALPHA) * up + CAM_ALPHA * cam_up;
     Vector3 new_forward = (1.0 - CAM_ALPHA) * forward + CAM_ALPHA * cam_forward;
+#ifndef LEVEL_EDITOR_MODE
     camera->setOrientation(Quaternion(new_right, new_up, -new_forward));
-	//camera->setOrientation(Quaternion(-left, up, -forward));
-	//camera->setPosition(target_position);
+#endif
+
 }
 
 /** Called on each physics time step */
