@@ -18,10 +18,10 @@ Level:startLoop{id=1}
 Level:waitForDownbeat()
 while (true) do
 
-Level:setLight{name="Light", diffuse={1, 1, 1.0}}
+--Level:setLight{name="Light", diffuse={1, 1, 1.0}}
 Level:waitForBeat()
 
-Level:setLight{name="Light", diffuse={0.0, 0.0, 0.0}}
+--Level:setLight{name="Light", diffuse={0.0, 0.0, 0.0}}
 Level:waitForBeat()
 
 end

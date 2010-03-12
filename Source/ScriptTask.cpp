@@ -150,6 +150,7 @@ lua_State* Warp::operator<<(lua_State* env, const Ogre::Vector3& v) {
     lua_rawseti(env, -2, 3);
 
 	lua_call(env, 2, 1);
+	lua_remove(env, -2);
 	
     return env;
 }
@@ -169,6 +170,7 @@ lua_State* Warp::operator<<(lua_State* env, const Ogre::Quaternion& q) {
     lua_rawseti(env, -2, 4);
 
 	lua_call(env, 2, 1);
+	lua_remove(env, -2);
 
     return env;
 }
