@@ -44,14 +44,15 @@ function AI:flyFromBehind(enemy)
     local proj = Level:getSpineProjection(-10)
     local left = proj.forward:cross{0, 1, 0}
     left:normalize()
-    enemy:setPosition(proj.position + left * 4)
+    enemy:setPosition(proj.position)
     enemy:setVelocity(proj.forward * 60)
+    enemy:setOrientation(proj.forward)
     
     local offsetv = Vector:new{0, math.random(-3, 3), 0}
     local offseth = math.random(-3, 3)
     Level:createTask(function()
         -- Wait 2 seconds
-        Level:sleep(1)
+        Level:sleep(2)
         local onTimeStep = enemy.onTimeStep;
         enemy.onTimeStep = function(self)
             local alpha = 0.99
@@ -73,10 +74,7 @@ function AI:flyFromBehind(enemy)
             quat:fromAxes(left * -1, up, forward * -1) 
 
             enemy:setOrientation(quat)
-            --print("sending orientation: "..quat[1].." "..quat[2].." "..quat[3]..""..quat[4])
-            --print("x "..quat:getDirection()[1])
-            --print("y "..quat:getDirection()[2])
-            --print("z "..quat:getDirection()[3])
+
             onTimeStep(enemy)
         end
     end)
