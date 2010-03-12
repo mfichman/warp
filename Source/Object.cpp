@@ -216,6 +216,7 @@ void Object::setOrientation(const Ogre::Quaternion& q) {
     transform.setRotation(btQuaternion(q.x, q.y, q.z, q.w));
 	body_->setCenterOfMassTransform(transform);
     setWorldTransform(transform);
+    node_->setOrientation(q);
 }
 
 void Object::onTargetDelete(ObjectPtr target) {
@@ -628,6 +629,7 @@ int Object::luaSetOrientation(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
     Quaternion orientation;
 	env >> orientation;
+    //cout << "orientation recieved: " << orientation << endl;
 	self->setOrientation(orientation);
 	return 0;
 }

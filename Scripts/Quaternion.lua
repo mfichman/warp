@@ -49,9 +49,9 @@ function Quaternion:toAngleAxis()
     if (sqr_length > 0) then
         angle = 2 * math.acos(self[4])
         local inv_length = 1 / math.sqrt(sqr_length)
-        axis[1] = self[1] * sqr_length
-        axis[2] = self[2] * sqr_length
-        axis[3] = self[3] * sqr_length
+        axis[1] = self[1] * inv_length
+        axis[2] = self[2] * inv_length
+        axis[3] = self[3] * inv_length
     else
         axis:set(1,0,0)
     end
@@ -73,11 +73,118 @@ function Quaternion:fromAngleAxis(vector, angle)
     self[3] = f_sin*vector[3];
 end
 
-function Quaternion:fromAxes(x, y, z)
-    forward = Vector:new(forward)
-    left = forward:cross(up)
-    -- unfinished
+function Quaternion:fromRotationMatrix(kRot)
+    -- Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
+    -- article "Quaternion Calculus and Fast Animation".
+
+    local fTrace = kRot[1][1]+kRot[2][2]+kRot[3][3]
+    local fRoot
+
+    if ( fTrace > 0.0 ) then
+        -- |w| > 1/2, may as well choose w > 1/2
+        fRoot = math.sqrt(fTrace + 1.0) -- 2w
+        self[4] = 0.5*fRoot
+        fRoot = 0.5/fRoot -- 1/(4w)
+        self[1] = (kRot[3][2]-kRot[2][3])*fRoot
+        self[2] = (kRot[1][3]-kRot[3][1])*fRoot
+        self[3] = (kRot[2][1]-kRot[1][2])*fRoot
+    else
+        -- |w| <= 1/2
+        s_iNext = { 2, 3, 1 }
+        local i = 1
+        if ( kRot[2][2] > kRot[1][1] ) then
+            i = 2
+        end
+        if ( kRot[3][3] > kRot[i][i] ) then
+            i = 3
+        end
+        local j = s_iNext[i]
+        local k = s_iNext[j]
+
+        fRoot = math.sqrt(kRot[i][i]-kRot[j][j]-kRot[k][k] + 1.0)
+        self[i] = 0.5*fRoot
+        fRoot = 0.5/fRoot
+        self[4] = (kRot[k][j]-kRot[j][k])*fRoot
+        self[j] = (kRot[j][i]+kRot[i][j])*fRoot
+        self[k] = (kRot[k][i]+kRot[i][k])*fRoot
+    end
 end
+
+function Quaternion:toRotationMatrix()
+    -- return value
+    local kRot = {}
+    kRot[1] = {}
+    kRot[2] = {}
+    kRot[3] = {}
+
+    local fTx  = 2.0*self[1]
+    local fTy  = 2.0*self[2]
+    local fTz  = 2.0*self[3]
+    local fTwx = fTx*self[4]
+    local fTwy = fTy*self[4]
+    local fTwz = fTz*self[4]
+    local fTxx = fTx*self[1]
+    local fTxy = fTy*self[1]
+    local fTxz = fTz*self[1]
+    local fTyy = fTy*self[2]
+    local fTyz = fTz*self[2]
+    local fTzz = fTz*self[3]
+
+    kRot[1][1] = 1.0-(fTyy+fTzz)
+    kRot[1][2] = fTxy-fTwz
+    kRot[1][3] = fTxz+fTwy
+    kRot[2][1] = fTxy+fTwz
+    kRot[2][2] = 1.0-(fTxx+fTzz)
+    kRot[2][3] = fTyz-fTwx
+    kRot[3][1] = fTxz-fTwy
+    kRot[3][2] = fTyz+fTwx
+    kRot[3][3] = 1.0-(fTxx+fTyy)
+
+    return kRot
+end
+
+function Quaternion:fromAxes(xAxis, yAxis, zAxis)
+    local kRot = {}
+    kRot[1] = {}
+    kRot[2] = {}
+    kRot[3] = {}
+ 
+    kRot[1][1] = xAxis[1];
+    kRot[2][1] = xAxis[2];
+    kRot[3][1] = xAxis[3];
+ 
+    kRot[1][2] = yAxis[1];
+    kRot[2][2] = yAxis[2];
+    kRot[3][2] = yAxis[3];
+ 
+    kRot[1][3] = zAxis[1];
+    kRot[2][3] = zAxis[2];
+    kRot[3][3] = zAxis[3];
+ 
+    self:fromRotationMatrix(kRot);
+end
+
+function Quaternion:toAxes()
+    kRot = self:toRotationMatrix(kRot);
+
+    local x_axis = Vector:new()
+    local y_axis = Vector:new()
+    local z_axis = Vector:new()
+
+    x_axis[1] = kRot[1][1]
+    x_axis[2] = kRot[2][1]
+    x_axis[3] = kRot[3][1]
+
+    y_axis[1] = kRot[1][2]
+    y_axis[2] = kRot[2][2]
+    y_axis[3] = kRot[3][2]
+
+    z_axis[1] = kRot[1][3]
+    z_axis[2] = kRot[2][3]
+    z_axis[3] = kRot[3][3]
+    return x_axis, y_axis, z_axis
+end
+   
 
 function Vector:__tostring()
     return self[1]..", "..self[2]..", "..self[3]..", "..self[4]
