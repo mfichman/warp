@@ -7,8 +7,14 @@ function Enemy:onDestroy()
     if (self.destroyed) then return end
     self.destroyed = true
     Level:createTask(function()
-        if (on_death_sound) then
-            Level:playSFX{id=on_death_sound, gain=2} -- queue chuck sound effect
+        if (self.on_death_sound) then
+            --Level:playSFX{id=self.on_death_sound, gain=2} -- queue chuck sound effect
+            --Level:sleep(.25)
+            if (self.gain) then
+                Level:playSFX{id=self.on_death_sound, gain=self.gain} -- queue chuck sound effect
+            else
+                Level:playSFX{id=self.on_death_sound, gain=3} -- queue chuck sound effect
+            end
         end
         local explosion = Level:createObject("Explosion")  
         explosion:setPosition(self:getPosition())

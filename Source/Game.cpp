@@ -246,7 +246,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 		keyboard_->capture();
 		mouse_->capture();
 
-		if (keyboard_->isKeyDown(OIS::KC_S)) {
+		if (keyboard_->isKeyDown(OIS::KC_T)) {
 			world_->stepSimulation(getTimeStep() / 4.0, 0);
 		} else {
 			world_->stepSimulation(getTimeStep(), 0);
@@ -283,6 +283,10 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 		resetEvent_ = true;
 		std::cout << "Reset" << endl;
 		setLevel("Tube1");
+    } else if (getKeyboard()->isKeyDown(OIS::KC_F) && !resetEvent_) {
+		resetEvent_ = true;
+		std::cout << "my Reset" << endl;
+		setLevel("Level1");
 	} else {
 		resetEvent_ = false;
 	}
