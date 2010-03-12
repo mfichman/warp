@@ -24,3 +24,13 @@ print("started loop 4")
 --Level:loadLoop{id=0, path="loops/Pluck Synth 01 120_C_4.wav", bpm=120, n_beats=4}
 --Level:loadLoop{id=1, path="beats/Exotic Beat 04 108_8.wav", bpm=108, n_beats=8}
 
+
+
+local distance = Level:getSpineNodeDistance()
+
+while (true) do
+
+    Level:createCity()
+    Level:waitForDistance(distance)
+    distance = distance + 120
+end

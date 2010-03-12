@@ -9,6 +9,7 @@
 #include "Enemy.hpp"
 #include "Object.hpp"
 #include "Projectile.hpp"
+#include "Overlays.hpp"
 #include "DynamicTube.hpp"
 
 #include <OIS/OIS.h>
@@ -288,6 +289,7 @@ void Player::onCollision(EnemyPtr enemy) {
 	if (shields_ > 0) {
 		shields_ -= 10;
 		if (shields_ <= 0) {
+			level_->getOverlays()->setShowGameOver(true);
 			callMethod("onDestroy");
 		} 
 	}
@@ -298,6 +300,7 @@ void Player::onCollision(ProjectilePtr projectile) {
 	if (shields_ > 0) {
 		shields_ -= 10;
 		if (shields_ <= 0) {
+			level_->getOverlays()->setShowGameOver(true);
 			callMethod("onDestroy");
 		} 
 	}

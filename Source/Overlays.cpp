@@ -31,14 +31,24 @@ Overlays::Overlays(Game* game) :
 	Overlay* debug = OverlayManager::getSingleton().getByName("Warp/Debug");
 	debug->show();
 
-
 	Overlay* hud = OverlayManager::getSingleton().getByName("Warp/HUD");
 	hud->show();
 }
 
 /** Destroys the overlays and hides them */
 Overlays::~Overlays() {
+	Overlay* go = OverlayManager::getSingleton().getByName("Warp/GameOver");
+	go->show();
 	game_->removeListener(this);
+}
+
+void Overlays::setShowGameOver(bool show) {
+	Overlay* go = OverlayManager::getSingleton().getByName("Warp/GameOver");
+	if (show) {
+		go->show();
+	} else {
+		go->hide();
+	}
 }
 
 /** Called when a new frame is detected */

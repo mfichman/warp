@@ -17,6 +17,8 @@ public:
     /** Destructor */
     ~Overlays();
 
+	void setShowGameOver(bool show);
+
 private:
 	Overlays(const Overlays&);
     Overlays& operator=(const Overlays&);

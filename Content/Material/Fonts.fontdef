@@ -1,6 +1,15 @@
-Neuropol
+Font24
 {
     type truetype
-    source Neuropol.ttf
-    size 24
+    //source Neuropol.ttf
+    source spaceage.ttf
+    size 32
+}
+
+Font200
+{
+    type truetype
+    //source Neuropol.ttf
+    source spaceage.ttf
+    size 200
 }

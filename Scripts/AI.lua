@@ -240,7 +240,7 @@ function AI:flyFromBehindAndRam(enemy)
             -- only apply velocity if the enemy is in front of you
             local target_vel = Vector:new{0, 0, 0}
             if (cur_position - target):dot(Level:getSpineProjection(0).forward) > 0 then
-                target_vel = (dir*50 + Level:getPlayerVelocity())
+                target_vel = (dir*100 + Level:getPlayerVelocity())
             end
             local vel = (cur_vel*alpha) + target_vel * (1 - alpha)
             enemy:setVelocity(vel)

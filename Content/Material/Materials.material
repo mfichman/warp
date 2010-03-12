@@ -33,6 +33,21 @@ material Splash
 	}
 }
 
+material Splash2
+{
+    technique
+    {
+		pass
+		{
+		    fog_override true
+			texture_unit
+			{
+				texture Instructions.jpg
+			}
+		}
+	}
+}
+
 
 material City
 {

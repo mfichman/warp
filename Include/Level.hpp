@@ -28,6 +28,10 @@ public:
 		return tube_.get();
 	}
 
+	inline Overlays* getOverlays() const {
+		return overlays_.get();
+	}
+
 	ProjectilePtr createProjectile(const std::string& type);
 
 private:
