@@ -88,7 +88,7 @@ function AI:outsideFloat(enemy)
     rot:fromAngleAxis(math.pi, proj.forward)
     enemy:setOrientation(player_orientation)
 
-    enemy:setVelocity(proj.forward * 70)
+    enemy:setVelocity(proj.forward * 90)
 
     Level:createTask(function()
         Level:sleep(.5)
@@ -132,6 +132,63 @@ function AI:rammingSpeed(enemy)
 
 end
 
+function AI:flyFromFront(enemy)
+    local proj = Level:getSpineProjection(50)
+    enemy:setPosition(proj.position)
+    enemy:setOrientation(proj.rotation)
+    
+    local offsetv = Vector:new{0, math.random(-3, 3), 0}
+    local offseth = math.random(-3, 3)
+    Level:createTask(function()
+        -- Wait 2 seconds
+        Level:sleep(2)
+        local onTimeStep = enemy.onTimeStep;
+        enemy.onTimeStep = function(self)
+            local alpha = 0.99
+            local proj = Level:getSpineProjection(50)
+            local left = proj.forward:cross(Vector.UNIT_Y) -- note: unit_Y is not perpendicular
+            proj.position = proj.position + offsetv
+            proj.position = proj.position + left * offseth
+            
+            local dir = proj.position - enemy:getPosition()
+            dir:normalize()
+            local cur_vel = enemy:getVelocity()
+            
+            local vel = (cur_vel*alpha) + (dir*50*(1-alpha))
+            enemy:setVelocity(vel)
+
+            -- set orientation
+            local left, up, forward = Level:getPlayerOrientation():toAxes()
+            local target_orientation = Quaternion:new()
+            target_orientation:fromAxes(left * -1, up, forward * -1) 
+            enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
+            onTimeStep(enemy)
+        end
+        Level:sleep(6)
+        -- go away
+        local onTimeStep = enemy.onTimeStep;
+        enemy.onTimeStep = function(self)
+            local alpha = 0.99
+            local target = Level:getSpineProjection(-200).position
+            
+            local dir = target - enemy:getPosition()
+            dir:normalize()
+            local cur_vel = enemy:getVelocity()
+            
+            local vel = (cur_vel*alpha) + (dir*10*(1-alpha))
+            enemy:setVelocity(vel)
+
+            -- set orientation
+            local left, up, forward = Level:getPlayerOrientation():toAxes()
+            local target_orientation = Quaternion:new()
+            target_orientation:fromAxes(left * -1, up, forward * -1) 
+            enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
+            onTimeStep(enemy)
+        end
+    end)
+
+end
+
 function AI:flyFromBehindAndRam(enemy)
     local proj = Level:getSpineProjection(-10)
     local left = proj.forward:cross{0, 1, 0}
@@ -146,7 +203,7 @@ function AI:flyFromBehindAndRam(enemy)
     Level:createTask(function()
         -- Wait 2 seconds
         Level:sleep(2)
-        local onTimeStep = enemy.onTimeStep;
+        local onTimeStep = enemy.onTimeStep
         enemy.onTimeStep = function(self)
             local alpha = 0.99
             local proj = Level:getSpineProjection(40)
