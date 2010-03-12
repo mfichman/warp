@@ -82,6 +82,9 @@ public:
 	/** Called when the target is deleted */
 	void onTargetDelete(ObjectPtr target);
 
+	/** Returns the object name */
+	const std::string& getName() const { return name_; }
+
 protected:
 	void callMethod(const std::string& method);
 	static int luaWarningDestroyed(lua_State* env);

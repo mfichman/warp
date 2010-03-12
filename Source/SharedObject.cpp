@@ -9,6 +9,7 @@
 #include "Projectile.hpp"
 
 using namespace Warp;
+using namespace std;
 
 void Warp::intrusive_ptr_add_ref(Enemy* p) {
 	intrusive_ptr_add_ref(static_cast<SharedObject*>(p));
@@ -23,6 +24,7 @@ void Warp::intrusive_ptr_add_ref(Player* p) {
 }
 
 void Warp::intrusive_ptr_release(Player* p) {
+	//cout << "DEC" << endl;
 	intrusive_ptr_release(static_cast<SharedObject*>(p));
 }
 

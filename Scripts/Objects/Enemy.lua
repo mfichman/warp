@@ -30,3 +30,7 @@ end
 function Enemy:onSelect()
     self:target()
 end
+
+-- Default timestep function
+function Enemy:onTimeStep()
+end 

@@ -1,4 +1,9 @@
-curve 0 1 0 45 50
+straight 100
+curve 0 -1 0 45 200
+curve 0 1 0 45 100
+curve 1 0 0 45 100
+curve -1 0 0 45 100
+straight 300
 
 visible 0
 straight 100

@@ -195,8 +195,6 @@ void Object::addTracker(TrackerPtr p) {
 		p->onTargetDelete(this);
 	} else if (p) {
 		trackers_.insert(p);
-	} else {
-		cout << "WARNING NULL TRACKER" << endl;
 	}
 }
 
@@ -485,7 +483,6 @@ int Object::luaSetParticleSystem(lua_State* env) {
 			lua_getfield(env, -1, "width");
 			lua_getfield(env, -2, "height");
 			if (!lua_isnil(env, -1) && !lua_isnil(env, -2)) {
-				cout << "Setting particle dimensions" << endl;
 				float width = lua_tonumber(env, -1);
 				float height = lua_tonumber(env, -1);
 				psys->setDefaultDimensions(width, height);
