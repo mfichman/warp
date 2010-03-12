@@ -4,6 +4,6 @@ straight 200
 straight 200
 straight 200
 
-curve 0 1 0 30 800
+curve 0 1 0 30 2000
 curve 0 -1 0 30 100
 curve -1 0 0 180 200
