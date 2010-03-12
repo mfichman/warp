@@ -137,7 +137,7 @@ void DynamicTube::generateRing() {
     for (int i = 0; i < ringDivisions_; i++) {
 	    float theta = 360.0f/(ringDivisions_-1)*i + 45.0f;
         float u = (float)i/(float)ringDivisions_ * 2;
-        Vector3 position(cosf(Math::PI/180.0*theta)*ringRadius_, sinf(Math::PI/180.0*theta)*ringRadius_, 0.0f);
+        Vector3 position(cosf(Math::PI/180.0f*theta)*ringRadius_, sinf(Math::PI/180.0f*theta)*ringRadius_, 0.0f);
 	    Vector4 normalh(-position.normalisedCopy());
 	    normalh.w = 0;
 

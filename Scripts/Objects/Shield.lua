@@ -24,10 +24,13 @@ end
 
 
 function Shield:top()
-
+    self:addEntity{name="Top", mesh="ShieldTop.mesh"}
+    self:addEntity{name="Right", mesh="ShieldRight.mesh"}
 end
 
 function Shield:bottom()
+    self:addEntity{name="Left", mesh="ShieldLeft.mesh"}
+    self:addEntity{name="Bottom", mesh="ShieldBottom.mesh"}
 end
 
 function Shield:left()

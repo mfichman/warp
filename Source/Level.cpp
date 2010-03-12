@@ -72,7 +72,7 @@ Level::~Level() {
 
 	// Manually clear all targets to break any remaining
 	// circular references
-	for (list<ObjectPtr>::iterator i = objects_.begin(); i != objects_.end(); i++) {
+	for (std::list<ObjectPtr>::iterator i = objects_.begin(); i != objects_.end(); i++) {
 		(*i)->setTarget(0);
 		(*i)->clearAllTrackers();
 	}
@@ -84,13 +84,14 @@ void Level::onTimeStep() {
 
 	if (oldObjectCount_ != objects_.size()) {
 		oldObjectCount_ = objects_.size();
-		//cout << "Object count: " << objects_.size() << endl;
+		cout << "Object count: " << objects_.size() << endl;
 	}
 	
 	//player_->onTimeStep();
 
-	for (list<ObjectPtr>::iterator i = objects_.begin(); i != objects_.end();) {
+	for (std::list<ObjectPtr>::iterator i = objects_.begin(); i != objects_.end();) {
 		if (!(*i)->isAlive()) {
+			cout << "ERASING" << (*i)->getName() << endl;
 			i = objects_.erase(i);
 		} else {
 			(*i)->onTimeStep();
@@ -98,7 +99,7 @@ void Level::onTimeStep() {
 		}
 	}
 
-	for (list<CityPtr>::iterator i = cities_.begin(); i != cities_.end();) {
+	for (std::list<CityPtr>::iterator i = cities_.begin(); i != cities_.end();) {
 		if (!(*i)->isAlive()) {
 			i = cities_.erase(i);
 		} else {
@@ -107,7 +108,7 @@ void Level::onTimeStep() {
 		}
 	}
 
-	for (list<ScriptTaskPtr>::iterator i = tasks_.begin(); i != tasks_.end();) {
+	for (std::list<ScriptTaskPtr>::iterator i = tasks_.begin(); i != tasks_.end();) {
 		if (!(*i)->isAlive()) {
 			i = tasks_.erase(i);
 		} else {
@@ -120,7 +121,13 @@ void Level::onTimeStep() {
 	if (scriptNumber_ != newScriptNumber) {
 		// Switch script
 		cout << "Switching level script: " << scriptNumber_ << " >>> " << newScriptNumber << endl;
-		tasks_.erase(find(tasks_.begin(), tasks_.end(), levelScript_));
+		std::list<ScriptTaskPtr>::iterator i;
+		
+		i = find(tasks_.begin(), tasks_.end(), levelScript_);
+		if (i != tasks_.end()) tasks_.erase(i);
+
+		i = find(tasks_.begin(), tasks_.end(), audioScript_);
+		if (i != tasks_.end()) tasks_.erase(i);
 
 		scriptNumber_ = newScriptNumber;
 
@@ -246,7 +253,7 @@ void Level::loadScriptCallbacks() {
 
 int Level::luaGetSpineProjection(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	float distance = lua_tonumber(env, -1);
+	float distance = (float)lua_tonumber(env, -1);
 
 	const SpineProjection& player = level->player_->getPlayerProjection();
 	const SpineProjection& proj = level->tube_->getSpineProjection(distance + player.distance, player.index);
@@ -433,7 +440,7 @@ int Level::luaSetLight(lua_State* env) {
 /** Lua callback.  Returns the current spine node ID. */
 int Level::luaGetSpineNodeDistance(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
-	lua_pushinteger(env, level->player_->getPlayerProjection().distance);
+	lua_pushnumber(env, level->player_->getPlayerProjection().distance);
     return 1;
 }
 
@@ -474,7 +481,7 @@ int Level::luaPlaySFX(lua_State* env) {
 		float gain = 1; // default value
 		lua_getfield(env, -1, "gain");
 		if (!lua_isnil(env, -1)) {
-			gain = lua_tonumber(env, -1);
+			gain = (float)lua_tonumber(env, -1);
 		}
 		lua_pop(env, 1); 
 
@@ -529,7 +536,7 @@ int Level::luaStartLoop(lua_State* env) {
 		float gain = 1; // default value
 		lua_getfield(env, -1, "gain");
 		if (!lua_isnil(env, -1)) {
-			gain = lua_tonumber(env, -1);
+			gain = (float)lua_tonumber(env, -1);
 		}
 		lua_pop(env, 1); 
 

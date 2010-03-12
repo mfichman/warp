@@ -13,8 +13,6 @@
 #include "ScriptTask.hpp"
 
 #include <Ogre.h>
-#include <OgreCEGUIRenderer.h>
-#include <CEGUI/CEGUI.h>
 #include <OIS/OIS.h>
 #include <Bullet/btBulletDynamicsCommon.h>
 #include <Bullet/btBulletCollisionCommon.h>
@@ -39,8 +37,6 @@ using namespace std;
 #define MAX_TIME_LAG 0.2f
 
 Game::Game() : 
-	guiRenderer_(0), 
-	guiSystem_(0), 
 	inputManager_(0),
 	keyboard_(0),
 	mouse_(0),
@@ -82,8 +78,6 @@ Game::~Game() {
 
 	// Destroy the level before tearing down the physics and graphics
 	// engines
-	if (guiRenderer_) { delete guiRenderer_;	}
-	if (guiSystem_) { delete guiSystem_; }
 	if (root_) { delete root_; }
 	if (inputManager_) { 
 		if (keyboard_) inputManager_->destroyInputObject(keyboard_);
@@ -143,12 +137,10 @@ void Game::loadGraphics() {
     
 	// Initialize viewport
 	viewport_ = window_->addViewport(camera_);
-	viewport_->setBackgroundColour(ColourValue(0.7, 0.7, 0.9));
+	viewport_->setBackgroundColour(ColourValue(0.7f, 0.7f, 0.9f));
 	camera_->setAspectRatio(Real(viewport_->getActualWidth())/Real(viewport_->getActualHeight()));
     
 	// CEGUI Setup
-	guiRenderer_ = new CEGUI::OgreCEGUIRenderer(window_, Ogre::RENDER_QUEUE_OVERLAY, false, 3000, sceneManager_);
-	guiSystem_ = new CEGUI::System(guiRenderer_);
 	root_->addFrameListener(this);
 	Ogre::WindowEventUtilities::addWindowEventListener(window_, this);
 	
@@ -247,7 +239,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 		mouse_->capture();
 
 		if (keyboard_->isKeyDown(OIS::KC_T)) {
-			world_->stepSimulation(getTimeStep() / 4.0, 0);
+			world_->stepSimulation(getTimeStep() / 4.0f, 0);
 		} else {
 			world_->stepSimulation(getTimeStep(), 0);
 		}
@@ -269,7 +261,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 			}
 		}
 
-		list<GameListener*>::iterator i = listeners_.begin();
+		std::list<GameListener*>::iterator i = listeners_.begin();
 		while (i != listeners_.end()) {
 			GameListener* listener = *i;
 			i++;
@@ -360,7 +352,7 @@ void Game::addListener(GameListener* listener) {
 }
 
 void Game::removeListener(GameListener* listener) { 
-	list<GameListener*>::iterator i = find(listeners_.begin(), listeners_.end(), listener);
+	std::list<GameListener*>::iterator i = find(listeners_.begin(), listeners_.end(), listener);
 
 	if (i != listeners_.end()) {
 		listeners_.erase(i);

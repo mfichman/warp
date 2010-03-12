@@ -36,11 +36,6 @@ namespace OIS {
 	class InputManager;
 }
 
-namespace CEGUI {
-	class OgreCEGUIRenderer;
-	class System;
-}
-
 class btBroadphaseInterface;
 class btCollisionDispatcher;
 class btConstraintSolver;

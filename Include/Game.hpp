@@ -98,9 +98,6 @@ private:
     Ogre::Viewport*	viewport_;
     Ogre::RenderWindow*	window_;
     
-	// GUI objects
-    CEGUI::OgreCEGUIRenderer* guiRenderer_;
-    CEGUI::System* guiSystem_;
     
 	// Input objects
     OIS::InputManager* inputManager_;

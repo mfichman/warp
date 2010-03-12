@@ -23,19 +23,19 @@ int main(int argc, char** argv) {
 		Ogre::LogManager::getSingleton().setLogDetail(LL_LOW);
 
 
-		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.2, 0.2, 0.2));
+		game->getWindow()->getViewport(0)->setBackgroundColour(ColourValue(0.2f, 0.2f, 0.2f));
 		// TOOD: REENABLE FOG
 #ifndef LEVEL_EDITOR_MODE
-		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.2, 0.2, 0.2), 0.0, 0, 450);
+		game->getSceneManager()->setFog(FOG_LINEAR, ColourValue(0.2f, 0.2f, 0.2f), 0.0f, 0.0f, 450.0f);
 		//game->getSceneManager()->setFog(FOG_EXP, ColourValue(0.4, 0.4, 0.8), 0.007, 0.005);
 #endif
-		game->getSceneManager()->setAmbientLight(ColourValue(0.4, 0.4, 0.4));
+		game->getSceneManager()->setAmbientLight(ColourValue(0.4f, 0.4f, 0.4f));
 
 		Light* light = game->getSceneManager()->createLight("Light");
 		light->setType(Light::LT_DIRECTIONAL);
-		light->setDiffuseColour(ColourValue(0.6, 0.6, 0.6));
-		light->setSpecularColour(ColourValue(1.0, 1.0, 1.0));
-		light->setDirection(Vector3(0.5, -1, 0.8)); 
+		light->setDiffuseColour(ColourValue(0.6f, 0.6f, 0.6f));
+		light->setSpecularColour(ColourValue(1.0f, 1.0f, 1.0f));
+		light->setDirection(Vector3(0.5f, -1.0f, 0.8f)); 
         
         //Warp::ScriptTask script(game.get(), "Scripts/Test.lua");
 #ifdef LEVEL_EDITOR_MODE

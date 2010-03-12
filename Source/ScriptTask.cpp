@@ -60,7 +60,10 @@ void ScriptTask::init(int functionRef) {
 
     // Call "coroutine.create(script chunk)" as the argument
     // Return value is the coroutine object
-    lua_call(env, 1, 1);
+	if (lua_pcall(env, 1, 1, 0)) {
+		string message(lua_tostring(env, -1));
+        throw runtime_error("Could not load script: " + message);
+	}
 
      // Save a reference to the coroutine object (and pop it off the stack)
     coroutine_ = lua_ref(env, LUA_REGISTRYINDEX);
@@ -229,13 +232,13 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
 		throw runtime_error("Invalid argument: expected vector");
 	}
     lua_rawgeti(env, -1, 1);
-    v.x = lua_tonumber(env, -1);
+    v.x = (float)lua_tonumber(env, -1);
     lua_pop(env, 1);
     lua_rawgeti(env, -1, 2);
-    v.y = lua_tonumber(env, -1);
+    v.y = (float)lua_tonumber(env, -1);
     lua_pop(env, 1);
     lua_rawgeti(env, -1, 3);
-    v.z = lua_tonumber(env, -1);
+    v.z = (float)lua_tonumber(env, -1);
     lua_pop(env, 1);
     lua_pop(env, 1);
 
@@ -250,16 +253,16 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
 	}
 
 	lua_rawgeti(env, -1, 1);
-	q.x = lua_tonumber(env, -1);
+	q.x = (float)lua_tonumber(env, -1);
 	lua_pop(env, 1);
 	lua_rawgeti(env, -1, 2);
-	q.y = lua_tonumber(env, -1);
+	q.y = (float)lua_tonumber(env, -1);
 	lua_pop(env, 1);
 	lua_rawgeti(env, -1, 3);
-	q.z = lua_tonumber(env, -1);
+	q.z = (float)lua_tonumber(env, -1);
 	lua_pop(env, 1);
 	lua_rawgeti(env, -1, 4);
-	q.w = lua_tonumber(env, -1);
+	q.w = (float)lua_tonumber(env, -1);
 	lua_pop(env, 1);
 
     return env;
@@ -398,13 +401,13 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
 		throw runtime_error("Invalid argument: expected table");
 	}
     lua_rawgeti(env, -1, 1);
-    c.r = lua_tonumber(env, -1);
+    c.r = (float)lua_tonumber(env, -1);
     lua_pop(env, 1);
     lua_rawgeti(env, -1, 2);
-    c.g = lua_tonumber(env, -1);
+    c.g = (float)lua_tonumber(env, -1);
     lua_pop(env, 1);
     lua_rawgeti(env, -1, 3);
-    c.b = lua_tonumber(env, -1);
+    c.b = (float)lua_tonumber(env, -1);
     lua_pop(env, 1);
     lua_pop(env, 1);
 

@@ -1,79 +1,27 @@
-curve 0 1 0 45 60
-visible 0
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
-straight 200
+# SEGMENT 1 - BEGINNING
 straight 200
 straight 200
 straight 200
 straight 200
 straight 200
 
-curve 0 -1 0 45 200
-curve 1 0 0 30 200
-curve -1 0 0 30 200
-straight 200
-straight 200
-curve 0 -1 0 90 200
-curve 0 1 0 45 100
-curve -1 0 0 45 100
-straight 80
-curve 1 0 0 45 100
+curve 0 -1 0 180 200
 
-curve 0 1 0 45 100
-curve 0 1 0 180 200
-straight 100
-straight 100
-
-curve 0 1 0 45 200
-curve 1 0 0 30 200
-curve -1 0 0 30 200
+curve -1 0 0 10 100
 straight 200
 straight 200
+curve 1 0 0 10 100
 curve 0 -1 0 90 200
 
-
-straight 200
-
-curve -1 0 0 30 80
-straight 40
-curve 1 0 0 30 80
 straight 100
 straight 100
 
+
+# SEGMENT 2 - OUTSIDE 1st PASS
 visible 0
+script 1
 
+# Zigzag 1
 curve 0 -1 0 30 140
 straight 100
 curve 0 1 0 60 100
@@ -84,7 +32,7 @@ curve 0 1 0 30 100
 straight 200
 curve 0 -1 0 30 80
 
-
+# Zigzag 2
 curve 0 1 0 60 100
 straight 100
 curve 0 -1 0 60 180
@@ -93,6 +41,53 @@ curve 0 1 0 60 100
 straight 100
 curve 0 -1 0 30 80
 straight 200
+straight 200
+straight 200
+
+
+curve 1 0 0 30 200
+curve -1 0 0 30 100
+straight 200
+curve -1 0 0 15 100
+straight 100
+curve 1 0 0 15 80
+straight 200
+straight 200
+
+# BEGIN CANYON DIVE
+curve 0 -1 0 15 100
+straight 200
+curve 1 0 0 15 200
+straight 100
+curve -1 0 0 15 100
+straight 200
+straight 200
+straight 200
+straight 200
+straight 200
+
+# SEGMENT 3 - 2nd TUBE
+visible 1
+script 2
+
+curve 0 1 0 60 100
+straight 100
+curve 0 -1 0 60 180
+
+curve 0 -1 0 75 400
+straight 200
+straight 200
+
+curve 0 1 0 45 100
+curve 0 -1 0 45 100
+straight 200
+straight 200
+curve  1 0 0 45 120
+curve -1 0 0 45 120
+straight 200
+curve 1 0 0 90 180
+curve -1 0 0 180 180
+curve 1 0 0 90 140
 
 
 

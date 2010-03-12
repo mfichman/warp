@@ -22,3 +22,4 @@ Warp.exe*
 *.blend2
 *.ignore
 audio\chuck.exe
+Deps\*

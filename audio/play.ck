@@ -140,11 +140,12 @@ class BeatLoop {
         if (is_playing) return;
         1 => is_playing;
         downbeat_e => now;
-        while(is_playing) {
+        while(true) {
             if (cur_beat % n_beats == 0) {
                 loop_back();
             }
             beat_e => now;
+            if (!is_playing && cur_beat == 0) break;
         }
     }
 }
@@ -250,9 +251,8 @@ class BeatServer {
     private void stop_loop_f() {
         while(true) {
             stop_loop_e => now;
-            while (start_loop_e.nextMsg()) {
+            while (stop_loop_e.nextMsg()) {
                 stop_loop_e.getInt() => int index;
-                stop_loop_e.getFloat() => float gain;
 
                 loops[index].stop();
             }

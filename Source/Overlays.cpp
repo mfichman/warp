@@ -9,8 +9,6 @@
 #include "Level.hpp"
 #include "Player.hpp"
 
-#include <CEGUI/CEGUI.h>
-
 using namespace Warp;
 using namespace Ogre;
 using namespace std;
@@ -58,7 +56,7 @@ void Overlays::onTimeStep() {
 	float shields = game_->getLevel()->getPlayer()->getShields();
 	float speed = game_->getLevel()->getPlayer()->getVelocity().length();
 	int points = game_->getLevel()->getPlayer()->getPoints();
-	speed_ = 0.6 * speed_ + 0.4 * speed;
+	speed_ = 0.6f * speed_ + 0.4f * speed;
 
 	OverlayElement* guiShields = OverlayManager::getSingleton().getOverlayElement("Warp/Shields");
 	guiShields->setCaption("Shields: " + StringConverter::toString(shields));

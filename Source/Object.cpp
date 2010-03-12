@@ -142,7 +142,7 @@ Object::~Object() {
 
 /** Called when the game updates */
 void Object::onTimeStep() {
-	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
+	for (std::list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
 		(*i)->addTime(game_->getTimeStep());
 	}
 
@@ -155,12 +155,13 @@ void Object::onTimeStep() {
 	// out of the field of view so this object should be deleted.  N.B.:
 	// there is probably a better way to do this using the distance along the
 	// spine node path.
-	if (to.dotProduct(proj.forward) > 0 && to.length() > 100) {
+	//HACKHACKAHCK
+	if (to.dotProduct(proj.forward) > 0 && to.length() > 100 && name_ != "Player0") {
 		alive_ = false;
 		//cout << "Killing " << name_ << endl;
 	}
 
-	for (list<SubObjectPtr>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
+	for (std::list<SubObjectPtr>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
 		(*i)->onTimeStep();
 	}
 }
@@ -206,7 +207,7 @@ void Object::removeTracker(TrackerPtr p) {
 }
 
 void Object::clearAllTrackers() {
-	for (set<TrackerPtr>::iterator i = trackers_.begin(); i != trackers_.end(); i++) {
+	for (std::set<TrackerPtr>::iterator i = trackers_.begin(); i != trackers_.end(); i++) {
 		(*i)->onTargetDelete(this);
 	}
 	trackers_.clear();
@@ -343,7 +344,7 @@ int Object::luaAddEntity(lua_State* env) {
 		lua_getfield(env, -1, "mesh");
 		env >> mesh;
 		lua_getfield(env, -1, "mass");
-		float mass = lua_tonumber(env, -1);
+		float mass = (float)lua_tonumber(env, -1);
 		lua_pop(env, 1);
 
 		// Create the subobject and add it to this object
@@ -518,15 +519,15 @@ int Object::luaSetParticleSystem(lua_State* env) {
 			lua_getfield(env, -1, "width");
 			lua_getfield(env, -2, "height");
 			if (!lua_isnil(env, -1) && !lua_isnil(env, -2)) {
-				float width = lua_tonumber(env, -1);
-				float height = lua_tonumber(env, -1);
+				float width = (float)lua_tonumber(env, -1);
+				float height = (float)lua_tonumber(env, -1);
 				psys->setDefaultDimensions(width, height);
 			}
 			lua_pop(env, 2);
 
 			lua_getfield(env, -1, "velocity");
 			if (!lua_isnil(env, -1)) {
-				float velocity = lua_tonumber(env, -1);
+				float velocity = (float)lua_tonumber(env, -1);
 				psys->getEmitter(0U)->setParticleVelocity(velocity);
 			}
 			lua_pop(env, 1);
@@ -562,7 +563,7 @@ int Object::luaExplode(lua_State* env) {
 		self->exploded_ = true;
 
 		// Separate the subobjects
-		for (list<SubObjectPtr>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
+		for (std::list<SubObjectPtr>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
 			(*i)->separateFromParent();
 		}
 

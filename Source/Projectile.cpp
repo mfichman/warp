@@ -72,7 +72,7 @@ void Projectile::onTimeStep() {
 	Object::onTimeStep();
 
 	Billboard* billboard = billboards_->getBillboard(0);
-	billboard->setRotation(billboard->getRotation() + Radian(0.2));
+	billboard->setRotation(billboard->getRotation() + Radian(0.2f));
 
 	time_ += 0.1f;
 
@@ -81,11 +81,11 @@ void Projectile::onTimeStep() {
 
 	if (hit_) {
 		if (target_) node_->setPosition(target_->getPosition());
-		width = min(2.0, width + 0.2); // Grow the projectile
-		height = min(2.0, height + 0.2);
+		width = min(2.0f, width + 0.2f); // Grow the projectile
+		height = min(2.0f, height + 0.2f);
 	} else {
-		width = 0.2 * sinf(time_) + 1; // Make the projectile oscillate in size
-		height = 0.2 * sinf(time_) + 1;
+		width = 0.2f * sinf(time_) + 1.0f; // Make the projectile oscillate in size
+		height = 0.2f * sinf(time_) + 1.0f;
 	}
 
 	billboard->setDimensions(width, height);
