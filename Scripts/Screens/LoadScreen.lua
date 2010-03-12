@@ -13,7 +13,7 @@ end
 
 function LoadScreen:onKeyPressed(key)
     if (key == "S" or key == "Enter") then
-        self:setLevel("Tube1")
+        self:setLevel("Level1")
     elseif (key == "I") then
         self:setSplash("Introduction.jpg")
     end

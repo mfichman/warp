@@ -46,8 +46,9 @@ function AI:flyFromBehind(enemy)
     left:normalize()
     enemy:setPosition(proj.position)
     enemy:setVelocity(proj.forward * 60)
-    enemy:setOrientation(proj.forward)
     
+    enemy:setOrientation(Level:getPlayerOrientation())
+
     local offsetv = Vector:new{0, math.random(-3, 3), 0}
     local offseth = math.random(-3, 3)
     Level:createTask(function()
@@ -66,15 +67,12 @@ function AI:flyFromBehind(enemy)
             local cur_vel = enemy:getVelocity()
             
             local vel = (cur_vel*alpha) + (dir*50*(1-alpha))
-            enemy:setVelocity(vel)
 
             -- set orientation
             local left, up, forward = Level:getPlayerOrientation():toAxes()
-            local quat = Quaternion:new()
-            quat:fromAxes(left * -1, up, forward * -1) 
-
-            enemy:setOrientation(quat)
-
+            local target_orientation = Quaternion:new()
+            target_orientation:fromAxes(left * -1, up, forward * -1) 
+            enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
             onTimeStep(enemy)
         end
     end)
