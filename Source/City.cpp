@@ -74,7 +74,7 @@ void City::generateBuildings() {
 }
 
 void City::generateBuilding(float x, float z) {
-	float height = 2* Math::RangeRandom(BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT)/pow(x*x + z*z, 0.12f);
+	float height = 2* Math::RangeRandom(BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT)/pow(x*x + z*z, 0.4f);
 	height = min(height, BUILDING_MAX_HEIGHT);
 
 	float min = BUILDING_FOOTPRINT/3.0;

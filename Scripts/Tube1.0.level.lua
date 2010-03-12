@@ -10,9 +10,9 @@ Level:waitForDistance(distance)
 
 for i=1,4 do
 
-Level:createAIEnemy("SnakeCrab", AI.outsideFloat)
-Level:createAIEnemy("SnakeCrab", AI.outsideFloat)
-Level:createAIEnemy("SnakeCrab", AI.outsideFloat)
+Level:createAIEnemy("SnakeCrab", AI.outsideCrawl)
+Level:createAIEnemy("SnakeCrab", AI.outsideCrawl)
+Level:createAIEnemy("SnakeCrab", AI.outsideCrawl)
 
 distance = distance + 200
 Level:waitForDistance(distance)
@@ -26,6 +26,24 @@ Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
 
 distance = distance + 200
 Level:waitForDistance(distance)
+end
+
+for i=1,20 do
+
+Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
+Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
+
+distance = distance + 200
+Level:waitForDistance(distance)
+
+Level:createEnemy("Shield"):left()
+distance = distance + 100
+Level:waitForDistance(distance)
+
+Level:createEnemy("Shield"):right()
+distance = distance + 400
+Level:waitForDistance(distance)
+
 end
 
 
