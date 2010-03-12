@@ -5,6 +5,9 @@ material Shield/TEXFACE/Metal.png
 	{
 		pass
 		{
+		    transparent
+            scene_blend alpha_blend
+            depth_write off
 		    cull_hardware none
 			ambient 0.500000 0.500000 0.500000 1.000000
 			diffuse 0.800000 0.800000 0.800000 1.000000

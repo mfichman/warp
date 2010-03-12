@@ -26,19 +26,23 @@ end
 function Shield:top()
     self:addEntity{name="Top", mesh="ShieldTop.mesh"}
     self:addEntity{name="Right", mesh="ShieldRight.mesh"}
+    return self
 end
 
 function Shield:bottom()
     self:addEntity{name="Left", mesh="ShieldLeft.mesh"}
     self:addEntity{name="Bottom", mesh="ShieldBottom.mesh"}
+    return self
 end
 
 function Shield:left()
     self:addEntity{name="Right", mesh="ShieldRight.mesh"}
     self:addEntity{name="Bottom", mesh="ShieldBottom.mesh"}
+    return self
 end
 
 function Shield:right()
     self:addEntity{name="Left", mesh="ShieldLeft.mesh"}
     self:addEntity{name="Top", mesh="ShieldTop.mesh"}
+    return self
 end

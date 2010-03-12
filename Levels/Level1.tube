@@ -1,9 +1,26 @@
-straight 100
+# SEGMENT 1 - BEGINNING
+straight 200
+straight 200
+straight 200
+straight 200
+straight 200
 
+curve 0 -1 0 180 200
+
+curve -1 0 0 10 100
+straight 200
+straight 200
+
+
+curve 1 0 0 10 100
+curve 0 -1 0 90 200
+script 1
+straight 100
+straight 100
 
 # SEGMENT 2 - OUTSIDE 1st PASS
 visible 0
-script 1
+
 
 # Zigzag 1
 curve 0 -1 0 30 140

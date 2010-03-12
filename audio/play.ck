@@ -147,6 +147,7 @@ class BeatLoop {
             beat_e => now;
             if (!is_playing && cur_beat == 0) break;
         }
+        0 => sndbuf.rate;
     }
 }
 

@@ -9,7 +9,7 @@ distance = distance + 60
 Level:waitForDistance(distance)
 
 for i=1,5 do
-    Level:createAIEnemy("SnakeCrab", AI.outsideCrawl)
+    Level:createAIEnemy("SnakeCrab", AI.outsideCrawl).on_death_sound = 5
     distance = distance + 50
     Level:waitForDistance(distance)
 end
@@ -19,9 +19,9 @@ while (true) do
 
     for i=1,2 do
 
-        Level:createAIEnemy("FireCycle", AI.outsideFloat)
-        Level:createAIEnemy("FireCycle", AI.outsideFloat)
-        Level:createAIEnemy("FireCycle", AI.outsideFloat)
+        Level:createAIEnemy("FireCycle", AI.outsideFloat).on_death_sound = 4
+        Level:createAIEnemy("FireCycle", AI.outsideFloat).on_death_sound = 4
+        Level:createAIEnemy("FireCycle", AI.outsideFloat).on_death_sound = 4
 
         distance = distance + 200
         Level:waitForDistance(distance)
@@ -30,9 +30,9 @@ while (true) do
 
     for i=1,3 do
 
-        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
-        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
-        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
+        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam).on_death_sound = 4
+        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam).on_death_sound = 4
+        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam).on_death_sound = 4
 
         distance = distance + 200
         Level:waitForDistance(distance)
@@ -40,18 +40,18 @@ while (true) do
 
     for i=1,2 do
 
-        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
-        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
-        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
+        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam).on_death_sound = 4
+        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam).on_death_sound = 4
+        Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam).on_death_sound = 4
 
         distance = distance + 200
         Level:waitForDistance(distance)
 
-        Level:createEnemy("Shield"):left()
+        Level:createEnemy("Shield"):left().on_death_sound = 7
         distance = distance + 100
         Level:waitForDistance(distance)
 
-        Level:createEnemy("Shield"):right()
+        Level:createEnemy("Shield"):right().on_death_sound = 7
         distance = distance + 250
         Level:waitForDistance(distance)
 

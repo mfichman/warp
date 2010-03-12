@@ -36,6 +36,7 @@ end
 
 function Player:onEnemyHit()
     --self:explode();
+    Level:playSFX{id=6, gain=2}
 end
 
 function Player:onThrottleUp()
@@ -69,6 +70,7 @@ end
 
 function Player:onProjectileHit()
     self:setParticleSystem{name="Explosion", on=1}
+    Level:playSFX{id=6, gain=2}
     --local explosion = Level:createObject("SmallExplosion")  
     --explosion:setPosition(self:getPosition())
     --explosion:setVelocity(self:getVelocity())
