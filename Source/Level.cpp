@@ -41,6 +41,7 @@ Level::Level(Game* game, const std::string& name) :
 
 	loadScriptCallbacks();
 	player_.reset(new Player(game, this, "Player", 0));
+	objects_.push_back(player_);
 	game_->getSceneManager()->setWorldGeometry("terrain.cfg");
     game_->addListener(this);
 
@@ -68,6 +69,13 @@ Level::~Level() {
     sender->sendMsg();
 
 	game_->removeListener(this);
+
+	// Manually clear all targets to break any remaining
+	// circular references
+	for (list<ObjectPtr>::iterator i = objects_.begin(); i != objects_.end(); i++) {
+		(*i)->setTarget(0);
+		(*i)->clearAllTrackers();
+	}
 }
 
 #include <OIS/OIS.h>
@@ -79,7 +87,7 @@ void Level::onTimeStep() {
 		//cout << "Object count: " << objects_.size() << endl;
 	}
 	
-	player_->onTimeStep();
+	//player_->onTimeStep();
 
 	for (list<ObjectPtr>::iterator i = objects_.begin(); i != objects_.end();) {
 		if (!(*i)->isAlive()) {

@@ -169,29 +169,7 @@ particle_system SmallExplosion
         emission_rate 50
         //repeat_delay 0.0
     }
-    
-    emitter Ellipsoid
-    {
-        angle 360
-
-        velocity_min 2
-        velocity_max 2
-
-        width 0.5
-        height 0.5
-        depth 0.5
-        
-
-        time_to_live 1.0
-        
-        colour_range_start 1 0.6 0.1
-        colour_range_end 0.8 0.6 0.1
-        
-        direction 0 0 1
-        duration 0.2
-        emission_rate 80
-        //repeat_delay 2.0
-    }
+  
 
     affector Rotator
     {
@@ -208,7 +186,7 @@ particle_system SmallExplosion
 
     affector Scaler
     {
-        rate -1.0
+        rate -4.0
     }
 }
 

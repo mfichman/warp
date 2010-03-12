@@ -65,10 +65,7 @@ Object::Object(Game* game, Level* level, const string& type, int id) :
 Object::~Object() {
 
 	// Notify projectiles that the object is toast
-	for (set<TrackerPtr>::iterator i = trackers_.begin(); i != trackers_.end(); i++) {
-		(*i)->onTargetDelete(this);
-	}
-
+	clearAllTrackers();
 	//cout << "Collecting " << name_ << endl;
 
 	// Un-track
@@ -208,6 +205,13 @@ void Object::removeTracker(TrackerPtr p) {
 	trackers_.erase(p);
 }
 
+void Object::clearAllTrackers() {
+	for (set<TrackerPtr>::iterator i = trackers_.begin(); i != trackers_.end(); i++) {
+		(*i)->onTargetDelete(this);
+	}
+	trackers_.clear();
+}
+
 void Object::setPosition(const Ogre::Vector3& p) {
 	btTransform transform = body_->getCenterOfMassTransform();
 	transform.setOrigin(btVector3(p.x, p.y, p.z));
@@ -224,7 +228,7 @@ void Object::setOrientation(const Ogre::Quaternion& q) {
 }
 
 void Object::onTargetDelete(ObjectPtr target) {
-	target_ = 0;
+	target_.reset();
 	alive_ = false;
 	callMethod("onTargetDelete");
 }
@@ -558,13 +562,7 @@ int Object::luaExplode(lua_State* env) {
 
 		// Disable the original rigid body for the object
 		self->game_->getWorld()->removeCollisionObject(self->body_.get());
-
-		// Deactive projectiles
-		for (set<TrackerPtr>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
-			(*i)->onTargetDelete(self);
-		}
-		self->trackers_.clear();
-
+		self->clearAllTrackers();
 		self->node_->setVisible(false);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
