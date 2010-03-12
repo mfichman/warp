@@ -23,21 +23,23 @@ xmit.startMsg("/loop/load", "i s i i");
 80 => xmit.addInt;
 8 => xmit.addInt;
 
-//xmit.startMsg("/loop/start", "i f"); 
-//0 => xmit.addInt;
-//1.5 => xmit.addFloat;
+
 xmit.startMsg("/loop/start", "i f"); 
 1 => xmit.addInt;
 1 => xmit.addFloat;
-xmit.startMsg("/loop/start", "i f"); 
-2 => xmit.addInt;
-1 => xmit.addFloat;
-
 xmit.startMsg("/server/start", "i");
 120 => xmit.addInt;
 <<< "test: sent start signal", "" >>>;
 
-1::second => now;
+xmit.startMsg("/loop/start", "i f"); 
+2 => xmit.addInt;
+1 => xmit.addFloat;
+
+xmit.startMsg("/loop/start", "i f"); 
+0 => xmit.addInt;
+1.5 => xmit.addFloat;
+
+50::second => now;
 
 xmit.startMsg("/loop/stop", "i"); 
 1 => xmit.addInt;

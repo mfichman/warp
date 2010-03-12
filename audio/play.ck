@@ -244,6 +244,7 @@ class BeatServer {
                 start_loop_e.getFloat() => float gain;
 
                 loops[index].start(gain);
+                <<< "started loop ", index >>>;
             }
         }
     }
@@ -323,10 +324,6 @@ class BeatServer {
 ////////////
 // METHODS
 ///////////
-
-fun void kill_listener() {
-    
-}
 
 //////////////
 // INSTANCES

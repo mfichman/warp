@@ -4,10 +4,15 @@
 
 Level:waitForBeatSet()
 Level:stopLoop{id=0}
+print("stopped loop 0")
 Level:stopLoop{id=1}
+print("stopped loop 1")
 Level:stopLoop{id=2}
+print("stopped loop 2")
 Level:startLoop{id=3}
+print("started loop 3")
 Level:startLoop{id=4}
+print("started loop 4")
 
 ----------------------
 -- CONGO DRUMS PART --
