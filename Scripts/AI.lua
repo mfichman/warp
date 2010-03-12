@@ -31,6 +31,12 @@ function AI:spiral(enemy, distance, diameter)
             local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
             enemy:setVelocity(vel)
             onTimeStep(enemy)
+            
+            local left, up, forward = Level:getPlayerOrientation():toAxes()
+            local target_orientation = Quaternion:new()
+            target_orientation:fromAxes(left * -1, up, forward * -1) 
+            enemy:setOrientation(slerp(.05, enemy:getOrientation(), target_orientation))
+            onTimeStep(enemy)
         end 
     end)
 end
@@ -48,7 +54,7 @@ function AI:outsideCrawl(enemy)
     up_dir:normalize()
     --HACK!
     rot:fromAxes({1,0,0}, {0,-1,0}, {0,0,-1})
-    enemy:setOrientation(rot*player_orientation)
+    enemy:setOrientation(player_orientation*rot)
 
     enemy:setVelocity(proj.forward * 80)
 

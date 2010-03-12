@@ -3,7 +3,6 @@
 
 -- NOTE: my_function{val="blah"} is a shortcut for my_function({val="blah"})
 
-
 -- snake crabs!
 
 Level:loadSFX{id=0, path="sfx/dance_hihat_02.wav"} -- on fire
@@ -15,6 +14,8 @@ Level:loadSFX{id=4, path="sfx/planet_burst.wav"} -- on banshee explosion sound
 Level:loadSFX{id=5, path="sfx/hiphop_clicksurge.wav"} -- on banshee explosion sound
 Level:loadSFX{id=6, path="sfx/Electricty Surge_B.wav"} -- on player hit
 Level:loadSFX{id=7, path="sfx/glass_breaking_2.wav"}
+Level:loadSFX{id=8, path="sfx/hiphop_congo_02.wav"}
+Level:loadSFX{id=9, path="sfx/hiphop_congo_03.wav"}
 
 Level:loadLoop{id=0, path="loops/Synthesizer Bass 05 120_C_8.wav", bpm=120, n_beats=8}
 Level:loadLoop{id=1, path="beats/Club Dance Beat 036 130_16.wav", bpm=130, n_beats=16}
@@ -47,6 +48,10 @@ Level:startLoop{id=8}
 Level:waitForBeatSet()
 Level:startLoop{id=9}
 
+Level:waitForBeatSet()
+Level:waitForBeatSet()
+Level:startLoop{id=0}
+Level:startLoop{id=1}
 Level:stopLoop{id=2}
 
 

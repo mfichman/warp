@@ -1,7 +1,7 @@
 -- Warp: CS248 Final Project
 -- Matt Fichman & Francesco Georg
 
-
+Level:startLoop{id=3}
 Level:waitForBeatSet()
 Level:stopLoop{id=0}
 
@@ -10,14 +10,13 @@ Level:stopLoop{id=1}
 Level:stopLoop{id=2}
 Level:stopLoop{id=7}
 
+Level:startLoop{id=4}
+
+Level:waitForBeatSet()
+
 Level:stopLoop{id=8}
 
 Level:stopLoop{id=9}
-
-Level:startLoop{id=3}
-
-Level:startLoop{id=4}
-
 
 ----------------------
 -- CONGO DRUMS PART --

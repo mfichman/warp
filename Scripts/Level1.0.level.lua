@@ -2,6 +2,7 @@
 -- Matt Fichman & Francesco Georg
 
 -- Takes a vector now
+Level:setCompositor("Glass")
 Level:setGravity{0, 0, 0}
 local distance = Level:getSpineNodeDistance()
 
