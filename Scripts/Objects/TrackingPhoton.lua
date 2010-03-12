@@ -11,12 +11,20 @@ end
 
 function TrackingPhoton:realInit(parent)
     local position = parent:getPosition() + parent:getOrientation() * {0,0,-1} * 1.5
-    local vel = Level:getPlayerPosition() - self:getPosition();
-    vel:normalize()
-    vel = vel * 30
-    vel = vel + { math.random(-6, 6), math.random(-6, 6), math.random(-6, 6) }
+    local velocity = Level:getPlayerPosition() - self:getPosition();
+    velocity:normalize()
+    velocity = velocity * 30
+    velocity = velocity + Level:getPlayerVelocity()
+    
     self:setPosition(position)
-    self:setVelocity(vel)
+    self:setVelocity(velocity)
+    
+    --local vel = Level:getPlayerPosition() - self:getPosition();
+    --vel:normalize()
+    --vel = vel * 30
+    --vel = vel + { math.random(-6, 6), math.random(-6, 6), math.random(-6, 6) }
+    --self:setPosition(position)
+    --self:setVelocity(vel)
 end
 
 -- This function gets called once per timestep by the

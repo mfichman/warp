@@ -19,7 +19,7 @@ public:
 
 
 private:
-	virtual void collide(ObjectPtr other) { if (immunity_ <= 0.0f) other->onCollision(this); }
+	virtual void collide(ObjectPtr other);
 	virtual void onCollision(EnemyPtr enemy);
 	virtual void onCollision(PlayerPtr player);
 

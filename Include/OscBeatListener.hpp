@@ -38,12 +38,8 @@ public:
 				IpEndpointName( IpEndpointName::ANY_ADDRESS, port ),
 				(osc::OscPacketListener*) this );
 
-		//std::cout << "listening for input on port " << port << "...\n";
-		//std::cout << "press ctrl-c to end\n";
 
 		s.RunUntilSigInt();
-
-		//std::cout << "finishing.\n";
 		exit(0);
 	}
 
@@ -70,7 +66,7 @@ protected:
         } catch( osc::Exception& e ){
             // any parsing errors such as unexpected argument types, or 
             // missing arguments get thrown as exceptions.
-            std::cout << "error while parsing message: "
+            std::cout << "Error while parsing message: "
                 << m.AddressPattern() << ": " << e.what() << "\n";
         }
 	}

@@ -7,6 +7,7 @@
 #include <City.hpp>
 #include <sstream>
 #include <boost/thread.hpp>
+#include <cstdio>
 
 using namespace Ogre;
 using namespace std;
@@ -46,11 +47,10 @@ int main(int argc, char** argv) {
 		game->setScreen("LoadScreen");
 		game->getRoot()->startRendering();
 
-
-    } catch (Exception& ex) {
-        cerr << "Exception: " << ex.getFullDescription() << endl;
     } catch (std::exception& ex) {
         cerr << "Exception: " << ex.what() << endl;
+		cerr << "Press any key to continue" << endl;
+		getchar();
     } 
 
 #ifdef WIN32   

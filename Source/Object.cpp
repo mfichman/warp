@@ -140,7 +140,7 @@ Object::~Object() {
 /** Called when the game updates */
 void Object::onTimeStep() {
 	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
-		(*i)->addTime(0.01);
+		(*i)->addTime(game_->getTimeStep());
 	}
 
 	callMethod("onTimeStep"); // destruction also handled in lua
@@ -195,8 +195,6 @@ void Object::addTracker(TrackerPtr p) {
 		p->onTargetDelete(this);
 	} else if (p) {
 		trackers_.insert(p);
-	} else {
-		cout << "WARNING NULL TRACKER" << endl;
 	}
 }
 
@@ -268,10 +266,6 @@ void Object::loadScriptCallbacks() {
 	lua_setfield(env, -2, "setParticleSystem");
 
 	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Object::luaSet, 1);
-	lua_setfield(env, -2, "set");
-
-	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaExplode, 1);
 	lua_setfield(env, -2, "explode");
 
@@ -321,14 +315,6 @@ void Object::loadScriptCallbacks() {
 	table_ = lua_ref(env, -1);
 }
 
-/** Sets the scene node position and orientation */
-int Object::luaSet(lua_State* env) {
-	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	env >> *self->body_;
-
-	return 0;
-}
-
 /** Adds an entity to the Object in its own scene node */
 int Object::luaAddEntity(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
@@ -362,11 +348,6 @@ int Object::luaAddEntity(lua_State* env) {
 			lua_pop(env, 1);
 		}
 
-		assert(self->node_ == subobj->getSceneNode()->getParent());
-
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -400,9 +381,6 @@ int Object::luaAddParticleSystem(lua_State* env) {
 		ParticleSystem* system = self->game_->getSceneManager()->createParticleSystem(name, templ);
 		node->attachObject(system);
 
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -433,9 +411,6 @@ int Object::luaFireMissile(lua_State* env) {
 		}
 
         env << p;
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -482,9 +457,6 @@ int Object::luaSetEntity(lua_State* env) {
 		self->shape_->addChildShape(transform, subobj->getShape());
 		self->body_->updateInertiaTensor();
 
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -512,7 +484,6 @@ int Object::luaSetParticleSystem(lua_State* env) {
 			lua_getfield(env, -1, "width");
 			lua_getfield(env, -2, "height");
 			if (!lua_isnil(env, -1) && !lua_isnil(env, -2)) {
-				cout << "Setting particle dimensions" << endl;
 				float width = lua_tonumber(env, -1);
 				float height = lua_tonumber(env, -1);
 				psys->setDefaultDimensions(width, height);
@@ -529,9 +500,6 @@ int Object::luaSetParticleSystem(lua_State* env) {
 			cout << "Warning, particle system does not exist" << endl;
 		}
 
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -542,25 +510,30 @@ int Object::luaSetParticleSystem(lua_State* env) {
 
 /** Explodes the object */
 int Object::luaExplode(lua_State* env) {
-	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	if (self->exploded_) {
-		return 0;
-	}
-	self->exploded_ = true;
+	try {
+		Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+		if (self->exploded_) {
+			return 0;
+		}
+		self->exploded_ = true;
 
-	// Separate the subobjects
-	for (list<SubObjectPtr>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
-		(*i)->separateFromParent();
-	}
+		// Separate the subobjects
+		for (list<SubObjectPtr>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
+			(*i)->separateFromParent();
+		}
 
-	// Disable the original rigid body for the object
-	self->game_->getWorld()->removeCollisionObject(self->body_.get());
+		// Disable the original rigid body for the object
+		self->game_->getWorld()->removeCollisionObject(self->body_.get());
 
-	// Deactive projectiles
-	for (set<TrackerPtr>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
-		(*i)->onTargetDelete(self);
+		// Deactive projectiles
+		for (set<TrackerPtr>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
+			(*i)->onTargetDelete(self);
+		}
+		self->trackers_.clear();
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
 	}
-	self->trackers_.clear();
 
 	return 0;
 }
@@ -598,9 +571,14 @@ int Object::luaGetPosition(lua_State* env) {
 
 int Object::luaSetPosition(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	Vector3 position;
-	env >> position;
-	self->setPosition(position);
+	try {
+		Vector3 position;
+		env >> position;
+		self->setPosition(position);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
 	return 0;
 }
 
@@ -612,9 +590,14 @@ int Object::luaGetVelocity(lua_State* env) {
 
 int Object::luaSetVelocity(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	Vector3 velocity;
-	env >> velocity;
-	self->setVelocity(velocity);
+	try {
+		Vector3 velocity;
+		env >> velocity;
+		self->setVelocity(velocity);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
 	return 0;
 }
 
@@ -627,10 +610,21 @@ int Object::luaGetOrientation(lua_State* env) {
 
 int Object::luaSetOrientation(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+<<<<<<< local
+	try {
+		Quaternion orientation;
+		env >> orientation;
+		self->setOrientation(orientation);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
+=======
     Quaternion orientation;
 	env >> orientation;
     //cout << "orientation recieved: " << orientation << endl;
 	self->setOrientation(orientation);
+>>>>>>> other
 	return 0;
 }
 

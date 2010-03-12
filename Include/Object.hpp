@@ -82,6 +82,9 @@ public:
 	/** Called when the target is deleted */
 	void onTargetDelete(ObjectPtr target);
 
+	/** Returns the object name */
+	const std::string& getName() const { return name_; }
+
 protected:
 	void callMethod(const std::string& method);
 	static int luaWarningDestroyed(lua_State* env);
@@ -123,7 +126,6 @@ private:
 	static int luaSetEntity(lua_State* env);
 	static int luaAddParticleSystem(lua_State* env);
 	static int luaSetParticleSystem(lua_State* env);
-	static int luaSet(lua_State* env);
 	static int luaExplode(lua_State* env);
 	static int luaDestroy(lua_State* env);
 	static int luaGetPosition(lua_State* env);
