@@ -35,6 +35,7 @@ straight 100
 
 # SEGMENT 2 - OUTSIDE 1st PASS
 visible 0
+script 1
 
 # Zigzag 1
 curve 0 -1 0 30 140
@@ -82,8 +83,9 @@ straight 200
 straight 200
 
 # SEGMENT 3 - 2nd TUBE
-
 visible 1
+script 2
+
 curve 0 1 0 60 100
 straight 100
 curve 0 -1 0 60 180
