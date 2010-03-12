@@ -25,6 +25,9 @@ private:
 
 	virtual void onTimeStep();
 
+	void loadScriptCallbacks();
+	static int Projectile::luaSetMaterial(lua_State* env);
+
 	Ogre::BillboardSet* billboards_;
 	std::auto_ptr<btSphereShape> shape_;
 	bool hit_;

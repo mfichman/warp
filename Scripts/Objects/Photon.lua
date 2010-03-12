@@ -16,9 +16,11 @@ end
 function Photon:onTimeStep()
     local target = self:getTarget()
     if (target ~= nil) then
-        local dir = target:getPosition() - self:getPosition()
-        dir:normalize()
-        self:setVelocity(dir * 100)
+        local velocity = target:getPosition() - self:getPosition()
+        velocity:normalize()
+        velocity = velocity * 80
+        --velocity = velocity + target:getVelocity()
+        self:setVelocity(velocity)
     
     end
 end

@@ -22,6 +22,7 @@ function Player:init()
     self:addParticleSystem{name="Jet", template="Jet", position={0.0, 0.15, 0.481}}
     self:addParticleSystem{name="JetLeft", template="SmallJet", position={-0.3, 0.08, 0.461}}
     self:addParticleSystem{name="JetRight", template="SmallJet", position={0.3, 0.08, 0.461}}
+    self:addParticleSystem{name="Explosion", template="SmallExplosion", position={0.0, 0.1, -0.4}, on=0}
 --    self:addEntity{name="Hull", mesh="DaggerHull.mesh"}
 --    self:addEntity{name="LeftWing", mesh="DaggerLeftWing.mesh"}
 --    self:addEntity{name="RightWing", mesh="DaggerRightWing.mesh"}
@@ -64,6 +65,13 @@ function Player:onDestroy()
     explosion:setPosition(self:getPosition())
     self:explode()
     print("Explode")
+end
+
+function Player:onProjectileHit()
+    self:setParticleSystem{name="Explosion", on=1}
+    --local explosion = Level:createObject("SmallExplosion")  
+    --explosion:setPosition(self:getPosition())
+    --explosion:setVelocity(self:getVelocity())
 end
 
 

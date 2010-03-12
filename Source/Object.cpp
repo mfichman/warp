@@ -386,6 +386,7 @@ int Object::luaAddParticleSystem(lua_State* env) {
 		} else {
 			lua_pop(env, 1);
 		}
+		
 
 		name = self->name_ + "." + name;
 
@@ -393,6 +394,16 @@ int Object::luaAddParticleSystem(lua_State* env) {
 		node->setPosition(position);
 		ParticleSystem* system = self->game_->getSceneManager()->createParticleSystem(name, templ);
 		node->attachObject(system);
+
+		lua_getfield(env, -1, "on");
+		if (!lua_isnil(env, -1)) {
+#pragma warning(disable:4800)
+			for (int i = 0; i < system->getNumEmitters(); i++ ) {
+				system->getEmitter(i)->setEnabled(lua_toboolean(env, -1));
+			}
+#pragma warning(default:4800)
+		}
+		lua_pop(env, 1);
 
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
@@ -507,6 +518,16 @@ int Object::luaSetParticleSystem(lua_State* env) {
 			if (!lua_isnil(env, -1)) {
 				float velocity = lua_tonumber(env, -1);
 				psys->getEmitter(0U)->setParticleVelocity(velocity);
+			}
+			lua_pop(env, 1);
+
+			lua_getfield(env, -1, "on");
+			if (!lua_isnil(env, -1)) {
+#pragma warning(disable:4800)
+				for (int i = 0; i < psys->getNumEmitters(); i++ ) {
+					psys->getEmitter(i)->setEnabled(lua_toboolean(env, -1));
+				}
+#pragma warning(default:4800)
 			}
 			lua_pop(env, 1);
 		} else {

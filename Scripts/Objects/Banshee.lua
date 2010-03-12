@@ -14,7 +14,7 @@ function Banshee:init()
     self:addEntity{name="Wing", mesh="BansheeWings.mesh"}
     self:addEntity{name="Pylon", mesh="BansheePylon.mesh"}
     self.hitPoints = 4
-    self.cooldown = 4
+    self.cooldown = 2
 end
 
 -- This function gets called once per timestep by the
@@ -22,8 +22,8 @@ end
 function Banshee:onTimeStep()
     self.cooldown = self.cooldown - Level:getTimeStep()
     if (self.cooldown <= 0 and not self.destroyed) then
-        self:createMissile{type="TrackingPhoton"}:launch(self)
-        self.cooldown = 0.3
+        self:createMissile{type="Orb"}:launch(self)
+        self.cooldown = 0.8
     end
 end
 

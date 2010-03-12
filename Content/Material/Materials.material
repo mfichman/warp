@@ -71,6 +71,25 @@ material PhotonBlue
 	}
 }
 
+material Orb
+{
+	technique
+	{
+		pass
+		{
+		    fog_override true
+            transparent
+            lighting off
+            scene_blend alpha_blend
+            depth_write off
+			texture_unit
+			{
+				texture Orb.png
+			}
+		}
+	}
+}
+
 material Road
 {
 	technique

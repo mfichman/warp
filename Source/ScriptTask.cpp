@@ -241,12 +241,12 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
 
 }
 
+// Reads a quaternion from lua
 lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
     if (!lua_istable(env, -1)) {
 		throw runtime_error("Invalid argument: expected quaternion");
 	}
 
-	lua_pop(env, 1);
 	lua_rawgeti(env, -1, 1);
 	q.x = lua_tonumber(env, -1);
 	lua_pop(env, 1);

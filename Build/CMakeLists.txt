@@ -3,8 +3,8 @@ project(Criterium)
 
 
 
-set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 add_definitions("/DWARP_DEBUG")

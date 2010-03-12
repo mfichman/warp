@@ -48,6 +48,7 @@ particle_system Flames
     particle_height 2.0
     cull_each false
     quota 40
+    billboard_rotation_type vertex
     billboard_type point
     
 
@@ -136,6 +137,82 @@ particle_system Explosion
     }
 }
 
+particle_system SmallExplosion
+{
+    material GoldFire
+    local_space true
+    particle_width 1.5
+    particle_height 1.5
+    cull_each false
+    quota 1000
+    billboard_type point
+    billboard_rotation_type vertex
+
+    emitter Box
+    {
+
+        width 0.2
+        height 0.0
+        depth 0.0
+        
+
+        time_to_live 1.0
+        
+        colour_range_start 1 0.6 0.1
+        colour_range_end 0.8 0.6 0.1
+        
+        direction 0 0 -1
+        velocity_min -12.0
+        velocity_max -12.0
+        
+        duration 0.3
+        emission_rate 50
+        //repeat_delay 0.0
+    }
+    
+    emitter Ellipsoid
+    {
+        angle 360
+
+        velocity_min 2
+        velocity_max 2
+
+        width 0.5
+        height 0.5
+        depth 0.5
+        
+
+        time_to_live 1.0
+        
+        colour_range_start 1 0.6 0.1
+        colour_range_end 0.8 0.6 0.1
+        
+        direction 0 0 1
+        duration 0.2
+        emission_rate 80
+        //repeat_delay 2.0
+    }
+
+    affector Rotator
+    {
+        rotation_range_start 0
+        rotation_range_end 360
+    }
+
+    affector ColourFader 
+    {
+        red -2
+        blue -2
+        green -2
+    }
+
+    affector Scaler
+    {
+        rate -1.0
+    }
+}
+
+
 particle_system Smoke
 {
     material Smoke
@@ -148,7 +225,7 @@ particle_system Smoke
 
     emitter Ellipsoid
     {
-        angle 360
+        angle 70
         
         velocity_min 0.1
         velocity_max 0.15
