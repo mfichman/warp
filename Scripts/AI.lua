@@ -20,7 +20,7 @@ function AI:spiral(enemy, distance, diameter)
             enemy.timeElapsed = enemy.timeElapsed + .02
             local target_position = proj.position + Level:getPlayerOrientation() * {diameter * math.sin(enemy.timeElapsed), diameter * math.cos(enemy.timeElapsed), 0}
   
-            local alpha = 0.6
+            local alpha = 0.9
             local dir = target_position - enemy:getPosition()
             dir:normalize()
             local cur_vel = enemy:getVelocity()
@@ -57,7 +57,7 @@ function AI:flyFromBehind(enemy)
         local onTimeStep = enemy.onTimeStep;
         enemy.onTimeStep = function(self)
             local alpha = 0.99
-            local proj = Level:getSpineProjection(40)
+            local proj = Level:getSpineProjection(20)
             local left = proj.forward:cross(Vector.UNIT_Y) -- note: unit_Y is not perpendicular
             proj.position = proj.position + offsetv
             proj.position = proj.position + left * offseth
