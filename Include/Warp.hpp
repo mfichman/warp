@@ -14,7 +14,7 @@
 #include <boost/intrusive_ptr.hpp>
 
 #define WARP_BT_FLAG 0x01000000 
-#define LEVEL_EDITOR_MODE
+//#define LEVEL_EDITOR_MODE
 
 // Forward declarations to increase compilation speed
 namespace Ogre {
