@@ -13,7 +13,7 @@ while (true) do
     --Level:createAIEnemy("FireCycle", AI.flyFromBehind)
     --Level:createAIEnemy("FireCycle", AI.flyFromBehind)
 
-    Level:createAIEnemy("Banshee", AI.flyFromBehind)
+    --Level:createAIEnemy("Banshee", AI.flyFromBehind)
     --Level:createEnemy("Seeker")
     --Level:createEnemy("Banshee")
     --Level:createEnemy("Banshee")

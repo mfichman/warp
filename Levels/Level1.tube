@@ -1,4 +1,9 @@
-straight 400
-curve 0 1 0 30 300
+straight 200
+straight 200
+straight 200
+straight 200
+straight 200
+
+curve 0 1 0 30 800
 curve 0 -1 0 30 100
-curve 1 0 0 180 200
+curve -1 0 0 180 200

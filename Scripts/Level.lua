@@ -29,6 +29,7 @@ end
 function Level:createAIEnemy(type, ai_func, ...)
     enemy = Level:createEnemy(type)
     ai_func(AI, enemy, ...)
+    return enemy
 end
 
 
@@ -63,7 +64,7 @@ end
 
 -- Waits for the next set of 4 measures before returning
 function Level:waitForBeatSet()
-    if (self:getBeat() == 0) then self:waitForBeat(1) end
+    if (self:getBeat() == 0) then self:waitForDownbeat() end
     coroutine.yield(function()
         return self:getBeat() == 0
     end)

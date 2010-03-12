@@ -7,9 +7,9 @@ function Enemy:onDestroy()
     if (self.destroyed) then return end
     self.destroyed = true
     Level:createTask(function()
-        Level:playSFX{id=1, gain=2} -- queue chuck sound effect
-        Level:sleep(.2); -- grow animation happens here
-        Level:playSFX{id=2, gain=2} -- queue chuck sound effect
+        if (on_death_sound) then
+            Level:playSFX{id=on_death_sound, gain=2} -- queue chuck sound effect
+        end
         local explosion = Level:createObject("Explosion")  
         explosion:setPosition(self:getPosition())
         self:explode()
