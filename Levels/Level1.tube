@@ -23,15 +23,13 @@ visible 0
 
 
 # Zigzag 1
-curve 0 -1 0 30 140
-straight 100
-curve 0 1 0 60 100
-straight 100
-curve 0 -1 0 60 120
-straight 100
-curve 0 1 0 30 100
 straight 200
-curve 0 -1 0 30 80
+straight 200
+straight 100
+straight 200
+
+
+curve 0 -1 0 30 140
 
 # Zigzag 2
 curve 0 1 0 60 100

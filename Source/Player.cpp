@@ -287,7 +287,7 @@ const SpineProjection& Player::getSpawnProjection(float distance) const {
 void Player::onCollision(EnemyPtr enemy) {
 	callMethod("onEnemyHit"); 
 	if (shields_ > 0) {
-		shields_ -= 10;
+		shields_ -= 5;
 		if (shields_ <= 0) {
 			level_->getOverlays()->setShowGameOver(true);
 			callMethod("onDestroy");
@@ -298,7 +298,7 @@ void Player::onCollision(EnemyPtr enemy) {
 void Player::onCollision(ProjectilePtr projectile) { 
 	callMethod("onProjectileHit"); 
 	if (shields_ > 0) {
-		shields_ -= 10;
+		shields_ -= 5;
 		if (shields_ <= 0) {
 			level_->getOverlays()->setShowGameOver(true);
 			callMethod("onDestroy");
