@@ -6,6 +6,12 @@ Level:setGravity{0, 0, 0}
 local distance = Level:getSpineNodeDistance()
 
 distance = distance + 60
+Level:waitForDistance(distance)
+
+Level:createAIEnemy("SnakeCrab", AI.outsideCrawl)
+Level:createAIEnemy("SnakeCrab", AI.outsideCrawl)
+distance = distance + 60
+
 while (true) do
 Level:waitForDistance(distance)
 
