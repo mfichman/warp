@@ -86,6 +86,8 @@ void DynamicTube::readInputFile() {
         
 		if (type.find("#") == 0) {
 			// comment
+			string comment;
+			getline(in, comment);
 		} else if (type == "straight") {
 			if (first) generateStraight(1);
             float length;
