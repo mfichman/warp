@@ -4,7 +4,7 @@
 AI = Object:new()
 
 function AI:spiral(enemy, distance, diameter)
-    distance = distance or 50 
+    distance = distance or 70 
     diameter = diameter or 6 
 
     enemy.timeElapsed = 0
@@ -18,7 +18,7 @@ function AI:spiral(enemy, distance, diameter)
 
     local onTimeStep = enemy.onTimeStep;
     Level:createTask(function()
-        Level:sleep(1)
+        Level:sleep(3)
         enemy.onTimeStep = function(self)
             local proj = Level:getSpineProjection(distance)
             enemy.timeElapsed = enemy.timeElapsed + .02
@@ -283,7 +283,7 @@ function AI:flyFromBehind(enemy)
     local offseth = math.random(-3, 3)
     Level:createTask(function()
         -- Wait 2 seconds
-        Level:sleep(2)
+        Level:sleep(1)
         local onTimeStep = enemy.onTimeStep;
         enemy.onTimeStep = function(self)
             local alpha = 0.99
@@ -306,7 +306,7 @@ function AI:flyFromBehind(enemy)
             enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
             onTimeStep(enemy)
         end
-        Level:sleep(6)
+        Level:sleep(3)
         -- go away
         local onTimeStep = enemy.onTimeStep;
         enemy.onTimeStep = function(self)
@@ -324,7 +324,7 @@ function AI:flyFromBehind(enemy)
             local left, up, forward = Level:getPlayerOrientation():toAxes()
             local target_orientation = Quaternion:new()
             target_orientation:fromAxes(left * -1, up, forward * -1) 
-            enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
+            enemy:setOrientation(slerp(.05, enemy:getOrientation(), target_orientation))
             onTimeStep(enemy)
         end
     end)

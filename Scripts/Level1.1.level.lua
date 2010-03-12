@@ -37,12 +37,16 @@ for i=1,2 do
     Level:sleep(5)
 end
 
-for i=1,4 do
+while true do
+
+Level:startLoop{id=3}
+Level:startLoop{id=4}
+for i=1,5 do
     Level:createAIEnemy("Banshee", AI.flyFromBehind).on_death_sound = 3
     Level:createAIEnemy("Banshee", AI.flyFromBehind).on_death_sound = 3
     Level:createAIEnemy("Banshee", AI.flyFromBehind).on_death_sound = 3
 
-    Level:sleep(3)
+    Level:sleep(4)
 end
 
 Level:stopLoop{id=3}
@@ -55,7 +59,7 @@ Level:createTask(function()
     Level:startLoop{id=6}
 end)
 
-while true do
+for i=1,2 do
     Level:createAIEnemy("Seeker", AI.spiral, 100, 10).on_death_sound = 8
     Level:sleep(.5)
     Level:createAIEnemy("Seeker", AI.spiral, 100, 10).on_death_sound = 9
@@ -100,5 +104,7 @@ while true do
     Level:sleep(.5)
     Level:createAIEnemy("Seeker", AI.spiral, 100, 30).on_death_sound = 8
     Level:sleep(.5)
+end
+
 end
 

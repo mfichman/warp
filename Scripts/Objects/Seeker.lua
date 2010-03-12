@@ -14,7 +14,7 @@ function Seeker:init()
     self:addEntity{name="BodyRight", mesh="SeekerBodyRight.mesh"}
     self:addEntity{name="Ring", mesh="SeekerRing.mesh"}
     self.hitPoints = 1
-    self.cooldown = 6.0
+    self.cooldown = 7.0
 end
 
 -- This function gets called once per timestep by the
