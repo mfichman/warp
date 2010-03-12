@@ -106,7 +106,7 @@ function Quaternion:getDirection()
     return self * {0,0,-1}
 end
 
-function Quaternion:fromAngleAxis(vector, angle)
+function Quaternion:fromAngleAxis(angle, vector)
     local half_angle = 0.5*angle
     local f_sin = math.sin(half_angle)
     self[4] = math.cos(half_angle);

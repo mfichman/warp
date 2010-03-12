@@ -31,7 +31,95 @@ function AI:spiral(enemy, distance, diameter)
 end
 
 function AI:outsideCrawl(enemy)
-    
+    local proj = Level:getSpineProjection(-10)
+
+    local up_dir = Level:getSpineProjection(0).position - Level:getPlayerPosition()
+
+    enemy:setPosition(proj.position + up_dir)
+
+    local player_orientation = Level:getPlayerOrientation()
+    local rot = Quaternion:new()
+
+    up_dir:normalize()
+    --HACK!
+    rot:fromAxes({1,0,0}, {0,-1,0}, {0,0,-1})
+    enemy:setOrientation(rot*player_orientation)
+
+    enemy:setVelocity(proj.forward * 80)
+
+    Level:createTask(function()
+        Level:sleep(2)
+        enemy.onTimeStep = function(self)
+            enemy:setVelocity(enemy:getVelocity() * .99)
+--            local proj = Level:getSpineProjection(90)
+--            local up_dir = Level:getSpineProjection(0).position - Level:getPlayerPosition()
+--
+--            local target_position = proj.position + up_dir
+--
+--            local player_orientation = Level:getPlayerOrientation()
+--            local rot = Quaternion:new()
+--            up_dir:normalize()
+--            --HACK!
+--            rot:fromAxes({1,0,0}, {0,-1,0}, {0,0,-1})
+--            enemy:setOrientation(rot*player_orientation)
+--
+--            -- filter velocity
+--            local alpha = 0.9
+--            local dir = target_position - enemy:getPosition()
+--            dir:normalize()
+--            local cur_vel = enemy:getVelocity()
+--            local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
+--            enemy:setVelocity(vel)
+        end 
+    end)
+end
+
+function AI:outsideFloat(enemy)
+    local proj = Level:getSpineProjection(-10)
+
+    local up_dir = Level:getSpineProjection(0).position - Level:getPlayerPosition()
+
+    enemy:setPosition(proj.position + up_dir)
+
+    local player_orientation = Level:getPlayerOrientation()
+    local rot = Quaternion:new()
+
+    up_dir:normalize()
+    rot:fromAngleAxis(math.pi, proj.forward)
+    enemy:setOrientation(player_orientation)
+
+    enemy:setVelocity(proj.forward * 70)
+
+    Level:createTask(function()
+        Level:sleep(.5)
+        enemy.onTimeStep = function(self)
+            local proj = Level:getSpineProjection(90)
+            local up_dir = Level:getSpineProjection(0).position - Level:getPlayerPosition()
+
+            local target_position = proj.position + up_dir
+
+            local player_orientation = Level:getPlayerOrientation()
+            local rot = Quaternion:new()
+            up_dir:normalize()
+            rot:fromAngleAxis(math.pi, proj.forward)
+            enemy:setOrientation(player_orientation)
+
+            -- filter velocity
+            local alpha = 0.9
+            local dir = target_position - enemy:getPosition()
+            dir:normalize()
+            local cur_vel = enemy:getVelocity()
+            local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
+            enemy:setVelocity(vel)
+        end 
+        Level:sleep(8)
+        Level:createTask(function()
+            Level:sleep(2)
+            enemy.onTimeStep = function(self)
+                enemy:setVelocity(enemy:getVelocity() * .99)
+            end 
+        end)
+    end)
 end
 
 function AI:rammingSpeed(enemy)
