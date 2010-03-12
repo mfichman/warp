@@ -80,10 +80,13 @@ public:
 	virtual void onTimeStep();
 
 	/** Called when the target is deleted */
-	void onTargetDelete(ObjectPtr target);
+	virtual void onTargetDelete(ObjectPtr target);
 
 	/** Returns the object name */
 	const std::string& getName() const { return name_; }
+
+	/** Whatever */
+	void clearAllTrackers();
 
 protected:
 	void callMethod(const std::string& method);

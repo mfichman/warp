@@ -95,6 +95,7 @@ struct SpineNode {
 	SpineNode() :
 		distance(0) {}
 
+	Ogre::Quaternion rotation;
 	Ogre::Vector3 position; // Position of the node
 	float distance; // Distance along the path from first node
 	bool visible;
@@ -107,6 +108,7 @@ struct SpineProjection {
 		distance(0),
 		script(0) {}
 
+	Ogre::Quaternion rotation;
     Ogre::Vector3 position;
     Ogre::Vector3 forward;
 	int index;

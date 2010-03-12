@@ -122,6 +122,7 @@ void DynamicTube::generateRing() {
 	node.position = transform_ * Vector3::ZERO;
 	node.visible = tubeVisible_;
 	node.script = scriptNumber_;
+	node.rotation = transform_.extractQuaternion();
 	
     if (nodes_.size() != 0) {
         v_ += lastSpinePosition_.distance(node.position);
@@ -259,6 +260,8 @@ SpineProjection DynamicTube::getSpineProjection(float distance, int node_i) cons
 	result.index = prev_i;
 	result.script = prev.script;
 	result.distance = (1 - alpha)*prev.distance + (alpha)*next.distance;
+	result.rotation = Quaternion::Slerp(0, prev.rotation, next.rotation, true);
+
 
 	return result;
 }
@@ -322,6 +325,7 @@ SpineProjection DynamicTube::getSpineProjection(const Vector3& v, int node_i) co
 	result.index = prev_i;
 	result.script = prev.script;
 	result.distance = (1 - alpha)*prev.distance + (alpha)*next.distance;
+	result.rotation = Quaternion::Slerp(0, prev.rotation, next.rotation, true);
 
 	return result;
 }
