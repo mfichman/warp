@@ -186,6 +186,6 @@ function Quaternion:toAxes()
 end
    
 
-function Vector:__tostring()
+function Quaternion:__tostring()
     return self[1]..", "..self[2]..", "..self[3]..", "..self[4]
 end

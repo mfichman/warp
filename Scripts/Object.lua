@@ -13,3 +13,5 @@ function Object:new(o)
 	if o.init then o:init() end
 	return o
 end
+
+require "Scripts.Objects.Enemy"

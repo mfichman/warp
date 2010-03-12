@@ -69,7 +69,7 @@ Object::~Object() {
 		(*i)->onTargetDelete(this);
 	}
 
-	cout << "Collecting " << name_ << endl;
+	//cout << "Collecting " << name_ << endl;
 
 	// Un-track
 	if (target_) target_->removeTracker(this);
@@ -100,7 +100,12 @@ Object::~Object() {
 
 	// Clean up scripting
 	lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 	lua_getref(env, table_);
+	
+	lua_pushnil(env);
+	lua_setfield(env, -2, "__thiscpp");
+
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "addEntity");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
@@ -130,17 +135,18 @@ Object::~Object() {
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "getOrientation");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
-	lua_setfield(env, -2, "fireMissile");
+	lua_setfield(env, -2, "createMissile");
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "getTarget");
-	lua_pop(env, 1);
+	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
+	lua_setfield(env, -2, "setTarget");
 	lua_unref(env, table_);
 }
 
 /** Called when the game updates */
 void Object::onTimeStep() {
 	for (list<AnimationState*>::iterator i = activeAnimations_.begin(); i != activeAnimations_.end(); i++) {
-		(*i)->addTime(0.01);
+		(*i)->addTime(game_->getTimeStep());
 	}
 
 	callMethod("onTimeStep"); // destruction also handled in lua
@@ -154,7 +160,7 @@ void Object::onTimeStep() {
 	// spine node path.
 	if (to.dotProduct(proj.forward) > 0 && to.length() > 100) {
 		alive_ = false;
-		cout << "Killing " << name_ << endl;
+		//cout << "Killing " << name_ << endl;
 	}
 
 	for (list<SubObjectPtr>::iterator i = subObjects_.begin(); i != subObjects_.end(); i++) {
@@ -195,8 +201,6 @@ void Object::addTracker(TrackerPtr p) {
 		p->onTargetDelete(this);
 	} else if (p) {
 		trackers_.insert(p);
-	} else {
-		cout << "WARNING NULL TRACKER" << endl;
 	}
 }
 
@@ -242,6 +246,7 @@ lua_State* Warp::operator<<(lua_State* env, Warp::ObjectPtr e) {
 
 void Object::loadScriptCallbacks() {
 	lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
 	// Create the peer Lua object
 	lua_getglobal(env, type_.c_str());
@@ -250,6 +255,9 @@ void Object::loadScriptCallbacks() {
 	lua_remove(env, -3);
 
 	lua_newtable(env);
+
+	lua_pushlightuserdata(env, this);
+	lua_setfield(env, -2, "__thiscpp");
 
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaAddEntity, 1);
@@ -266,10 +274,6 @@ void Object::loadScriptCallbacks() {
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaSetParticleSystem, 1);
 	lua_setfield(env, -2, "setParticleSystem");
-
-	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Object::luaSet, 1);
-	lua_setfield(env, -2, "set");
 
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaExplode, 1);
@@ -304,29 +308,24 @@ void Object::loadScriptCallbacks() {
 	lua_setfield(env, -2, "setOrientation");
 
 	lua_pushlightuserdata(env, this);
-	lua_pushcclosure(env, &Object::luaFireMissile, 1);
-	lua_setfield(env, -2, "fireMissile");
+	lua_pushcclosure(env, &Object::luaCreateMissile, 1);
+	lua_setfield(env, -2, "createMissile");
 
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Object::luaGetTarget, 1);
 	lua_setfield(env, -2, "getTarget");
 
+	lua_pushlightuserdata(env, this);
+	lua_pushcclosure(env, &Object::luaSetTarget, 1);
+	lua_setfield(env, -2, "setTarget");
+
 	// Call <name>:new()
 	if (lua_pcall(env, 2, 1, 0)) {
 		string message(lua_tostring(env, -1));
-		lua_pop(env, 1);
 		throw runtime_error("Error creating Object: " + message);
 	}
 
 	table_ = lua_ref(env, -1);
-}
-
-/** Sets the scene node position and orientation */
-int Object::luaSet(lua_State* env) {
-	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	env >> *self->body_;
-
-	return 0;
 }
 
 /** Adds an entity to the Object in its own scene node */
@@ -362,11 +361,6 @@ int Object::luaAddEntity(lua_State* env) {
 			lua_pop(env, 1);
 		}
 
-		assert(self->node_ == subobj->getSceneNode()->getParent());
-
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -400,9 +394,6 @@ int Object::luaAddParticleSystem(lua_State* env) {
 		ParticleSystem* system = self->game_->getSceneManager()->createParticleSystem(name, templ);
 		node->attachObject(system);
 
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -411,7 +402,7 @@ int Object::luaAddParticleSystem(lua_State* env) {
 	return 0;
 }
 
-int Object::luaFireMissile(lua_State* env) {
+int Object::luaCreateMissile(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
 
 	try {
@@ -433,9 +424,6 @@ int Object::luaFireMissile(lua_State* env) {
 		}
 
         env << p;
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -482,9 +470,6 @@ int Object::luaSetEntity(lua_State* env) {
 		self->shape_->addChildShape(transform, subobj->getShape());
 		self->body_->updateInertiaTensor();
 
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -512,7 +497,6 @@ int Object::luaSetParticleSystem(lua_State* env) {
 			lua_getfield(env, -1, "width");
 			lua_getfield(env, -2, "height");
 			if (!lua_isnil(env, -1) && !lua_isnil(env, -2)) {
-				cout << "Setting particle dimensions" << endl;
 				float width = lua_tonumber(env, -1);
 				float height = lua_tonumber(env, -1);
 				psys->setDefaultDimensions(width, height);
@@ -529,9 +513,6 @@ int Object::luaSetParticleSystem(lua_State* env) {
 			cout << "Warning, particle system does not exist" << endl;
 		}
 
-	} catch (Exception& ex) {
-		lua_pushstring(env, ex.getFullDescription().c_str());
-		lua_error(env);
 	} catch (std::exception& ex) {
 		lua_pushstring(env, ex.what());
 		lua_error(env);
@@ -542,25 +523,32 @@ int Object::luaSetParticleSystem(lua_State* env) {
 
 /** Explodes the object */
 int Object::luaExplode(lua_State* env) {
-	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	if (self->exploded_) {
-		return 0;
-	}
-	self->exploded_ = true;
+	try {
+		Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+		if (self->exploded_) {
+			return 0;
+		}
+		self->exploded_ = true;
 
-	// Separate the subobjects
-	for (list<SubObjectPtr>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
-		(*i)->separateFromParent();
-	}
+		// Separate the subobjects
+		for (list<SubObjectPtr>::iterator i = self->subObjects_.begin(); i != self->subObjects_.end(); i++) {
+			(*i)->separateFromParent();
+		}
 
-	// Disable the original rigid body for the object
-	self->game_->getWorld()->removeCollisionObject(self->body_.get());
+		// Disable the original rigid body for the object
+		self->game_->getWorld()->removeCollisionObject(self->body_.get());
 
-	// Deactive projectiles
-	for (set<TrackerPtr>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
-		(*i)->onTargetDelete(self);
+		// Deactive projectiles
+		for (set<TrackerPtr>::iterator i = self->trackers_.begin(); i != self->trackers_.end(); i++) {
+			(*i)->onTargetDelete(self);
+		}
+		self->trackers_.clear();
+
+		self->node_->setVisible(false);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
 	}
-	self->trackers_.clear();
 
 	return 0;
 }
@@ -574,6 +562,24 @@ int Object::luaGetTarget(lua_State* env) {
 	}
 
 	return 1;
+}
+
+int Object::luaSetTarget(lua_State* env) {
+	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
+	
+	if (!lua_istable(env, -1)) {
+		lua_pushstring(env, "Expected a table");
+		lua_error(env);
+	}
+	lua_getfield(env, -1, "__thiscpp");
+	if (lua_isnil(env, -1)) {
+		lua_pushstring(env, "Expected a C++ object");
+		lua_error(env);
+	}
+	Object* target = (Object*)lua_touserdata(env, -1);
+	self->setTarget(target);
+
+	return 0;
 }
 
 /** Destroys the object */
@@ -598,9 +604,14 @@ int Object::luaGetPosition(lua_State* env) {
 
 int Object::luaSetPosition(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	Vector3 position;
-	env >> position;
-	self->setPosition(position);
+	try {
+		Vector3 position;
+		env >> position;
+		self->setPosition(position);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
 	return 0;
 }
 
@@ -612,9 +623,14 @@ int Object::luaGetVelocity(lua_State* env) {
 
 int Object::luaSetVelocity(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-	Vector3 velocity;
-	env >> velocity;
-	self->setVelocity(velocity);
+	try {
+		Vector3 velocity;
+		env >> velocity;
+		self->setVelocity(velocity);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
 	return 0;
 }
 
@@ -627,10 +643,14 @@ int Object::luaGetOrientation(lua_State* env) {
 
 int Object::luaSetOrientation(lua_State* env) {
 	Object* self = (Object*)lua_touserdata(env, lua_upvalueindex(1));
-    Quaternion orientation;
-	env >> orientation;
-    //cout << "orientation recieved: " << orientation << endl;
-	self->setOrientation(orientation);
+	try {
+		Quaternion orientation;
+		env >> orientation;
+		self->setOrientation(orientation);
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
+	}
 	return 0;
 }
 
@@ -646,7 +666,6 @@ void Object::callMethod(const std::string& method) {
 	lua_getref(env, table_);
 	lua_getfield(env, -1, method.c_str());
 	if (!lua_isfunction(env, -1)) {
-		lua_pop(env, 3);
 		return;
 	}
 
@@ -655,11 +674,8 @@ void Object::callMethod(const std::string& method) {
 
 	if (lua_pcall(env, 1, 0, -3)) {
 		string message(lua_tostring(env, -1));
-		lua_pop(env, 2);
 		throw runtime_error(message);
 	}
-
-	lua_pop(env, 1);
 }
 
 

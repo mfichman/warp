@@ -61,12 +61,15 @@ private:
 	static int luaGetPlayerPosition(lua_State* env);
 	static int luaGetPlayerVelocity(lua_State* env);
 	static int luaGetPlayerOrientation(lua_State* env);
+	static int luaGetTimeStep(lua_State* env);
+	static int luaGetPlayer(lua_State* env);
 
 	Game* game_;
 	std::list<ObjectPtr> objects_;
 	std::list<ScriptTaskPtr> tasks_;
 	std::list<CityPtr> cities_;
 	ScriptTaskPtr levelScript_;
+	ScriptTaskPtr audioScript_;
 	PlayerPtr player_;
 	std::auto_ptr<DynamicTube> tube_;
 	std::auto_ptr<Warp::Overlays> overlays_;

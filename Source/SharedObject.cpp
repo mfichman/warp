@@ -9,6 +9,7 @@
 #include "Projectile.hpp"
 
 using namespace Warp;
+using namespace std;
 
 void Warp::intrusive_ptr_add_ref(Enemy* p) {
 	intrusive_ptr_add_ref(static_cast<SharedObject*>(p));

@@ -27,11 +27,11 @@ ScriptTask::ScriptTask(Game* game, const std::string& path) :
 	alive_(true) {    
 
     lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
     // Load the script chunk as a function
     if (luaL_loadfile(env, path.c_str())) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 1); // "coroutine.create"
         throw runtime_error("Could not load script: " + message);
 	}
 
@@ -74,13 +74,13 @@ ScriptTask::~ScriptTask() {
 bool ScriptTask::hasTriggerFired() {
     if (!trigger_) return true;
     lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
     // Call the trigger function.  It should return a 
     // boolean on the stack.
     lua_getref(env, trigger_);
     if (lua_pcall(env, 0, 1, 0)) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 1);
         throw runtime_error("Error calling trigger: " + message);
     }
 
@@ -92,7 +92,6 @@ bool ScriptTask::hasTriggerFired() {
 #pragma warning(disable:4800)
         bool result = lua_toboolean(env, -1);
 #pragma warning(default:4800)
-        lua_pop(env, lua_gettop(env));
         return result;
     } else {
         throw runtime_error("Trigger returned an invalid value");
@@ -118,7 +117,6 @@ void ScriptTask::onTimeStep() {
     // Resume the corutine
     if (lua_pcall(env, 1, 2, 0)) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 1);
         throw runtime_error("Error calling script function: " + message);
     }
 
@@ -126,18 +124,15 @@ void ScriptTask::onTimeStep() {
     if (lua_isfunction(env, -1)) {
         // Save a handle to the trigger function
         trigger_ = luaL_ref(env, LUA_REGISTRYINDEX);
-        lua_pop(env, 1);
 
     } else if (lua_isboolean(env, -2) && !lua_toboolean(env, -2)) {
         // Coroutine returned with an error
         string message(lua_tostring(env, -1));
-        lua_pop(env, 2);
         throw runtime_error("Error calling script function: " + message);
 
     } else {
         // ScriptTask is complete, never run it again
         alive_ = false;
-        lua_pop(env, 2);
     }
 }
 
@@ -228,7 +223,9 @@ lua_State* Warp::operator<<(lua_State* env, const Ogre::ColourValue& c) {
 
 /** Methods for reading Ogre from a script */
 lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
-    assert(lua_istable(env, -1));
+	if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected vector");
+	}
     lua_rawgeti(env, -1, 1);
     v.x = lua_tonumber(env, -1);
     lua_pop(env, 1);
@@ -245,38 +242,31 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
-    assert(lua_istable(env, -1));
-
-	lua_getfield(env, -1, "angle");
-	if (lua_isnil(env, -1)) {
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 1);
-		q.x = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 2);
-		q.y = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 3);
-		q.z = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 4);
-		q.w = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		//lua_pop(env, 1);
-	} else {
-		Vector3 axis;
-		float angle = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		env >> axis; 	
-		q = Quaternion(Degree(angle), axis);
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected quaternion");
 	}
-    
+
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 1);
+	q.x = lua_tonumber(env, -1);
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 2);
+	q.y = lua_tonumber(env, -1);
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 3);
+	q.z = lua_tonumber(env, -1);
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 4);
+	q.w = lua_tonumber(env, -1);
+	lua_pop(env, 1);
 
     return env;
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     
     lua_getfield(env, -1, "position");
     if (!lua_isnil(env, -1)) {
@@ -301,7 +291,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, btRigidBody& n) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     
     lua_getfield(env, -1, "position");
     if (!lua_isnil(env, -1)) {
@@ -331,7 +323,9 @@ lua_State* Warp::operator>>(lua_State* env, btRigidBody& n) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Entity& e) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
 
     lua_pop(env, 1);
 
@@ -340,7 +334,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Entity& e) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Light& l) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     Vector3 position, direction;
     ColourValue diffuse, specular;
 
@@ -396,7 +392,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Light& l) {
 
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     lua_rawgeti(env, -1, 1);
     c.r = lua_tonumber(env, -1);
     lua_pop(env, 1);
@@ -414,7 +412,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
 
 /** This is a convenience method for reading into a string from lua */
 lua_State* Warp::operator>>(lua_State* env, std::string& s) {
-    assert(lua_isstring(env, -1)); // Make sure the top of the stack is a string. -1 == top of stack
+    if (!lua_isstring(env, -1)) {
+		throw runtime_error("Invalid argument: expected string");
+	}
     s.assign(lua_tostring(env, -1)); // Get the string
     lua_pop(env, 1); // Pop the string value off the lua stack
 
@@ -423,7 +423,9 @@ lua_State* Warp::operator>>(lua_State* env, std::string& s) {
 
 /** Reads beat loop info from an id and table of values */
 lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
 
 	lua_getfield(env, -1, "id");
     bl.id = lua_tointeger(env, -1);
@@ -483,5 +485,5 @@ StackCheck::StackCheck(lua_State* env) {
 }
 
 StackCheck::~StackCheck() {
-	assert(top_ == lua_gettop(env_));
+	lua_settop(env_, top_);
 }

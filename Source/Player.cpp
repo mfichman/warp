@@ -66,22 +66,15 @@ void Player::setWorldTransform(const btTransform& transform) {
 	// Get the spawn location
 	spawnProjection_ = level_->getTube()->getSpineProjection(playerProjection_.distance + SPAWN_DISTANCE, spawnProjection_.index);
 
-	const SpineProjection& projection = playerProjection_;
-    assert(projection.forward != Vector3::ZERO);
-    assert(projection.position - position != Vector3::ZERO);
-
     // Up points toward spine node
+	const SpineProjection& projection = playerProjection_;
     Vector3 forward = projection.forward;
 	Vector3 up = (projection.position - position).normalisedCopy();//Vector3::UNIT_Y;
-	
-	// Need to make sure up is orthogonal to forward
-    assert(up.crossProduct(forward) != Vector3::ZERO);
 	
     // Project the gravity vector into the plane with "forward" as the
     // normal vector.  This forces the ball to the outside of the ring, and
     // removes any component that would make the ball move forward/backward
     up = up - (up.dotProduct(projection.forward)) * projection.forward;
-    assert(up != Vector3::ZERO);
     up.normalise();
     Vector3 left = up.crossProduct(forward);
 	// END TODO
@@ -110,7 +103,6 @@ void Player::setWorldTransform(const btTransform& transform) {
     camera->setOrientation(Quaternion(new_right, new_up, -new_forward));
 	//camera->setOrientation(Quaternion(-left, up, -forward));
 	//camera->setPosition(target_position);
-    //cout << velocity.dotProduct(forward);
 }
 
 /** Called on each physics time step */
@@ -122,15 +114,17 @@ void Player::onTimeStep() {
 }
 
 void Player::fireMissiles() {
-	if (cooldown_ <= 0.0f && targets_.size() > 0) {
+	// Fire if the cooldown period has elapsed and there are more 
+	// missiles ready in the queue
+
+	cooldown_ = max(0.0f, cooldown_ - game_->getTimeStep());
+	if (cooldown_ <= 0.0f && !targets_.empty()) {
 		list<EnemyPtr>::iterator i = targets_.begin();
 		ProjectilePtr p = level_->createProjectile("Photon");
 		p->setTarget(*i);
 		p->setPosition(forward_ + getPosition());
 		targets_.erase(i);
 		cooldown_ = MAX_COOLDOWN;
-	} else if (cooldown_ > 0.0f) {
-		cooldown_ -= TIME_STEP;
 	}
 }
 
@@ -147,24 +141,15 @@ void Player::computeForces() {
 	// Get the spawn location
 	spawnProjection_ = level_->getTube()->getSpineProjection(playerProjection_.distance + SPAWN_DISTANCE, spawnProjection_.index);
 
-
-	// Get the spawn location
+	// Up points toward spine node
 	const SpineProjection& projection = playerProjection_;
-    assert(projection.forward != Vector3::ZERO);
-    assert(projection.position - position != Vector3::ZERO);
-
-    // Up points toward spine node
     Vector3 forward = projection.forward;
 	Vector3 up = (projection.position - position).normalisedCopy();//Vector3::UNIT_Y;
-	
-	// Need to make sure up is orthogonal to forward
-    assert(up.crossProduct(forward) != Vector3::ZERO);
 	
     // Project the gravity vector into the plane with "forward" as the
     // normal vector.  This forces the ball to the outside of the ring, and
     // removes and component that would make the ball move forward/backward
     up = up - (up.dotProduct(projection.forward)) * projection.forward;
-    assert(up != Vector3::ZERO);
     up.normalise();
     Vector3 right = up.crossProduct(forward);
 
@@ -292,12 +277,12 @@ const SpineProjection& Player::getSpawnProjection(float distance) const {
 
 }
 
-void Player::onCollision(EnemyPtr enemy) { 
+void Player::onCollision(EnemyPtr enemy) {
 	callMethod("onEnemyHit"); 
 	if (shields_ > 0) {
 		shields_ -= 10;
 		if (shields_ <= 0) {
-			callMethod("onKilled");
+			callMethod("onDestroy");
 		} 
 	}
 }
@@ -307,7 +292,7 @@ void Player::onCollision(ProjectilePtr projectile) {
 	if (shields_ > 0) {
 		shields_ -= 10;
 		if (shields_ <= 0) {
-			callMethod("onKilled");
+			callMethod("onDestroy");
 		} 
 	}
 }

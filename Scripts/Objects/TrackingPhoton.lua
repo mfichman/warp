@@ -9,23 +9,18 @@ function TrackingPhoton:init()
     --Level:playSFX{id=0, gain=2} -- queue chuck sound effect
 end
 
-function TrackingPhoton:realInit(parent)
+function TrackingPhoton:launch(parent)
     local position = parent:getPosition() + parent:getOrientation() * {0,0,-1} * 1.5
-    local vel = Level:getPlayerPosition() - self:getPosition();
-    vel:normalize()
-    vel = vel * 30
-    vel = vel + { math.random(-6, 6), math.random(-6, 6), math.random(-6, 6) }
+    local velocity = Level:getPlayerPosition() - self:getPosition();
+    velocity:normalize()
+    velocity = velocity * 20
+    velocity = velocity + Level:getPlayerVelocity()
+    
     self:setPosition(position)
-    self:setVelocity(vel)
+    self:setVelocity(velocity)
+    self:setTarget(Level:getPlayer())
 end
 
--- This function gets called once per timestep by the
--- C++ peer class connected to this Lua class
-function TrackingPhoton:onTimeStep()
-   -- local alpha = 0.4
-    --local vel = Level:getPlayerPosition() - self:getPosition() + Level:getPlayerVelocity() * 0.1;
-    --vel:normalize();
-    --vel = vel * 40
-   -- self:setVelocity(vel)
-   -- self:setVelocity(self:getVelocity()*alpha + vel*(1-alpha))
+function TrackingPhoton:onTargetHit()
+    self:destroy()
 end

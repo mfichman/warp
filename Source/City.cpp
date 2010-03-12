@@ -64,23 +64,12 @@ City::~City() {
 
 void City::generateBuildings() {
 
-	//for (float x = -width/2; x < width/2; x += CELL_SIZE) {
-	//	for (float z = -depth/2; z < depth/2; z += CELL_SIZE) {
-	//		cout << x << ", " << z << endl;
-	//		float height = 100 * Math::RangeRandom(BUILDING_MIN_HEIGHT, BUILDING_MAX_HEIGHT)/sqrt(x*x + z*z);
-	//		generateBuilding(x + CELL_SIZE/2.0, z + CELL_SIZE/2.0, height);
-	//	}
-	//}
-
 	for (int i = 0; i < 15; i++) {
 		float theta = Math::RangeRandom(0, 2*Math::PI);
 		float radius = Math::RangeRandom(0, CITY_RADIUS);
 		float x = radius*cosf(theta);
 		float z = radius*sinf(theta);
-		//float x = Math::RangeRandom(-width/2.0, width/2.0);
-		//float z = Math::RangeRandom(-depth/2.0, depth/2.0);
 		generateBuilding(x, z);
-
 	}
 }
 

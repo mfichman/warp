@@ -10,6 +10,7 @@
 #include "Player.hpp"
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
+#include "ScriptTask.hpp"
 
 #include <Ogre.h>
 #include <OgreCEGUIRenderer.h>
@@ -33,8 +34,9 @@ using namespace Ogre;
 using namespace std;
 
 // for OSC interface to chuck
-#define SEND_PORT 6449
-#define LISTEN_PORT 7000
+#define OSC_SEND_PORT 6449
+#define OSC_LISTEN_PORT 7000
+#define MAX_TIME_LAG 0.2f
 
 Game::Game() : 
 	guiRenderer_(0), 
@@ -210,9 +212,9 @@ void Game::loadPhysics() {
 /** Loads a script */
 void Game::loadScript(const std::string& name) {
 	lua_State* env = scriptState_;
+	StackCheck check(env);
 	if (luaL_dofile(env, name.c_str())) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 2);
         throw runtime_error("ScriptTask error: " + message);
     }
 }
@@ -226,8 +228,8 @@ void Game::loadScripting() {
 /** load up osc interaction */
 void Game::loadOsc() {
 	// initialize sender
-	oscSender_ = new OscSender(SEND_PORT);
-	oscListener_ = new OscBeatListener(LISTEN_PORT);
+	oscSender_ = new OscSender(OSC_SEND_PORT);
+	oscListener_ = new OscBeatListener(OSC_LISTEN_PORT);
 }
 
 /** Called when the main window is closed */
@@ -239,17 +241,15 @@ void Game::windowClosed(RenderWindow* rw) {
 bool Game::frameRenderingQueued(const FrameEvent& evt) { 
 
 	physicsAccumulator_ += evt.timeSinceLastFrame;
-	float delta = 0.01;
-	physicsAccumulator_ = min(physicsAccumulator_, 0.1f);
-	while (physicsAccumulator_ > delta) {
+	physicsAccumulator_ = min(physicsAccumulator_, MAX_TIME_LAG);
+	while (physicsAccumulator_ >= getTimeStep()) {
 		keyboard_->capture();
 		mouse_->capture();
 
-        // slow motion hack/easter egg
-		if (keyboard_->isKeyDown(OIS::KC_T)) {
-			world_->stepSimulation(delta / 4.0, 0);
+		if (keyboard_->isKeyDown(OIS::KC_S)) {
+			world_->stepSimulation(getTimeStep() / 4.0, 0);
 		} else {
-			world_->stepSimulation(delta, 0);
+			world_->stepSimulation(getTimeStep(), 0);
 		}
 
 		// Check for collisions
@@ -275,7 +275,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 			i++;
 			listener->onTimeStep();
 		}
-		physicsAccumulator_ -= delta;
+		physicsAccumulator_ -= getTimeStep();
 	}
 
 	// Hack hack hack

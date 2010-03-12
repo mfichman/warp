@@ -15,6 +15,7 @@ public:
 	SharedObject() : refCount_(0) {}
 	friend void intrusive_ptr_add_ref(SharedObject* p);
 	friend void intrusive_ptr_release(SharedObject* p);
+	int getRefCount() const { return refCount_; }
 
 private:
 	mutable int refCount_;
