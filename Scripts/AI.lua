@@ -10,7 +10,10 @@ function AI:spiral(enemy, distance, diameter)
     enemy.timeElapsed = 0
 
     local proj = Level:getSpineProjection(-10)
-    enemy:setPosition(proj.position)
+    
+    local up_dir = Level:getSpineProjection(0).position - Level:getPlayerPosition()
+    enemy:setPosition(proj.position + up_dir)
+    
     enemy:setVelocity(proj.forward * 60)
 
     local onTimeStep = enemy.onTimeStep;
@@ -183,7 +186,7 @@ function AI:flyFromFront(enemy)
             local left, up, forward = Level:getPlayerOrientation():toAxes()
             local target_orientation = Quaternion:new()
             target_orientation:fromAxes(left * -1, up, forward * -1) 
-            enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
+            enemy:setOrientation(slerp(.05, enemy:getOrientation(), target_orientation))
             onTimeStep(enemy)
         end
     end)
@@ -194,7 +197,8 @@ function AI:flyFromBehindAndRam(enemy)
     local proj = Level:getSpineProjection(-10)
     local left = proj.forward:cross{0, 1, 0}
     left:normalize()
-    enemy:setPosition(proj.position)
+    local up_dir = Level:getSpineProjection(0).position - Level:getPlayerPosition()
+    enemy:setPosition(proj.position + up_dir)
     enemy:setVelocity(proj.forward * 60)
     
     enemy:setOrientation(Level:getPlayerOrientation())
@@ -250,7 +254,7 @@ function AI:flyFromBehindAndRam(enemy)
             local left, up, forward = Level:getPlayerOrientation():toAxes()
             local target_orientation = Quaternion:new()
             target_orientation:fromAxes(left * -1, up, forward * -1) 
-            enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
+            enemy:setOrientation(slerp(.05, enemy:getOrientation(), target_orientation))
 
 
 
@@ -263,7 +267,8 @@ function AI:flyFromBehind(enemy)
     local proj = Level:getSpineProjection(-10)
     local left = proj.forward:cross{0, 1, 0}
     left:normalize()
-    enemy:setPosition(proj.position)
+    local up_dir = Level:getSpineProjection(0).position - Level:getPlayerPosition()
+    enemy:setPosition(proj.position + up_dir)
     enemy:setVelocity(proj.forward * 60)
     
     enemy:setOrientation(Level:getPlayerOrientation())

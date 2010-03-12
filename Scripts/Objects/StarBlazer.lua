@@ -16,7 +16,7 @@ function StarBlazer:init()
     self:addEntity{name="TopWing", mesh="StarBlazerTopWing.mesh"}
     self:addEntity{name="Ring", mesh="StarBlazerRing.mesh"}
     self.hitPoints = 4
-    self.cooldown = 4.0
+    self.cooldown = 6.0
 end
 
 -- This function gets called once per timestep by the

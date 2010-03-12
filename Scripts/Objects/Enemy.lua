@@ -13,7 +13,7 @@ function Enemy:onDestroy()
             if (self.gain) then
                 Level:playSFX{id=self.on_death_sound, gain=self.gain} -- queue chuck sound effect
             else
-                Level:playSFX{id=self.on_death_sound, gain=1.5} -- queue chuck sound effect
+                Level:playSFX{id=self.on_death_sound, gain=2} -- queue chuck sound effect
             end
         end
         local explosion = Level:createObject("Explosion")  

@@ -9,7 +9,9 @@ distance = distance + 60
 Level:waitForDistance(distance)
 
 for i=1,5 do
-    Level:createAIEnemy("SnakeCrab", AI.outsideCrawl).on_death_sound = 5
+    local enemy = Level:createAIEnemy("SnakeCrab", AI.outsideCrawl)
+    enemy.on_death_sound = 5
+    enemy.gain = 4
     distance = distance + 50
     Level:waitForDistance(distance)
 end
