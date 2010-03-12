@@ -274,7 +274,7 @@ bool Game::frameRenderingQueued(const FrameEvent& evt) {
 	if (getKeyboard()->isKeyDown(OIS::KC_R) && !resetEvent_) {
 		resetEvent_ = true;
 		std::cout << "Reset" << endl;
-		setLevel("Tube1");
+		setLevel("Level1");
     } else if (getKeyboard()->isKeyDown(OIS::KC_F) && !resetEvent_) {
 		resetEvent_ = true;
 		std::cout << "my Reset" << endl;

@@ -38,7 +38,7 @@ Overlays::Overlays(Game* game) :
 /** Destroys the overlays and hides them */
 Overlays::~Overlays() {
 	Overlay* go = OverlayManager::getSingleton().getByName("Warp/GameOver");
-	go->show();
+	go->hide();
 	game_->removeListener(this);
 }
 
