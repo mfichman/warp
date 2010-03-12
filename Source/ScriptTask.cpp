@@ -228,7 +228,9 @@ lua_State* Warp::operator<<(lua_State* env, const Ogre::ColourValue& c) {
 
 /** Methods for reading Ogre from a script */
 lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
-    assert(lua_istable(env, -1));
+	if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected vector");
+	}
     lua_rawgeti(env, -1, 1);
     v.x = lua_tonumber(env, -1);
     lua_pop(env, 1);
@@ -245,38 +247,31 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Vector3& v) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Quaternion& q) {
-    assert(lua_istable(env, -1));
-
-	lua_getfield(env, -1, "angle");
-	if (lua_isnil(env, -1)) {
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 1);
-		q.x = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 2);
-		q.y = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 3);
-		q.z = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		lua_rawgeti(env, -1, 4);
-		q.w = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		//lua_pop(env, 1);
-	} else {
-		Vector3 axis;
-		float angle = lua_tonumber(env, -1);
-		lua_pop(env, 1);
-		env >> axis; 	
-		q = Quaternion(Degree(angle), axis);
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected quaternion");
 	}
-    
+
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 1);
+	q.x = lua_tonumber(env, -1);
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 2);
+	q.y = lua_tonumber(env, -1);
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 3);
+	q.z = lua_tonumber(env, -1);
+	lua_pop(env, 1);
+	lua_rawgeti(env, -1, 4);
+	q.w = lua_tonumber(env, -1);
+	lua_pop(env, 1);
 
     return env;
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     
     lua_getfield(env, -1, "position");
     if (!lua_isnil(env, -1)) {
@@ -301,7 +296,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::SceneNode& n) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, btRigidBody& n) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     
     lua_getfield(env, -1, "position");
     if (!lua_isnil(env, -1)) {
@@ -331,7 +328,9 @@ lua_State* Warp::operator>>(lua_State* env, btRigidBody& n) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Entity& e) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
 
     lua_pop(env, 1);
 
@@ -340,7 +339,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Entity& e) {
 }
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::Light& l) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     Vector3 position, direction;
     ColourValue diffuse, specular;
 
@@ -396,7 +397,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::Light& l) {
 
 
 lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
     lua_rawgeti(env, -1, 1);
     c.r = lua_tonumber(env, -1);
     lua_pop(env, 1);
@@ -414,7 +417,9 @@ lua_State* Warp::operator>>(lua_State* env, Ogre::ColourValue& c) {
 
 /** This is a convenience method for reading into a string from lua */
 lua_State* Warp::operator>>(lua_State* env, std::string& s) {
-    assert(lua_isstring(env, -1)); // Make sure the top of the stack is a string. -1 == top of stack
+    if (!lua_isstring(env, -1)) {
+		throw runtime_error("Invalid argument: expected string");
+	}
     s.assign(lua_tostring(env, -1)); // Get the string
     lua_pop(env, 1); // Pop the string value off the lua stack
 
@@ -423,7 +428,9 @@ lua_State* Warp::operator>>(lua_State* env, std::string& s) {
 
 /** Reads beat loop info from an id and table of values */
 lua_State* Warp::operator>>(lua_State* env, Warp::BeatLoop & bl) {
-    assert(lua_istable(env, -1));
+    if (!lua_istable(env, -1)) {
+		throw runtime_error("Invalid argument: expected table");
+	}
 
 	lua_getfield(env, -1, "id");
     bl.id = lua_tointeger(env, -1);

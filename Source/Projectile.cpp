@@ -11,7 +11,7 @@ Projectile::Projectile(Game* game, Level* level, const string& name, int id) :
 	Object(game, level, name, id),
 	hit_(false),
 	time_(0.0f),
-	immunity_(0.6f) {
+	immunity_(0.3f) {
 
 	billboards_ = game_->getSceneManager()->createBillboardSet(name_ + ".Billboard", 1);
 	billboards_->setBillboardRotationType(BBR_VERTEX);
@@ -39,10 +39,7 @@ void Projectile::onTimeStep() {
 	billboard->setRotation(billboard->getRotation() + Radian(0.2));
 
 	time_ += 0.6f;
-
-	if (immunity_ > 0.0f) {
-		immunity_ -= 0.01f;
-	}
+	immunity_ = max(0.0f, immunity_ - game_->getTimeStep());
 
 	float width = billboard->getOwnWidth();
 	float height = billboard->getOwnWidth();
@@ -57,16 +54,12 @@ void Projectile::onTimeStep() {
 	}
 
 	billboard->setDimensions(width, height);
-
-	if (target_) {
-		/*float speed = getVelocity().length();
-		if (getPosition().distance(target_->getPosition()) < speed * 1.5) {
-			// Projectile is close enough, so fake a collision
-			collide(target_);
-		}*/
-	}
 }
 
+void Projectile::collide(ObjectPtr other) { 
+	if (immunity_ > 0.0f) return
+	other->onCollision(this); 
+}
 
 void Projectile::onCollision(EnemyPtr enemy) {
 	if (immunity_ > 0.0f) return;

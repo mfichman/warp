@@ -28,8 +28,6 @@ Screen::Screen(Game* game, const std::string& type) :
 
 	loadScriptCallbacks();
 	game_->getKeyboard()->setEventCallback(this);
-
-	
 }
 
 Screen::~Screen() {

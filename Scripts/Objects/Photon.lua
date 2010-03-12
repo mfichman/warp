@@ -14,8 +14,6 @@ end
 -- This function gets called once per timestep by the
 -- C++ peer class connected to this Lua class
 function Photon:onTimeStep()
-
-
     local target = self:getTarget()
     if (target ~= nil) then
         local dir = target:getPosition() - self:getPosition()

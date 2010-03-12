@@ -7,6 +7,7 @@
 #include "Level.hpp"
 #include "Player.hpp"
 #include "Game.hpp"
+#include "ScriptTask.hpp"
 extern "C" {
 #include <lua/lua.h> 
 #include <lua/lualib.h>
@@ -28,22 +29,12 @@ Enemy::Enemy(Game* game, Level* level, const string& type, int id) :
 	hitPoints_(1),
 	finalHitCount_(0) {
 
-    // default behavior is to stick it at the spawn position, but lua may override this
-
-	// Find the spawn position
-	//const SpineProjection& spawn = level_->getPlayer()->getSpawnProjection(10);
-	// TODO: Align the object so it's facing down the tube
-	//setPosition(spawn.position + Vector3(Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0), Math::RangeRandom(-3.0, 3.0)));
-
-    // Position/velocity information is set in lua
-	//setSpeed(40);
-	//setTarget(level_->getPlayer());
-
 	loadScriptCallbacks();
 }
 
 Enemy::~Enemy() {
 	lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 	lua_getref(env, table_);
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "target");
@@ -70,11 +61,11 @@ void Enemy::onCollision(ProjectilePtr p) {
 	if (finalHitCount_ == hitPoints_) {
 		callMethod("onDestroy");
 		level_->getPlayer()->addPoints(hitPoints_);
-	}
-	if (billboards_) {
-		node_->detachObject(billboards_);
-		game_->getSceneManager()->destroyBillboardSet(billboards_);
-		billboards_ = 0;
+		if (billboards_) {
+			node_->detachObject(billboards_);
+			game_->getSceneManager()->destroyBillboardSet(billboards_);
+			billboards_ = 0;
+		}
 	}
 }
 
@@ -92,22 +83,11 @@ void Enemy::setWorldTransform(const btTransform& transform) {
     node_->setPosition(origin.x(), origin.y(), origin.z());
     // Set local info
     transform_ = transform;
-
-
-    /* lua script should take care of this
-
-    // set enemy to look in direction of motion
-	btVector3 btvelocity = body_->getLinearVelocity();
-	Vector3 velocity(btvelocity.x(), btvelocity.y(), btvelocity.z());
-	velocity.normalise();
-	Vector3 right = velocity.crossProduct(Vector3::UNIT_Y);
-	Vector3 forward = right.crossProduct(Vector3::UNIT_Y);
-	node_->setOrientation(Quaternion(right, Vector3::UNIT_Y, forward));
-    */
 }
 
 void Enemy::loadScriptCallbacks() {
 	lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 	lua_getref(env, table_);
 	lua_pushlightuserdata(env, this);
 	lua_pushcclosure(env, &Enemy::luaTarget, 1);
@@ -124,13 +104,18 @@ void Enemy::loadScriptCallbacks() {
 int Enemy::luaTarget(lua_State* env) {
 	Enemy* self = (Enemy*)lua_touserdata(env, lua_upvalueindex(1));
 	
-	if (!self->billboards_) {
-		self->billboards_ = self->game_->getSceneManager()->createBillboardSet(self->name_ + ".Target", 1);
-		self->billboards_->setMaterialName("Circle");
-		self->billboards_->setDefaultWidth(5.0f);
-		self->billboards_->setDefaultHeight(5.0f);
-		self->billboards_->createBillboard(0.0f, 0.0f, 0.0f);
-		self->node_->attachObject(self->billboards_);
+	try {
+		if (!self->billboards_ && self->finalHitCount_ < self->hitPoints_) {
+			self->billboards_ = self->game_->getSceneManager()->createBillboardSet(self->name_ + ".Target", 1);
+			self->billboards_->setMaterialName("Circle");
+			self->billboards_->setDefaultWidth(5.0f);
+			self->billboards_->setDefaultHeight(5.0f);
+			self->billboards_->createBillboard(0.0f, 0.0f, 0.0f);
+			self->node_->attachObject(self->billboards_);
+		}
+	} catch (std::exception& ex) {
+		lua_pushstring(env, ex.what());
+		lua_error(env);
 	}
 
 	return 0;

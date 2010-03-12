@@ -71,6 +71,9 @@ public:
 
 	/** Returns the current level */
 	Level* getLevel() const { return level_.get(); }
+
+	/** Returns the physics timestep used */
+	float getTimeStep() { return 0.01f; }
     
 private:
 	Game(const Game&);

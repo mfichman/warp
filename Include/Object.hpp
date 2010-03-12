@@ -123,7 +123,6 @@ private:
 	static int luaSetEntity(lua_State* env);
 	static int luaAddParticleSystem(lua_State* env);
 	static int luaSetParticleSystem(lua_State* env);
-	static int luaSet(lua_State* env);
 	static int luaExplode(lua_State* env);
 	static int luaDestroy(lua_State* env);
 	static int luaGetPosition(lua_State* env);

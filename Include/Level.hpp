@@ -61,6 +61,7 @@ private:
 	static int luaGetPlayerPosition(lua_State* env);
 	static int luaGetPlayerVelocity(lua_State* env);
 	static int luaGetPlayerOrientation(lua_State* env);
+	static int luaGetTimeStep(lua_State* env);
 
 	Game* game_;
 	std::list<ObjectPtr> objects_;
