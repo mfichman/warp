@@ -4,9 +4,34 @@
 -- Takes a vector now
 Level:setGravity{0, 0, 0}
 local distance = Level:getSpineNodeDistance()
-Level:waitForDistance(60)
 
-Level:createEnemy("Shield")
+distance = distance + 60
+Level:waitForDistance(distance)
+
+for i=1,4 do
+
+Level:createAIEnemy("SnakeCrab", AI.outsideFloat)
+Level:createAIEnemy("SnakeCrab", AI.outsideFloat)
+Level:createAIEnemy("SnakeCrab", AI.outsideFloat)
+
+distance = distance + 200
+Level:waitForDistance(distance)
+end
+
+
+for i=1,4 do
+
+Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
+Level:createAIEnemy("FireCycle", AI.flyFromBehindAndRam)
+
+distance = distance + 200
+Level:waitForDistance(distance)
+end
+
+
+
+
+--Level:createEnemy("Shield")
 --while (true) do
     --Level:createCity()
     --Level:waitForDistance(distance)
