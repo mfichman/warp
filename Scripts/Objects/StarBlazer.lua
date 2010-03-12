@@ -16,7 +16,7 @@ function StarBlazer:init()
     self:addEntity{name="TopWing", mesh="StarBlazerTopWing.mesh"}
     self:addEntity{name="Ring", mesh="StarBlazerRing.mesh"}
     self.hitPoints = 4
-    self.cooldown = 1.5
+    self.cooldown = 4.0
 end
 
 -- This function gets called once per timestep by the
@@ -25,6 +25,6 @@ function StarBlazer:onTimeStep()
     self.cooldown = self.cooldown - Level:getTimeStep()
     if (self.cooldown <= 0 and not self.destroyed) then
         self:createMissile{type="Orb"}:launch(self)
-        self.cooldown = 0.8
+        self.cooldown = 2.0
     end
 end

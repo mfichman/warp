@@ -13,6 +13,7 @@ function AI:spiral(enemy, distance, diameter)
     enemy:setPosition(proj.position)
     enemy:setVelocity(proj.forward * 60)
 
+    local onTimeStep = enemy.onTimeStep;
     Level:createTask(function()
         Level:sleep(1)
         enemy.onTimeStep = function(self)
@@ -26,6 +27,7 @@ function AI:spiral(enemy, distance, diameter)
             local cur_vel = enemy:getVelocity()
             local vel = (cur_vel*alpha) + (dir*40*(1-alpha))
             enemy:setVelocity(vel)
+            onTimeStep(enemy)
         end 
     end)
 end
@@ -166,7 +168,6 @@ function AI:flyFromFront(enemy)
         end
         Level:sleep(6)
         -- go away
-        local onTimeStep = enemy.onTimeStep;
         enemy.onTimeStep = function(self)
             local alpha = 0.99
             local target = Level:getSpineProjection(-200).position

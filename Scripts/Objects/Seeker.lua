@@ -14,7 +14,7 @@ function Seeker:init()
     self:addEntity{name="BodyRight", mesh="SeekerBodyRight.mesh"}
     self:addEntity{name="Ring", mesh="SeekerRing.mesh"}
     self.hitPoints = 1
-    self.cooldown = 1.5
+    self.cooldown = 4.0
 end
 
 -- This function gets called once per timestep by the
@@ -23,7 +23,7 @@ function Seeker:onTimeStep()
     self.cooldown = self.cooldown - Level:getTimeStep()
     if (self.cooldown <= 0 and not self.destroyed) then
         self:createMissile{type="Orb"}:launch(self)
-        self.cooldown = 0.8
+        self.cooldown = 2.0
     end
 end
 
