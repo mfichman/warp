@@ -134,7 +134,7 @@ private:
 	static int luaSetVelocity(lua_State* env);
 	static int luaGetOrientation(lua_State* env);
 	static int luaSetOrientation(lua_State* env);
-	static int luaFireMissile(lua_State* env);
+	static int luaCreateMissile(lua_State* env);
 	static int luaGetTarget(lua_State* env);
 	static int luaSetTarget(lua_State* env);
 

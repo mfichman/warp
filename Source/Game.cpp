@@ -10,6 +10,7 @@
 #include "Player.hpp"
 #include "OscBeatListener.hpp"
 #include "OscSender.hpp"
+#include "ScriptTask.hpp"
 
 #include <Ogre.h>
 #include <OgreCEGUIRenderer.h>
@@ -211,9 +212,9 @@ void Game::loadPhysics() {
 /** Loads a script */
 void Game::loadScript(const std::string& name) {
 	lua_State* env = scriptState_;
+	StackCheck check(env);
 	if (luaL_dofile(env, name.c_str())) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 2);
         throw runtime_error("ScriptTask error: " + message);
     }
 }

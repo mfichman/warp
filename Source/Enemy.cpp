@@ -38,7 +38,6 @@ Enemy::~Enemy() {
 	lua_getref(env, table_);
 	lua_pushcclosure(env, &Object::luaWarningDestroyed, 0);
 	lua_setfield(env, -2, "target");
-	lua_pop(env, 1);
 }
 
 /** Called when the object is selected */
@@ -95,9 +94,6 @@ void Enemy::loadScriptCallbacks() {
 	
 	lua_getfield(env, -1, "hitPoints");
 	hitPoints_ = max(1, lua_tointeger(env, -1));
-	lua_pop(env, 1);
-	
-	lua_pop(env, 1);
 }
 
 /** Destroys the object */

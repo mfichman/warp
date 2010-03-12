@@ -45,11 +45,13 @@ Level::Level(Game* game, const std::string& name) :
     game_->addListener(this);
 
 	// Load beat script
-	tasks_.push_back(ScriptTaskPtr(new ScriptTask(game, "Scripts/" + name + ".Beat.lua")));
+	string audioPath = "Scripts/" + name + "." + lexical_cast<string>(scriptNumber_) + ".beat.lua";
+	audioScript_.reset(new ScriptTask(game, audioPath));
+	tasks_.push_back(audioScript_);
 
 	// Load level script
-	string path = "Scripts/" + name + "." + lexical_cast<string>(scriptNumber_) + ".lua";
-	levelScript_.reset(new ScriptTask(game, path));
+	string levelPath = "Scripts/" + name + "." + lexical_cast<string>(scriptNumber_) + ".level.lua";
+	levelScript_.reset(new ScriptTask(game, levelPath));
 	tasks_.push_back(levelScript_);
 
 	overlays_.reset(new Overlays(game_));
@@ -74,7 +76,7 @@ void Level::onTimeStep() {
 
 	if (oldObjectCount_ != objects_.size()) {
 		oldObjectCount_ = objects_.size();
-		cout << "Object count: " << objects_.size() << endl;
+		//cout << "Object count: " << objects_.size() << endl;
 	}
 	
 	player_->onTimeStep();
@@ -113,8 +115,15 @@ void Level::onTimeStep() {
 		tasks_.erase(find(tasks_.begin(), tasks_.end(), levelScript_));
 
 		scriptNumber_ = newScriptNumber;
-		string path = "Scripts/" + name_ + "." + lexical_cast<string>(scriptNumber_) + ".lua";
-		levelScript_.reset(new ScriptTask(game_, path));
+
+		// Load beat script
+		string audioPath = "Scripts/" + name_ + "." + lexical_cast<string>(scriptNumber_) + ".beat.lua";
+		audioScript_.reset(new ScriptTask(game_, audioPath));
+		tasks_.push_back(audioScript_);
+
+		// Load level script
+		string levelPath = "Scripts/" + name_ + "." + lexical_cast<string>(scriptNumber_) + ".level.lua";
+		levelScript_.reset(new ScriptTask(game_, levelPath));
 		tasks_.push_back(levelScript_);
 	}
 }
@@ -222,7 +231,9 @@ void Level::loadScriptCallbacks() {
     lua_pushcclosure(env, &Level::luaGetTimeStep, 1);
     lua_setfield(env, -2, "getTimeStep");
 
-	lua_pop(env, 1); // Pop the Level table
+	lua_pushlightuserdata(env, this);
+    lua_pushcclosure(env, &Level::luaGetPlayer, 1);
+    lua_setfield(env, -2, "getPlayer");
 }
 
 int Level::luaGetSpineProjection(lua_State* env) {
@@ -613,6 +624,12 @@ int Level::luaStopBeatServer(lua_State* env) {
 int Level::luaGetTimeStep(lua_State* env) {
 	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
 	lua_pushnumber(env, level->game_->getTimeStep());
+	return 1;
+}
+
+int Level::luaGetPlayer(lua_State* env) {
+	Level* level = (Level*)lua_touserdata(env, lua_upvalueindex(1));
+	env << level->player_;
 	return 1;
 }
 

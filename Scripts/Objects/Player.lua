@@ -59,8 +59,11 @@ function Player:onThrottleNormal()
     self:setParticleSystem{name="JetRight", width=0.2, height=0.2, velocity=-3.0}
 end
 
-function Player:onKilled()
+function Player:onDestroy()
+    local explosion = Level:createObject("Explosion")  
+    explosion:setPosition(self:getPosition())
     self:explode()
+    print("Explode")
 end
 
 

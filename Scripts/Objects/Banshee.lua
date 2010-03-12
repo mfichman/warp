@@ -13,7 +13,6 @@ function Banshee:init()
     self:addEntity{name="Hull", mesh="BansheeBody.mesh"}
     self:addEntity{name="Wing", mesh="BansheeWings.mesh"}
     self:addEntity{name="Pylon", mesh="BansheePylon.mesh"}
-    self.destroyed = false
     self.hitPoints = 4
     self.cooldown = 4
 end
@@ -22,11 +21,9 @@ end
 -- C++ peer class connected to this Lua class
 function Banshee:onTimeStep()
     self.cooldown = self.cooldown - Level:getTimeStep()
-    if (self.cooldown <= 0) then
-        p = self:fireMissile{type="TrackingPhoton"}
-        p:realInit(self)
+    if (self.cooldown <= 0 and not self.destroyed) then
+        self:createMissile{type="TrackingPhoton"}:launch(self)
         self.cooldown = 0.3
     end
-
 end
 

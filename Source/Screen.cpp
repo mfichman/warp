@@ -67,7 +67,6 @@ void Screen::loadScriptCallbacks() {
 
 	if (lua_pcall(env, 2, 1, 0)) {
 		string message(lua_tostring(env, -1));
-		lua_pop(env, 1);
 		throw runtime_error("Error creating Screen: " + message);
 	}
 
@@ -82,7 +81,6 @@ void Screen::callMethod(const string& method, const string& arg) {
 	lua_getref(env, table_);
 	lua_getfield(env, -1, method.c_str());
 	if (!lua_isfunction(env, -1)) {
-		lua_pop(env, 2);
 		return;
 	}
 
@@ -92,7 +90,6 @@ void Screen::callMethod(const string& method, const string& arg) {
 
 	if (lua_pcall(env, 2, 0, 0)) {
 		string message(lua_tostring(env, -1));
-		lua_pop(env, 1);
 		throw runtime_error(message);
 	}
 }

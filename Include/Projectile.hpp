@@ -29,7 +29,6 @@ private:
 	std::auto_ptr<btSphereShape> shape_;
 	bool hit_;
 	float time_;
-	float immunity_;
 };
 
 }

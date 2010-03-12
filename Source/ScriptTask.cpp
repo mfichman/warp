@@ -27,11 +27,11 @@ ScriptTask::ScriptTask(Game* game, const std::string& path) :
 	alive_(true) {    
 
     lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
     // Load the script chunk as a function
     if (luaL_loadfile(env, path.c_str())) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 1); // "coroutine.create"
         throw runtime_error("Could not load script: " + message);
 	}
 
@@ -74,13 +74,13 @@ ScriptTask::~ScriptTask() {
 bool ScriptTask::hasTriggerFired() {
     if (!trigger_) return true;
     lua_State* env = game_->getScriptState();
+	StackCheck check(env);
 
     // Call the trigger function.  It should return a 
     // boolean on the stack.
     lua_getref(env, trigger_);
     if (lua_pcall(env, 0, 1, 0)) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 1);
         throw runtime_error("Error calling trigger: " + message);
     }
 
@@ -92,7 +92,6 @@ bool ScriptTask::hasTriggerFired() {
 #pragma warning(disable:4800)
         bool result = lua_toboolean(env, -1);
 #pragma warning(default:4800)
-        lua_pop(env, lua_gettop(env));
         return result;
     } else {
         throw runtime_error("Trigger returned an invalid value");
@@ -118,7 +117,6 @@ void ScriptTask::onTimeStep() {
     // Resume the corutine
     if (lua_pcall(env, 1, 2, 0)) {
         string message(lua_tostring(env, -1));
-        lua_pop(env, 1);
         throw runtime_error("Error calling script function: " + message);
     }
 
@@ -126,18 +124,15 @@ void ScriptTask::onTimeStep() {
     if (lua_isfunction(env, -1)) {
         // Save a handle to the trigger function
         trigger_ = luaL_ref(env, LUA_REGISTRYINDEX);
-        lua_pop(env, 1);
 
     } else if (lua_isboolean(env, -2) && !lua_toboolean(env, -2)) {
         // Coroutine returned with an error
         string message(lua_tostring(env, -1));
-        lua_pop(env, 2);
         throw runtime_error("Error calling script function: " + message);
 
     } else {
         // ScriptTask is complete, never run it again
         alive_ = false;
-        lua_pop(env, 2);
     }
 }
 
@@ -490,5 +485,5 @@ StackCheck::StackCheck(lua_State* env) {
 }
 
 StackCheck::~StackCheck() {
-	assert(top_ == lua_gettop(env_));
+	lua_settop(env_, top_);
 }

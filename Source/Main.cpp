@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
 
     } catch (std::exception& ex) {
         cerr << "Exception: " << ex.what() << endl;
-		cerr << "Press any key to continue" << endl;
+		cerr << "Press any key to continue..." << endl;
 		getchar();
     } 
 

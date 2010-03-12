@@ -117,7 +117,7 @@ void Player::fireMissiles() {
 	// Fire if the cooldown period has elapsed and there are more 
 	// missiles ready in the queue
 
-	cooldown_ = min(0.0f, cooldown_ - TIME_STEP);
+	cooldown_ = max(0.0f, cooldown_ - game_->getTimeStep());
 	if (cooldown_ <= 0.0f && !targets_.empty()) {
 		list<EnemyPtr>::iterator i = targets_.begin();
 		ProjectilePtr p = level_->createProjectile("Photon");
@@ -277,12 +277,12 @@ const SpineProjection& Player::getSpawnProjection(float distance) const {
 
 }
 
-void Player::onCollision(EnemyPtr enemy) { 
+void Player::onCollision(EnemyPtr enemy) {
 	callMethod("onEnemyHit"); 
 	if (shields_ > 0) {
 		shields_ -= 10;
 		if (shields_ <= 0) {
-			callMethod("onKilled");
+			callMethod("onDestroy");
 		} 
 	}
 }
@@ -292,7 +292,7 @@ void Player::onCollision(ProjectilePtr projectile) {
 	if (shields_ > 0) {
 		shields_ -= 10;
 		if (shields_ <= 0) {
-			callMethod("onKilled");
+			callMethod("onDestroy");
 		} 
 	}
 }
