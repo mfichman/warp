@@ -7,25 +7,45 @@ Quaternion = Object:new()
 
 -- rotates a vector
 -- adapted from wikipedia pseudo-code http://en.wikipedia.org/wiki/Quaternion_rotation
-function Quaternion:__mul(v)
-    if (v[4]) then
-        return self:quat_mult(v)
+function Quaternion:__mul(a)
+    if (type(a) == "number") then
+        return self:scalar_mult(a)
     else
-        local t2  =  self[4] * self[1]
-        local t3  =  self[4] * self[2]
-        local t4  =  self[4] * self[3]
-        local t5  = -self[1] * self[1]
-        local t6  =  self[1] * self[2]
-        local t7  =  self[1] * self[3]
-        local t8  = -self[2] * self[2]
-        local t9  =  self[2] * self[3]
-        local t10 = -self[3] * self[3]
-        local result = Vector:new()
-        result[1] = 2*( (t8 + t10) * v[1] + (t6 -  t4) * v[2] + (t3 + t7) * v[3]) + v[1]
-        result[2] = 2*( (t4 +  t6) * v[1] + (t5 + t10) * v[2] + (t9 - t2) * v[3]) + v[2]
-        result[3] = 2*( (t7 -  t3) * v[1] + (t2 +  t9) * v[2] + (t5 + t8) * v[3]) + v[3]
-        return result
+        if (a[4]) then
+            return self:quat_mult(a)
+        end
+        return self:vec_mult(a)
     end
+end
+
+function Quaternion:__add(other)
+    local result = Quaternion:new()
+    result[1] = self[1] + other[1] 
+    result[2] = self[2] + other[2] 
+    result[3] = self[3] + other[3] 
+    result[4] = self[4] + other[4] 
+    return result
+end
+
+function Quaternion:scalar_mult(a)
+    return Quaternion:new{self[1]*a, self[2]*a, self[3]*a, self[4]*a}
+end
+
+function Quaternion:vec_mult(v)
+    local t2  =  self[4] * self[1]
+    local t3  =  self[4] * self[2]
+    local t4  =  self[4] * self[3]
+    local t5  = -self[1] * self[1]
+    local t6  =  self[1] * self[2]
+    local t7  =  self[1] * self[3]
+    local t8  = -self[2] * self[2]
+    local t9  =  self[2] * self[3]
+    local t10 = -self[3] * self[3]
+    local result = Vector:new()
+    result[1] = 2*( (t8 + t10) * v[1] + (t6 -  t4) * v[2] + (t3 + t7) * v[3]) + v[1]
+    result[2] = 2*( (t4 +  t6) * v[1] + (t5 + t10) * v[2] + (t9 - t2) * v[3]) + v[2]
+    result[3] = 2*( (t7 -  t3) * v[1] + (t2 +  t9) * v[2] + (t5 + t8) * v[3]) + v[3]
+    return result
 end
 
 -- rotate another quaternion by this one and return the result
@@ -40,6 +60,28 @@ function Quaternion:quat_mult(other)
     result[2] = self[4] * other[2] + self[2] * other[4] + self[3] * other[1] - self[1] * other[3]
     result[3] = self[4] * other[3] + self[3] * other[4] + self[1] * other[2] - self[2] * other[1]
     return result
+end
+
+-- it's slerp!
+-- fT = alpha -- 0 returns rkP, 1 returns rkQ
+function slerp (fT, rkP, rkQ)
+
+    local fCos = rkP:dot(rkQ)
+    local fAngle = math.acos(fCos)
+
+    if ( math.abs(fAngle) < .001 ) then
+        return rkP
+    end
+
+    local fSin = math.sin(fAngle)
+    local fInvSin = 1.0/fSin
+    local fCoeff0 = math.sin((1.0-fT)*fAngle)*fInvSin
+    local fCoeff1 = math.sin(fT*fAngle)*fInvSin
+    return (rkP * fCoeff0) + (rkQ * fCoeff1)
+end
+
+function Quaternion:dot(other)
+    return self[1] * other[1] + self[2] * other[2] + self[3] * other[3] + self[4] * other[4]
 end
 
 function Quaternion:toAngleAxis() 

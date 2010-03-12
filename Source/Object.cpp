@@ -219,7 +219,7 @@ void Object::setOrientation(const Ogre::Quaternion& q) {
 	btTransform transform = body_->getCenterOfMassTransform();
     transform.setRotation(btQuaternion(q.x, q.y, q.z, q.w));
 	body_->setCenterOfMassTransform(transform);
-    setWorldTransform(transform);
+    //setWorldTransform(transform);
     node_->setOrientation(q);
 }
 

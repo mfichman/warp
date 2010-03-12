@@ -44,14 +44,16 @@ function AI:flyFromBehind(enemy)
     local proj = Level:getSpineProjection(-10)
     local left = proj.forward:cross{0, 1, 0}
     left:normalize()
-    enemy:setPosition(proj.position + left * 4)
+    enemy:setPosition(proj.position)
     enemy:setVelocity(proj.forward * 60)
     
+    enemy:setOrientation(Level:getPlayerOrientation())
+
     local offsetv = Vector:new{0, math.random(-3, 3), 0}
     local offseth = math.random(-3, 3)
     Level:createTask(function()
         -- Wait 2 seconds
-        Level:sleep(1)
+        Level:sleep(2)
         local onTimeStep = enemy.onTimeStep;
         enemy.onTimeStep = function(self)
             local alpha = 0.99
@@ -65,22 +67,12 @@ function AI:flyFromBehind(enemy)
             local cur_vel = enemy:getVelocity()
             
             local vel = (cur_vel*alpha) + (dir*50*(1-alpha))
-            enemy:setVelocity(vel)
 
             -- set orientation
-            --local left, up, forward = Level:getPlayerOrientation():toAxes()
-            --local quat = Quaternion:new()
-            --quat:fromAxes(left * -1, up, forward * -1) 
-
-            --print(left)
-            ----print(up)
-            --print(forward)
-            --print(quat)
-            --enemy:setOrientation(quat)
-            --print("sending orientation: "..quat[1].." "..quat[2].." "..quat[3]..""..quat[4])
-            --print("x "..quat:getDirection()[1])
-            --print("y "..quat:getDirection()[2])
-            --print("z "..quat:getDirection()[3])
+            local left, up, forward = Level:getPlayerOrientation():toAxes()
+            local target_orientation = Quaternion:new()
+            target_orientation:fromAxes(left * -1, up, forward * -1) 
+            enemy:setOrientation(slerp(.01, enemy:getOrientation(), target_orientation))
             onTimeStep(enemy)
         end
     end)
