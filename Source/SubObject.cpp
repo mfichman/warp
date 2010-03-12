@@ -51,6 +51,10 @@ SubObject::~SubObject() {
 	}
 }
 
+Ogre::Vector3 SubObject::getOffsets() const {
+	return entity_->getMesh()->getBounds().getCenter();
+}
+
 void SubObject::getWorldTransform(btTransform& transform) const {
 	transform = transform_;
 }
