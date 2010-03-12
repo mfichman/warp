@@ -8,8 +8,8 @@ Level:loadSFX{id=1, path="sfx/dance_clap_01.wav"} -- on hit
 
 Level:loadSFX{id=2, path="sfx/Tape Rewinding 02_C.wav"} -- on banshee explosion sound
 
-Level:loadLoop{id=0, path="loops/Dance Floor Pattern 26 120_C_4.wav", bpm=80, n_beats=4}
-Level:loadLoop{id=1, path="loops/Deep Pad 01.wav", bpm=120, n_beats=8}
+Level:loadLoop{id=3, path="loops/Dance Floor Pattern 26 120_C_4.wav", bpm=80, n_beats=4}
+Level:loadLoop{id=4, path="loops/Deep Pad 01.wav", bpm=120, n_beats=8}
 
 Level:startLoop{id=0}
 Level:startLoop{id=1}

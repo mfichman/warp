@@ -6,6 +6,7 @@ Level:setGravity{0, 0, 0}
 local distance = Level:getSpineNodeDistance()
 
 distance = distance + 60
+while (true) do
 Level:waitForDistance(distance)
 
 for i=1,2 do
@@ -46,4 +47,5 @@ Level:createEnemy("Shield"):right()
 distance = distance + 250
 Level:waitForDistance(distance)
 
+end
 end
