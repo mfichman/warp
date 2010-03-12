@@ -14,7 +14,7 @@ material Shield/TEXFACE/Metal.png
 			emissive 0.000000 0.000000 0.000000 1.000000
 			texture_unit
 			{
-				texture Metal.png
+				texture Ice.png
 				colour_op modulate
 			}
 		}
