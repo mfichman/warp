@@ -9,8 +9,6 @@ target_link_libraries(Warp
     lua_d.lib
     OgreMain_d.lib
     OIS_d.lib
-    CEGUIBase_d.lib
-    OgreGUIRenderer_d.lib
     Plugin_OctreeSceneManager_d.lib
     oscpack_d.lib
     ws2_32.lib
@@ -23,8 +21,6 @@ target_link_libraries(Warp
     lua.lib
     OgreMain.lib
     OIS.lib
-    CEGUIBase.lib
-    OgreGUIRenderer.lib
     Plugin_OctreeSceneManager.lib
     oscpack.lib
     ws2_32.lib

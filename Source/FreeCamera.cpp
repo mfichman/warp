@@ -28,8 +28,8 @@ void FreeCamera::onTimeStep() {
 
     // Moves the camera around
     const OIS::MouseState& state = game_->getMouse()->getMouseState();
-    game_->getCamera()->pitch(Radian(-state.Y.rel/100.0));
-    game_->getCamera()->yaw(Radian(-state.X.rel/100.0));
+    game_->getCamera()->pitch(Radian(-state.Y.rel/100.0f));
+    game_->getCamera()->yaw(Radian(-state.X.rel/100.0f));
 
     if (game_->getKeyboard()->isKeyDown(OIS::KC_RSHIFT)) {
 	    if (game_->getKeyboard()->isKeyDown(OIS::KC_UP)) {

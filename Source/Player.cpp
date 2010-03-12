@@ -34,10 +34,10 @@ Player::Player(Game* game, Level* level, const string& name, int id) :
 	points_(0),
 	throttle_(TH_NORMAL) {
 
-    Vector3 position(0, 245, 5);
+    Vector3 position(0, 245, 20);
 	setPosition(position);
 
-    playerProjection_ = level_->getTube()->getSpineProjection(position, playerProjection_.index);
+    playerProjection_ = level_->getTube()->getSpineProjection(position, 0);
     // set the camera behind the player
     Vector3 forward = playerProjection_.forward;
     Vector3 up = Vector3::UNIT_Y;
@@ -97,14 +97,14 @@ void Player::setWorldTransform(const btTransform& transform) {
     Vector3 cam_right = camera->getDerivedRight();
     Vector3 cam_up = camera->getDerivedUp();
     Vector3 cam_forward = camera->getDerivedDirection();
-#define CAM_ALPHA .9   
+#define CAM_ALPHA 0.9f   
 	// TODO: REENABLE CAMERA
 #ifndef LEVEL_EDITOR_MODE
-    camera->setPosition((1.0 - CAM_ALPHA) * target_position + CAM_ALPHA * camera->getPosition());
+    camera->setPosition((1.0f - CAM_ALPHA) * target_position + CAM_ALPHA * camera->getPosition());
 #endif
-    Vector3 new_right = (1.0 - CAM_ALPHA) * -left + CAM_ALPHA * cam_right;
-    Vector3 new_up = (1.0 - CAM_ALPHA) * up + CAM_ALPHA * cam_up;
-    Vector3 new_forward = (1.0 - CAM_ALPHA) * forward + CAM_ALPHA * cam_forward;
+    Vector3 new_right = (1.0f - CAM_ALPHA) * -left + CAM_ALPHA * cam_right;
+    Vector3 new_up = (1.0f - CAM_ALPHA) * up + CAM_ALPHA * cam_up;
+    Vector3 new_forward = (1.0f - CAM_ALPHA) * forward + CAM_ALPHA * cam_forward;
 #ifndef LEVEL_EDITOR_MODE
     camera->setOrientation(Quaternion(new_right, new_up, -new_forward));
 #endif
@@ -125,7 +125,7 @@ void Player::fireMissiles() {
 
 	cooldown_ = max(0.0f, cooldown_ - game_->getTimeStep());
 	if (cooldown_ <= 0.0f && !targets_.empty()) {
-		list<EnemyPtr>::iterator i = targets_.begin();
+		std::list<EnemyPtr>::iterator i = targets_.begin();
 		ProjectilePtr p = level_->createProjectile("Photon");
 		p->setTarget(*i);
 		p->setPosition(forward_ + getPosition());
@@ -208,8 +208,8 @@ void Player::computeForces() {
 
     // and a drag force proportional to the velocity
     float forward_vel = forward.dotProduct(velocity);
-    float forward_drag = .03 * forward_vel * forward_vel;
-    if (forward_vel > 0) forward_drag *= -1; // make sure force is opposite
+    float forward_drag = 0.03f * forward_vel * forward_vel;
+    if (forward_vel > 0.0f) forward_drag *= -1; // make sure force is opposite
 
     body_->applyCentralForce(btVector3(forward_drag * forward.x,
                                        forward_drag * forward.y,
@@ -264,7 +264,7 @@ void Player::updateRay() {
 
 void Player::onTargetDelete(ObjectPtr object) {
 
-	for (list<EnemyPtr>::iterator i = targets_.begin(); i != targets_.end();) {
+	for (std::list<EnemyPtr>::iterator i = targets_.begin(); i != targets_.end();) {
 		EnemyPtr enemy = dynamic_pointer_cast<Enemy>(object);
 		if ((*i) == enemy) {
 			i = targets_.erase(i);

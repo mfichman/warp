@@ -1,26 +1,40 @@
 -- Warp: CS248 Final Project
 -- Matt Fichman & Francesco Georg
 
--- Takes a vector now
-local distance = Level:getSpineNodeDistance()
---Level:createEnemy("Seeker")
-while (true) do
-    Level:createCity()
-    Level:waitForDistance(distance)
-    --Level:createEnemy("Seeker")
-    --Level:createEnemy("Banshee")
-    --Level:createEnemy("Banshee")
-    --Level:createEnemy("Banshee")
-    --Level:createEnemy("Banshee")
-    --Level:createEnemy("Shark")
-    --Level:createEnemy("Shark")
-    Level:createEnemy("Banshee")
-    --Level:createEnemy("StarBlazer")
-    --Level:createEnemy("LightBike")
-    --Level:createEnemy("Seeker")
-    --Level:createEnemy("Seeker")
-    --Level:createEnemy("Seeker")
-    --Level:createEnemy("Seeker")
-    distance = distance + 70
-    --print(Level:getPlayerPosition():length())
+for i=1,3 do
+    Level:createAIEnemy("Seeker", AI.spiral).on_death_sound = 2
+    Level:sleep(.5)
+    Level:createAIEnemy("Seeker", AI.spiral).on_death_sound = 2
+    Level:sleep(.5)
+    Level:createAIEnemy("Seeker", AI.spiral).on_death_sound = 2
+    Level:sleep(.5)
+    Level:createAIEnemy("Seeker", AI.spiral).on_death_sound = 2
+    Level:sleep(.5)
+    Level:createAIEnemy("Seeker", AI.spiral).on_death_sound = 2
+    Level:sleep(.5)
+    Level:createAIEnemy("Seeker", AI.spiral).on_death_sound = 2
+    Level:sleep(.5)
+    Level:createAIEnemy("Seeker", AI.spiral).on_death_sound = 2
+    Level:sleep(.5)
+
+    Level:sleep(5)
+
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:sleep(.6)
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:sleep(.6)
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:sleep(.6)
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:sleep(.6)
+
+    Level:sleep(5)
+end
+
+for i=1,4 do
+    Level:createAIEnemy("Banshee", AI.flyFromBehind)
+    Level:createAIEnemy("Banshee", AI.flyFromBehind)
+    Level:createAIEnemy("Banshee", AI.flyFromBehind)
+
+    Level:sleep(3)
 end
