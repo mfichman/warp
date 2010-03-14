@@ -25,13 +25,13 @@ for i=1,2 do
 
     Level:sleep(5)
 
-    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 3
     Level:sleep(.6)
-    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 3
     Level:sleep(.6)
-    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 3
     Level:sleep(.6)
-    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 2
+    Level:createAIEnemy("StarBlazer", AI.spiral, 100, 14).on_death_sound = 3
     Level:sleep(.6)
 
     Level:sleep(5)
