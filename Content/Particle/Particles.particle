@@ -44,8 +44,8 @@ particle_system Fountain
 particle_system Flames
 {
     material Flare
-    particle_width 2.0
-    particle_height 2.0
+    particle_width 2.3
+    particle_height 2.3
     cull_each false
     quota 40
     billboard_rotation_type vertex
@@ -61,11 +61,11 @@ particle_system Flames
         width 0.5
         height 0
         depth 0.5
-        emission_rate 30
+        emission_rate 60
         time_to_live 0.5
         direction 0 1 0
-        velocity_min 1.0
-        velocity_max 2.0
+        velocity_min 0.0
+        velocity_max 0.0
         colour_range_start 1 0 0
         colour_range_end 0.5 0.6 0
     }
