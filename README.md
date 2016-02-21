@@ -42,7 +42,7 @@ similar to the REZ targeting system, where the user selects enemies by picking t
 2. Open Build\Warp.sln in Visual Studio
 3. Build > Build Solution (F7 key)
 
-# Run instructions
+# Run Instructions
 1. Open Warp.exe (it’s in the top-level folder)
 
 # Credits
